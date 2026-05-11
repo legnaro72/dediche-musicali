@@ -54,8 +54,9 @@ jobs:
 
       - name: Sync da Google Sheet
         run: |
-          DRY=${{ inputs.dry_run == 'true' && '--dry-run' || '' }}
-          python scripts/sync_from_google_sheet.py $DRY
+          ARGS=()
+          [ "${{ inputs.dry_run }}" = "true" ] && ARGS+=(--dry-run)
+          python scripts/sync_from_google_sheet.py "${ARGS[@]}"
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
@@ -68,10 +69,11 @@ jobs:
 
       - name: Pubblica dedica del giorno
         run: |
-          DATE_ARG=${{ inputs.date != '' && format('--date {0}', inputs.date) || '' }}
-          FORCE=${{ inputs.force_republish == 'true' && '--force-republish' || '' }}
-          DRY=${{ inputs.dry_run == 'true' && '--dry-run' || '' }}
-          python scripts/publish_daily.py $DATE_ARG $FORCE $DRY
+          ARGS=()
+          [ -n "${{ inputs.date }}" ] && ARGS+=(--date "${{ inputs.date }}")
+          [ "${{ inputs.force_republish }}" = "true" ] && ARGS+=(--force-republish)
+          [ "${{ inputs.dry_run }}" = "true" ] && ARGS+=(--dry-run)
+          python scripts/publish_daily.py "${ARGS[@]}"
         env:
           DEFAULT_VOTE_URL: ${{ secrets.DEFAULT_VOTE_URL }}
           SITE_NAME: ${{ secrets.SITE_NAME }}
