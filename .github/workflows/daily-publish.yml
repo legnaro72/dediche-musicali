@@ -1,0 +1,116 @@
+name: 🎵 Pubblicazione Giornaliera
+
+on:
+  schedule:
+    - cron: '10 4 * * *'   # 06:10 ora italiana (UTC+2) / 05:10 (UTC+1)
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Data da pubblicare (YYYY-MM-DD, default: oggi Rome)'
+        required: false
+        default: ''
+      force_republish:
+        description: 'Forza ripubblicazione anche se già pubblicata'
+        required: false
+        default: 'false'
+        type: boolean
+      dry_run:
+        description: 'Dry run: simula senza modifiche reali'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: daily-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Pubblica dedica del giorno
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Installa dipendenze Python
+        run: pip install -r requirements.txt
+
+      - name: Sync da Google Sheet
+        run: |
+          DRY=${{ inputs.dry_run == 'true' && '--dry-run' || '' }}
+          python scripts/sync_from_google_sheet.py $DRY
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          DEFAULT_VOTE_URL: ${{ secrets.DEFAULT_VOTE_URL }}
+
+      - name: Valida dati
+        run: python scripts/validate_dedications.py
+        env:
+          DEFAULT_VOTE_URL: ${{ secrets.DEFAULT_VOTE_URL }}
+
+      - name: Pubblica dedica del giorno
+        run: |
+          DATE_ARG=${{ inputs.date != '' && format('--date {0}', inputs.date) || '' }}
+          FORCE=${{ inputs.force_republish == 'true' && '--force-republish' || '' }}
+          DRY=${{ inputs.dry_run == 'true' && '--dry-run' || '' }}
+          python scripts/publish_daily.py $DATE_ARG $FORCE $DRY
+        env:
+          DEFAULT_VOTE_URL: ${{ secrets.DEFAULT_VOTE_URL }}
+          SITE_NAME: ${{ secrets.SITE_NAME }}
+          SITE_URL: ${{ secrets.SITE_URL }}
+
+      - name: Setup Node.js
+        if: ${{ inputs.dry_run != 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Installa dipendenze Node
+        if: ${{ inputs.dry_run != 'true' }}
+        run: npm ci
+
+      - name: Build Astro
+        if: ${{ inputs.dry_run != 'true' }}
+        run: npm run build
+        env:
+          SITE_NAME: ${{ secrets.SITE_NAME }}
+          SITE_URL: ${{ secrets.SITE_URL }}
+
+      - name: Commit modifiche
+        if: ${{ inputs.dry_run != 'true' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ public/images/dedications/ || true
+          git diff --cached --quiet || git commit -m "🎵 Dedica del giorno - $(date +'%Y-%m-%d')"
+          git push || true
+
+      - name: Upload artifact Pages
+        if: ${{ inputs.dry_run != 'true' }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+      - name: Deploy su GitHub Pages
+        if: ${{ inputs.dry_run != 'true' }}
+        id: deployment
+        uses: actions/deploy-pages@v4

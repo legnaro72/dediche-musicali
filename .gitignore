@@ -1,0 +1,24 @@
+# Node
+node_modules/
+dist/
+.astro/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.local
+
+# Backup zips (non tracciare nel repo)
+backups/*.zip
+
+# Secrets
+service_account.json
+*.key
+google_credentials.json
+
+# OS
+.DS_Store
+Thumbs.db

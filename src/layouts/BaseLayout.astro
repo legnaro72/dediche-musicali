@@ -1,0 +1,114 @@
+---
+// src/layouts/BaseLayout.astro
+import '../styles/global.css';
+export interface Props {
+  title: string;
+  description?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  canonicalUrl?: string;
+}
+
+const {
+  title,
+  description = 'Dediche musicali giornaliere — ascolta, senti, condividi.',
+  ogTitle,
+  ogDescription,
+  ogImage,
+  canonicalUrl,
+} = Astro.props;
+
+const base = (import.meta.env.BASE_URL ?? '/').replace(/([^/])$/, '$1/');
+const siteUrl = import.meta.env.SITE ?? 'https://example.github.io';
+const fullCanonical = canonicalUrl ?? (siteUrl + Astro.url.pathname);
+const fullOgImage = ogImage
+  ? (ogImage.startsWith('http') ? ogImage : siteUrl + base + ogImage.replace(/^\//, ''))
+  : siteUrl + base + 'images/og-default.webp';
+---
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#08070f" />
+
+  <!-- Primary -->
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={fullCanonical} />
+
+  <!-- OpenGraph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:title"       content={ogTitle ?? title} />
+  <meta property="og:description" content={ogDescription ?? description} />
+  <meta property="og:image"       content={fullOgImage} />
+  <meta property="og:url"         content={fullCanonical} />
+  <meta property="og:locale"      content="it_IT" />
+
+  <!-- Twitter card -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content={ogTitle ?? title} />
+  <meta name="twitter:description" content={ogDescription ?? description} />
+  <meta name="twitter:image"       content={fullOgImage} />
+
+  <!-- Robots -->
+  <meta name="robots" content="index, follow" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href={`${base}favicon/favicon.svg`} />
+
+  <!-- Preconnect Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="container navbar-inner">
+      <a class="navbar-brand" href={base}>♪ DDGPilli</a>
+      <ul class="navbar-nav">
+        <li><a href={base}>Home</a></li>
+        <li><a href={`${base}archive/`}>Archivio</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main>
+    <slot />
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>
+        ♪ <strong>DDGPilliSite</strong> — Dediche musicali giornaliere
+        &nbsp;·&nbsp;
+        <a href={`${base}archive/`}>Archivio</a>
+      </p>
+      <p style="margin-top:0.5rem; font-size:0.75rem; opacity:0.5;">
+        Pubblicato su GitHub Pages · Gratuito, open source, fatto con amore 🎵
+      </p>
+    </div>
+  </footer>
+
+  <!-- Navbar scroll effect + reveal animation -->
+  <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 40) navbar?.classList.add('scrolled');
+      else navbar?.classList.remove('scrolled');
+    }, { passive: true });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { threshold: 0.1 }
+    );
+    reveals.forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

@@ -1,0 +1,1170 @@
+﻿DOCUMENTO FINALE DEI REQUISITI
+Sito gratuito per dediche musicali automatiche
+Architettura: GitHub Pages + GitHub Actions + Astro + Python + Google Sheet
+________________
+
+
+1. Scopo del progetto
+Realizzare un sito web pubblico dedicato alla pubblicazione di dediche musicali giornaliere.
+Il sito deve essere:
+* completamente gratuito da mantenere;
+* pubblicato su GitHub Pages;
+* aggiornato automaticamente ogni giorno;
+* graficamente moderno, accattivante e adatto a contenuti musicali/emozionali;
+* gestibile senza dover modificare ogni giorno il codice;
+* integrato con link audio esterni, per esempio Spotify, YouTube Music, SoundCloud o cloud;
+* integrato con un pulsante “Votami” collegato a un Google Form;
+* dotato di archivio dediche;
+* dotato di sistema di backup;
+* predisposto per una futura interfaccia manuale tramite Streamlit.
+L’obiettivo principale è che l’utente possa preparare in anticipo settimane o mesi di dediche e lasciare che il sito pubblichi automaticamente la dedica corretta ogni giorno.
+________________
+
+
+2. Vincoli obbligatori
+2.1 Costo
+La soluzione deve avere costo operativo pari a:
+0 euro/mese
+Non devono essere richiesti:
+* hosting a pagamento;
+* VPS;
+* database a pagamento;
+* WordPress a pagamento;
+* servizi cloud a pagamento;
+* backend server persistente.
+________________
+
+
+2.2 Account da usare
+La soluzione deve essere realizzata usando un account GitHub già esistente.
+Il sito pubblico dovrà essere disponibile con URL del tipo:
+https://USERNAME.github.io/NOME-REPOSITORY/
+Il dominio personalizzato è opzionale e non deve essere necessario per il funzionamento del progetto.
+________________
+
+
+3. Architettura tecnica obbligatoria
+La soluzione deve usare questa architettura:
+Google Sheet / JSON
+       ↓
+Script Python
+       ↓
+File dati statici + immagini generate
+       ↓
+Astro
+       ↓
+GitHub Actions
+       ↓
+GitHub Pages
+       ↓
+Sito pubblico
+________________
+
+
+3.1 Frontend
+Il frontend deve essere realizzato con:
+Astro
+Astro deve essere usato per generare un sito statico veloce, responsive e compatibile con GitHub Pages.
+________________
+
+
+3.2 Stile grafico
+Per lo stile grafico si richiede l’uso di:
+Tailwind CSS
+oppure CSS modulare equivalente, purché il risultato sia moderno, responsive e ben documentato.
+________________
+
+
+3.3 Automazione
+L’automazione deve essere realizzata con:
+GitHub Actions
+GitHub Actions deve occuparsi di:
+* leggere i contenuti;
+* validare i dati;
+* generare le immagini;
+* aggiornare i file JSON;
+* costruire il sito Astro;
+* pubblicare il sito su GitHub Pages;
+* creare backup automatici;
+* permettere rilanci manuali in caso di correzione.
+________________
+
+
+3.4 Script
+Gli script devono essere realizzati in:
+Python 3.11 o superiore
+________________
+
+
+4. Funzionalità obbligatorie della prima versione
+La prima versione del sito deve includere almeno:
+1. homepage con dedica del giorno;
+2. pagina archivio dediche;
+3. pagina singola per ogni dedica;
+4. generazione automatica immagine dedica;
+5. pubblicazione automatica giornaliera;
+6. pulsante “Ascolta”;
+7. pulsante “Votami”;
+8. gestione contenuti da Google Sheet;
+9. possibilità di correzione manuale;
+10. backup automatico;
+11. restore documentato;
+12. deploy pubblico su GitHub Pages;
+13. grafica moderna e mobile-first.
+________________
+
+
+5. Sorgente dati principale
+5.1 Sorgente principale
+La sorgente dati principale deve essere:
+Google Sheet
+L’utente deve poter modificare le dediche dal Google Sheet senza toccare il codice.
+________________
+
+
+5.2 Sorgente alternativa
+Il sistema deve supportare anche file locali in formato:
+JSON
+CSV
+Questi formati servono per test, emergenza o uso senza Google Sheet.
+________________
+
+
+6. Struttura del Google Sheet
+Il Google Sheet deve contenere una riga per ogni dedica.
+Ogni riga rappresenta una dedica pubblicabile in una data specifica.
+6.1 Colonne obbligatorie
+Il Google Sheet deve contenere queste colonne:
+id
+date
+status
+song_title
+artist
+dedication_title
+dedication_text
+audio_url
+audio_type
+vote_url
+image_mode
+image_source
+short_phrase
+tags
+seo_title
+seo_description
+image_alt
+________________
+
+
+6.2 Descrizione dei campi
+id
+Identificativo univoco della dedica.
+Formato consigliato:
+2026-05-12-nome-canzone
+Regole:
+* obbligatorio;
+* univoco;
+* senza spazi;
+* usare solo lettere minuscole, numeri e trattini.
+________________
+
+
+date
+Data di pubblicazione della dedica.
+Formato obbligatorio:
+YYYY-MM-DD
+Esempio:
+2026-05-12
+La data deve essere interpretata secondo il fuso orario:
+Europe/Rome
+________________
+
+
+status
+Stato della dedica.
+Valori ammessi:
+draft
+scheduled
+published
+disabled
+Significato:
+draft      = bozza, non pubblicare
+scheduled  = pubblicabile automaticamente quando arriva la data
+published  = già pubblicata
+disabled   = esclusa dalla pubblicazione
+________________
+
+
+song_title
+Titolo della canzone.
+Campo obbligatorio.
+________________
+
+
+artist
+Nome dell’artista.
+Campo obbligatorio.
+________________
+
+
+dedication_title
+Titolo della dedica.
+Esempio:
+La dedica del giorno
+Campo obbligatorio.
+________________
+
+
+dedication_text
+Testo completo della dedica.
+Campo obbligatorio.
+Deve supportare:
+* testo multilinea;
+* emoji;
+* accenti;
+* apostrofi;
+* caratteri italiani.
+________________
+
+
+audio_url
+Link alla traccia audio.
+Campo obbligatorio.
+Può essere:
+* link Spotify;
+* link YouTube Music;
+* link SoundCloud;
+* link MP3 pubblico;
+* link a file cloud;
+* altro link audio pubblico.
+Il sito non deve caricare brani musicali protetti dentro il repository. Deve usare link o embed esterni.
+________________
+
+
+audio_type
+Tipo di sorgente audio.
+Valori ammessi:
+spotify
+youtube
+soundcloud
+mp3
+cloud
+other
+________________
+
+
+vote_url
+Link al Google Form per votare.
+Campo facoltativo solo se è configurato un link Google Form predefinito.
+Regola:
+Ogni dedica pubblicata deve avere sempre un pulsante “Votami”.
+Se vote_url è vuoto, il sistema deve usare il valore predefinito configurato nei GitHub Secrets.
+________________
+
+
+image_mode
+Modalità immagine.
+Valori ammessi:
+auto
+upload
+none
+Significato:
+auto    = immagine generata automaticamente da Python
+upload  = immagine fornita manualmente
+none    = usare immagine placeholder
+________________
+
+
+image_source
+Percorso o URL dell’immagine caricata manualmente.
+Obbligatorio solo se:
+image_mode = upload
+________________
+
+
+short_phrase
+Frase breve da inserire nell’immagine generata.
+Esempio:
+Una canzone per ricordare ciò che conta.
+Campo facoltativo.
+________________
+
+
+tags
+Lista tag separata da virgole.
+Esempio:
+amore,ricordi,estate
+________________
+
+
+seo_title
+Titolo SEO della pagina.
+Se vuoto, deve essere generato automaticamente usando:
+song_title + artist + date
+________________
+
+
+seo_description
+Descrizione SEO della pagina.
+Se vuota, deve essere generata automaticamente usando una sintesi della dedica.
+________________
+
+
+image_alt
+Testo alternativo dell’immagine.
+Obbligatorio per accessibilità.
+Se vuoto, deve essere generato automaticamente usando titolo canzone, artista e data.
+________________
+
+
+7. Validazione dati
+Prima di pubblicare una dedica, lo script Python deve validare i dati.
+7.1 Regole obbligatorie
+La pubblicazione deve fallire se:
+* id è vuoto;
+* id è duplicato;
+* date è vuota;
+* date non è nel formato YYYY-MM-DD;
+* esistono due dediche attive per la stessa data;
+* song_title è vuoto;
+* artist è vuoto;
+* dedication_title è vuoto;
+* dedication_text è vuoto;
+* audio_url è vuoto;
+* audio_url non è un URL valido;
+* vote_url è vuoto e non esiste un Google Form predefinito;
+* status contiene un valore non previsto;
+* image_mode contiene un valore non previsto.
+________________
+
+
+7.2 Comportamento in caso di errore
+Se la validazione fallisce:
+* il sito già online non deve essere modificato;
+* il deploy non deve avvenire;
+* il workflow deve terminare con errore;
+* l’errore deve essere leggibile nei log di GitHub Actions;
+* il Google Sheet deve essere aggiornato con messaggio di errore, se possibile.
+________________
+
+
+8. File JSON generati
+Per ogni dedica valida, il sistema deve generare un file JSON.
+Percorso richiesto:
+/data/dedications/YYYY-MM-DD.json
+Esempio:
+/data/dedications/2026-05-12.json
+________________
+
+
+8.1 Schema JSON richiesto
+Ogni JSON deve avere questa struttura:
+{
+ "id": "2026-05-12-nome-canzone",
+ "date": "2026-05-12",
+ "day_name": "martedì",
+ "status": "published",
+ "song_title": "Titolo canzone",
+ "artist": "Nome artista",
+ "dedication_title": "Titolo dedica",
+ "dedication_text": "Testo completo della dedica",
+ "audio": {
+   "url": "https://...",
+   "type": "spotify"
+ },
+ "vote": {
+   "url": "https://..."
+ },
+ "image": {
+   "path": "/images/dedications/2026-05-12.webp",
+   "alt": "Dedica musicale del 12 maggio 2026"
+ },
+ "tags": ["amore", "ricordi"],
+ "seo": {
+   "title": "Titolo SEO",
+   "description": "Descrizione SEO"
+ },
+ "created_at": "2026-05-12T06:00:00+02:00",
+ "updated_at": "2026-05-12T06:00:00+02:00"
+}
+________________
+
+
+9. Regole di pubblicazione giornaliera
+9.1 Fuso orario
+Il sito deve usare come data logica:
+Europe/Rome
+La dedica del giorno deve essere scelta sulla base della data italiana, non della data UTC.
+________________
+
+
+9.2 Dedica pubblicabile
+Una dedica è pubblicabile automaticamente se:
+date = data odierna Europe/Rome
+status = scheduled
+________________
+
+
+9.3 Pubblicazione automatica
+Ogni giorno GitHub Actions deve:
+1. leggere il Google Sheet;
+2. trovare la dedica del giorno;
+3. validare i dati;
+4. generare il JSON;
+5. generare o copiare l’immagine;
+6. aggiornare lo stato della dedica;
+7. costruire il sito Astro;
+8. pubblicare il sito su GitHub Pages;
+9. creare backup;
+10. scrivere log chiari.
+________________
+
+
+9.4 Nessuna dedica trovata
+Se per il giorno corrente non esiste una dedica valida:
+* il sito online deve restare invariato;
+* la homepage deve continuare a mostrare l’ultima dedica pubblicata;
+* il workflow deve registrare un warning;
+* non devono essere cancellati contenuti esistenti.
+________________
+
+
+10. Generazione immagini
+10.1 Obiettivo
+Lo script Python deve generare automaticamente un’immagine grafica della dedica.
+L’immagine deve essere bella, moderna e coerente con lo stile del sito.
+________________
+
+
+10.2 Contenuti dell’immagine
+L’immagine generata deve includere:
+* data;
+* giorno della settimana;
+* titolo canzone;
+* artista;
+* frase breve;
+* eventuale logo o nome del sito.
+________________
+
+
+10.3 Formati immagine richiesti
+Lo script deve generare almeno:
+1080x1350 px
+per formato verticale social/mobile.
+Deve generare anche:
+1200x630 px
+per anteprima social OpenGraph.
+________________
+
+
+10.4 Formato file
+Formato consigliato:
+webp
+Formato alternativo ammesso:
+png
+jpg
+________________
+
+
+10.5 Percorso immagini
+Le immagini devono essere salvate in:
+/public/images/dedications/
+Esempio:
+/public/images/dedications/2026-05-12.webp
+/public/images/dedications/2026-05-12-og.webp
+________________
+
+
+10.6 Librerie Python richieste
+Lo sviluppatore deve usare preferibilmente:
+Pillow
+pandas
+python-dotenv
+gspread
+google-auth
+requests
+________________
+
+
+11. Struttura del sito
+Il sito deve contenere almeno queste pagine:
+/
+Homepage con dedica del giorno.
+/archive/
+Archivio di tutte le dediche pubblicate.
+/dediche/YYYY-MM-DD-id/
+Pagina dettaglio della singola dedica.
+Esempio:
+/dediche/2026-05-12-nome-canzone/
+________________
+
+
+12. Homepage
+La homepage deve mostrare in modo molto evidente la dedica del giorno.
+12.1 Elementi obbligatori
+La homepage deve contenere:
+* immagine principale;
+* data;
+* giorno della settimana;
+* titolo canzone;
+* artista;
+* titolo dedica;
+* testo dedica;
+* pulsante “Ascolta”;
+* pulsante “Votami”;
+* link all’archivio;
+* eventuale anteprima delle ultime dediche.
+________________
+
+
+12.2 Comportamento
+La homepage deve mostrare:
+ultima dedica pubblicata con date <= oggi
+Se la dedica del giorno non è ancora disponibile, deve mostrare l’ultima dedica valida pubblicata.
+________________
+
+
+13. Pagina singola dedica
+Ogni dedica deve avere una pagina dedicata.
+13.1 Elementi obbligatori
+Ogni pagina dedica deve contenere:
+* immagine;
+* titolo canzone;
+* artista;
+* data;
+* testo dedica;
+* pulsante “Ascolta”;
+* pulsante “Votami”;
+* tag;
+* link alla dedica precedente;
+* link alla dedica successiva;
+* link all’archivio.
+________________
+
+
+14. Archivio dediche
+La pagina archivio deve mostrare tutte le dediche pubblicate.
+14.1 Funzioni richieste
+L’archivio deve supportare:
+* ordinamento cronologico decrescente;
+* ricerca testuale;
+* filtro per artista;
+* filtro per mese;
+* card grafiche animate;
+* immagine miniatura;
+* titolo canzone;
+* artista;
+* data;
+* link alla pagina dettaglio.
+________________
+
+
+15. Pulsante “Ascolta”
+15.1 Funzione
+Il pulsante “Ascolta” deve aprire il link audio della dedica.
+Testo pulsante:
+Ascolta
+________________
+
+
+15.2 Comportamento
+Il link deve aprirsi in una nuova scheda.
+Attributi richiesti:
+target="_blank"
+rel="noopener noreferrer"
+________________
+
+
+15.3 Embed audio
+Per Spotify, SoundCloud o altri servizi supportati, il sito può mostrare anche un embed.
+Regole:
+* l’embed non deve partire automaticamente;
+* l’embed non deve rallentare la homepage;
+* su mobile deve essere responsive;
+* se l’embed non è disponibile, deve restare il pulsante link.
+________________
+
+
+16. Pulsante “Votami”
+16.1 Funzione
+Il pulsante “Votami” deve aprire il Google Form associato.
+Testo pulsante:
+Votami
+________________
+
+
+16.2 Comportamento
+Il link deve aprirsi in una nuova scheda.
+Attributi richiesti:
+target="_blank"
+rel="noopener noreferrer"
+________________
+
+
+17. Requisiti grafici
+17.1 Stile richiesto
+Il sito deve avere uno stile:
+* musicale;
+* moderno;
+* emozionale;
+* elegante;
+* premium;
+* mobile-first;
+* adatto a dediche giornaliere;
+* più simile a una landing musicale che a un blog classico.
+________________
+
+
+17.2 Ispirazioni grafiche
+Lo stile deve ispirarsi a:
+* Spotify Wrapped;
+* Apple Music;
+* interfacce musicali dark;
+* landing page moderne;
+* card glassmorphism;
+* gradienti dinamici;
+* design emozionale.
+________________
+
+
+17.3 Dark mode
+La dark mode deve essere lo stile principale.
+Colori consigliati:
+nero profondo
+viola
+blu notte
+magenta
+gradienti neon soft
+bianco caldo per testi
+________________
+
+
+17.4 Animazioni
+Devono essere presenti animazioni leggere:
+* fade-in;
+* hover sui pulsanti;
+* reveal on scroll;
+* microinterazioni sulle card;
+* transizioni morbide;
+* effetto glow sui pulsanti principali.
+Le animazioni non devono compromettere le performance.
+________________
+
+
+18. Responsive design
+Il sito deve funzionare correttamente su:
+* smartphone;
+* tablet;
+* desktop;
+* schermi grandi.
+La priorità è:
+mobile-first
+La homepage deve essere perfettamente leggibile e usabile da smartphone.
+________________
+
+
+19. SEO e anteprime social
+Il sito deve generare automaticamente:
+* title HTML;
+* meta description;
+* OpenGraph title;
+* OpenGraph description;
+* OpenGraph image;
+* Twitter card;
+* sitemap;
+* robots.txt.
+Ogni dedica deve avere metadata specifici.
+________________
+
+
+20. Performance
+Il sito deve essere ottimizzato.
+Target minimo richiesto su Lighthouse:
+Performance >= 90
+Accessibility >= 90
+Best Practices >= 90
+SEO >= 90
+________________
+
+
+21. Struttura repository GitHub
+Il repository deve avere questa struttura minima:
+/
+├── .github/
+│   └── workflows/
+│       ├── deploy.yml
+│       ├── daily-publish.yml
+│       └── backup.yml
+│
+├── data/
+│   └── dedications/
+│       └── YYYY-MM-DD.json
+│
+├── public/
+│   ├── images/
+│   │   └── dedications/
+│   └── favicon/
+│
+├── scripts/
+│   ├── sync_from_google_sheet.py
+│   ├── validate_dedications.py
+│   ├── generate_image.py
+│   ├── publish_daily.py
+│   ├── backup_site.py
+│   └── utils.py
+│
+├── src/
+│   ├── components/
+│   ├── layouts/
+│   ├── pages/
+│   └── styles/
+│
+├── backups/
+│   └── README.md
+│
+├── astro.config.mjs
+├── package.json
+├── requirements.txt
+├── README.md
+└── .gitignore
+________________
+
+
+22. GitHub Actions richieste
+Devono essere previsti almeno tre workflow.
+________________
+
+
+22.1 deploy.yml
+Esegue il deploy del sito quando viene fatto push su main.
+Trigger:
+on:
+ push:
+   branches:
+     - main
+Funzioni:
+* installare dipendenze Node;
+* buildare Astro;
+* pubblicare su GitHub Pages.
+________________
+
+
+22.2 daily-publish.yml
+Esegue la pubblicazione automatica giornaliera.
+Trigger:
+on:
+ schedule:
+   - cron: "10 4 * * *"
+ workflow_dispatch:
+Nota: il cron GitHub usa UTC. Lo script Python deve comunque calcolare la data corretta usando Europe/Rome.
+Il workflow deve supportare anche esecuzione manuale con input:
+date
+force_republish
+dry_run
+________________
+
+
+22.3 backup.yml
+Esegue backup automatici.
+Trigger:
+on:
+ schedule:
+   - cron: "30 4 * * *"
+ workflow_dispatch:
+Funzioni:
+* creare archivio zip;
+* salvare backup come artifact GitHub Actions;
+* opzionalmente creare GitHub Release di backup;
+* non appesantire inutilmente il repository con zip giornalieri permanenti.
+________________
+
+
+23. Backup
+23.1 Obiettivo
+Il sistema deve permettere backup e ripristino del sito.
+Il backup deve consentire di recuperare:
+* dediche;
+* immagini;
+* codice sorgente;
+* configurazioni;
+* script;
+* workflow;
+* file pubblicabili;
+* configurazione Astro.
+________________
+
+
+23.2 Contenuto del backup
+Ogni backup deve includere:
+data/
+public/images/dedications/
+src/
+scripts/
+.github/workflows/
+package.json
+astro.config.mjs
+requirements.txt
+README.md
+Opzionale:
+dist/
+La cartella dist/ è opzionale perché il sito può essere rigenerato dal sorgente.
+________________
+
+
+23.3 Tipi di backup
+Devono esistere tre livelli di backup.
+Livello 1 — Git
+Ogni modifica deve essere versionata da Git.
+Questo permette rollback tramite commit precedenti.
+________________
+
+
+Livello 2 — Artifact GitHub Actions
+Il workflow backup.yml deve creare un file:
+backup-YYYY-MM-DD.zip
+da scaricare dagli artifact GitHub Actions.
+________________
+
+
+Livello 3 — Release GitHub opzionale
+Per backup più stabili, lo sviluppatore deve prevedere la possibilità di creare release di backup.
+Esempio:
+backup-2026-05-12
+________________
+
+
+23.4 Restore
+Lo sviluppatore deve documentare una procedura di ripristino.
+Il restore deve permettere:
+* ripristino completo del sito;
+* ripristino di una singola dedica;
+* ripristino di una singola immagine;
+* rollback a un commit precedente.
+________________
+
+
+24. Editing manuale
+24.1 Modalità principale
+La modifica manuale deve avvenire tramite Google Sheet.
+L’utente deve poter:
+* aggiungere dediche future;
+* modificare dediche future;
+* correggere dediche già pubblicate;
+* cambiare immagini;
+* cambiare link audio;
+* cambiare link Google Form;
+* cambiare testo dedica;
+* disabilitare una dedica.
+________________
+
+
+24.2 Ripubblicazione manuale
+GitHub Actions deve permettere una ripubblicazione manuale.
+Da GitHub:
+Actions → daily-publish.yml → Run workflow
+Input richiesti:
+date = YYYY-MM-DD
+force_republish = true
+dry_run = false
+________________
+
+
+24.3 Modalità emergenza
+Lo sviluppatore deve documentare anche la modifica manuale diretta dei JSON nel repository.
+Questa modalità deve essere considerata solo emergenza.
+Flusso principale:
+Google Sheet → GitHub Actions → sito
+________________
+
+
+25. Evoluzione futura: app Streamlit
+25.1 Obiettivo
+In una fase successiva deve essere possibile realizzare una piccola app Streamlit per gestire le dediche con interfaccia grafica.
+________________
+
+
+25.2 Funzioni Streamlit richieste
+L’app Streamlit dovrà permettere:
+* creare nuova dedica;
+* modificare dedica esistente;
+* cancellare o disabilitare dedica;
+* caricare immagine;
+* generare preview;
+* validare dati;
+* aggiornare Google Sheet o repository GitHub;
+* lanciare GitHub Actions;
+* vedere ultimo stato di pubblicazione;
+* scaricare backup;
+* ripristinare backup.
+________________
+
+
+25.3 Sicurezza Streamlit
+L’app Streamlit non deve esporre token pubblicamente.
+Eventuali token GitHub devono stare in variabili ambiente o secrets.
+________________
+
+
+26. Sicurezza
+26.1 Secrets
+Non devono essere presenti chiavi o password nel codice.
+I valori sensibili devono essere salvati in GitHub Secrets.
+Secrets previsti:
+GOOGLE_SERVICE_ACCOUNT_JSON
+GOOGLE_SHEET_ID
+DEFAULT_VOTE_URL
+SITE_NAME
+SITE_URL
+Il token GitHub standard può essere quello fornito automaticamente da GitHub Actions:
+GITHUB_TOKEN
+________________
+
+
+26.2 Google Sheet
+Il Google Sheet deve essere condiviso solo con:
+* proprietario;
+* eventuale sviluppatore;
+* service account usato dallo script.
+________________
+
+
+26.3 Validazione URL
+Tutti gli URL inseriti nel Google Sheet devono essere validati.
+Devono essere ammessi solo URL che iniziano con:
+https://
+________________
+
+
+27. Deploy pubblico
+27.1 Prerequisiti
+Prima del deploy servono:
+Account GitHub
+Repository GitHub
+Google Sheet configurato
+Google Form già creato
+Link audio pubblici
+Codice sorgente del sito
+GitHub Actions configurate
+GitHub Pages abilitato
+________________
+
+
+27.2 Creazione repository
+Lo sviluppatore deve creare o usare un repository esistente.
+Nome consigliato:
+dediche-musicali
+________________
+
+
+27.3 Configurazione Astro per GitHub Pages
+Nel file:
+astro.config.mjs
+deve essere configurato correttamente il path base.
+Per un sito GitHub Pages di tipo repository:
+export default defineConfig({
+ site: "https://USERNAME.github.io",
+ base: "/NOME-REPOSITORY"
+});
+Esempio:
+export default defineConfig({
+ site: "https://massimiliano.github.io",
+ base: "/dediche-musicali"
+});
+________________
+
+
+27.4 Abilitazione GitHub Pages
+Da GitHub:
+Repository → Settings → Pages
+Configurare:
+Source = GitHub Actions
+________________
+
+
+27.5 Permessi GitHub Actions
+Da GitHub:
+Repository → Settings → Actions → General
+Impostare:
+Workflow permissions = Read and write permissions
+________________
+
+
+27.6 Configurazione Secrets
+Da GitHub:
+Repository → Settings → Secrets and variables → Actions
+Aggiungere:
+GOOGLE_SERVICE_ACCOUNT_JSON
+GOOGLE_SHEET_ID
+DEFAULT_VOTE_URL
+SITE_NAME
+SITE_URL
+________________
+
+
+27.7 Deploy manuale iniziale
+Lo sviluppatore deve eseguire:
+npm install
+npm run build
+Poi deve fare push su main.
+Il workflow deploy.yml deve pubblicare automaticamente il sito.
+________________
+
+
+27.8 Verifica sito pubblico
+Dopo il deploy, verificare che il sito sia raggiungibile da:
+https://USERNAME.github.io/NOME-REPOSITORY/
+________________
+
+
+28. Comandi locali richiesti
+Lo sviluppatore deve documentare questi comandi.
+28.1 Installazione frontend
+npm install
+________________
+
+
+28.2 Avvio locale
+npm run dev
+________________
+
+
+28.3 Build produzione
+npm run build
+________________
+
+
+28.4 Ambiente Python
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+Su Windows:
+.venv\Scripts\activate
+pip install -r requirements.txt
+________________
+
+
+28.5 Validazione dati
+python scripts/validate_dedications.py
+________________
+
+
+28.6 Pubblicazione manuale locale
+python scripts/publish_daily.py --date 2026-05-12
+________________
+
+
+28.7 Dry run
+python scripts/publish_daily.py --date 2026-05-12 --dry-run
+________________
+
+
+29. README obbligatorio
+Il repository deve contenere un README completo con:
+* descrizione progetto;
+* architettura;
+* prerequisiti;
+* setup locale;
+* configurazione Google Sheet;
+* configurazione GitHub Secrets;
+* configurazione GitHub Pages;
+* deploy;
+* pubblicazione automatica;
+* pubblicazione manuale;
+* backup;
+* restore;
+* troubleshooting;
+* struttura repository;
+* spiegazione dei campi del Google Sheet.
+________________
+
+
+30. Criteri di accettazione
+Il progetto si considera completato solo se sono vere tutte queste condizioni:
+[ ] Il sito è pubblico su GitHub Pages
+[ ] La homepage mostra la dedica corretta
+[ ] L’archivio mostra le dediche pubblicate
+[ ] Ogni dedica ha una pagina dedicata
+[ ] Il pulsante “Ascolta” funziona
+[ ] Il pulsante “Votami” funziona
+[ ] Il sito è responsive
+[ ] La grafica è moderna e curata
+[ ] La pubblicazione giornaliera è automatica
+[ ] Il workflow manuale funziona
+[ ] Il backup automatico funziona
+[ ] È documentato il restore
+[ ] I dati vengono letti da Google Sheet
+[ ] I JSON vengono generati correttamente
+[ ] Le immagini vengono generate correttamente
+[ ] Gli errori bloccano il deploy senza rompere il sito online
+[ ] Non ci sono costi mensili
+________________
+
+
+31. Deliverable richiesti allo sviluppatore
+Lo sviluppatore deve consegnare:
+1. repository GitHub completo;
+2. codice Astro;
+3. layout grafico definitivo;
+4. script Python;
+5. workflow GitHub Actions;
+6. Google Sheet template;
+7. esempio di dedica già funzionante;
+8. configurazione GitHub Pages;
+9. sistema backup;
+10. documentazione README;
+11. istruzioni restore;
+12. istruzioni per aggiungere nuove dediche;
+13. istruzioni per correggere dediche pubblicate;
+14. istruzioni per futura app Streamlit.
+________________
+
+
+32. Funzionalità escluse dalla prima versione
+La prima versione non deve includere obbligatoriamente:
+* login utenti;
+* votazione interna al sito;
+* database;
+* WordPress;
+* editor drag-and-drop tipo Google Sites;
+* app mobile;
+* streaming audio proprietario;
+* caricamento di file musicali protetti;
+* dominio personalizzato.
+Queste funzioni possono essere valutate in futuro.
+________________
+
+
+33. Priorità del progetto
+Le priorità sono:
+1. Automazione giornaliera
+2. Costo zero
+3. Grafica accattivante
+4. Semplicità di gestione
+5. Backup e restore
+6. Mobile-first
+7. SEO e social preview
+________________
+
+
+34. Obiettivo finale operativo
+Alla fine del progetto, l’utente deve poter lavorare così:
+1. apre Google Sheet;
+2. inserisce le dediche dei prossimi giorni;
+3. aggiunge titolo, artista, testo, link audio e link voto;
+4. salva il foglio;
+5. non tocca più il sito;
+6. ogni giorno GitHub Actions pubblica automaticamente la dedica corretta;
+7. il sito resta pubblico su GitHub Pages;
+8. in caso di errore, il sito precedente resta online;
+9. in caso di problemi, è possibile ripristinare un backup;
+10. in futuro, la gestione potrà essere resa più comoda tramite app Streamlit.
+________________
+
+
+35. Formula conclusiva per lo sviluppatore
+La soluzione richiesta è:
+Sito statico gratuito basato su Astro, pubblicato su GitHub Pages,
+automatizzato con GitHub Actions e Python, alimentato da Google Sheet,
+con pubblicazione giornaliera automatica di dediche musicali,
+generazione immagini, pulsanti audio/voto, archivio, grafica moderna,
+backup automatici e predisposizione futura per editing tramite Streamlit.
+Fine documento.

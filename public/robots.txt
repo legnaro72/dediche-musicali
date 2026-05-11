@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://legnaro72.github.io/dediche-musicali/sitemap-index.xml

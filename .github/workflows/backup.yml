@@ -1,0 +1,39 @@
+name: 💾 Backup Automatico
+
+on:
+  schedule:
+    - cron: '30 4 * * *'   # 06:30 ora italiana
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    name: Crea backup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Installa dipendenze Python
+        run: pip install -r requirements.txt
+
+      - name: Crea backup zip
+        run: |
+          DATE=$(TZ='Europe/Rome' date +'%Y-%m-%d')
+          python scripts/backup_site.py --output backups/backup-${DATE}.zip
+
+      - name: Upload backup come artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-${{ github.run_id }}
+          path: backups/*.zip
+          retention-days: 30
+          if-no-files-found: warn

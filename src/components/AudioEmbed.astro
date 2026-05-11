@@ -1,0 +1,63 @@
+---
+// src/components/AudioEmbed.astro
+export interface Props {
+  url: string;
+  type: string; // spotify | youtube | soundcloud | mp3 | cloud | other
+}
+
+const { url, type } = Astro.props;
+
+function getSpotifyEmbedUrl(url: string): string | null {
+  const m = url.match(/spotify\.com\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/);
+  if (!m) return null;
+  return `https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator&theme=0`;
+}
+
+function getYoutubeEmbedUrl(url: string): string | null {
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+  if (!m) return null;
+  return `https://www.youtube.com/embed/${m[1]}?rel=0`;
+}
+
+function getSoundcloudEmbedUrl(url: string): string | null {
+  if (!url.includes('soundcloud.com')) return null;
+  return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%237c3aed&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=true`;
+}
+
+let embedUrl: string | null = null;
+let embedHeight = 152;
+
+if (type === 'spotify') {
+  embedUrl = getSpotifyEmbedUrl(url);
+  embedHeight = 152;
+} else if (type === 'youtube') {
+  embedUrl = getYoutubeEmbedUrl(url);
+  embedHeight = 315;
+} else if (type === 'soundcloud') {
+  embedUrl = getSoundcloudEmbedUrl(url);
+  embedHeight = 300;
+}
+---
+
+<div class="audio-section">
+  {embedUrl ? (
+    <div class="audio-embed" style="margin-bottom: 1rem;">
+      <iframe
+        src={embedUrl}
+        height={embedHeight}
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"
+        title="Player audio"
+      ></iframe>
+    </div>
+  ) : null}
+
+  {type === 'mp3' ? (
+    <div class="audio-embed" style="padding:1rem; background:var(--bg-card);">
+      <audio controls style="width:100%; accent-color:var(--purple-1);">
+        <source src={url} type="audio/mpeg" />
+        Il tuo browser non supporta l'audio HTML5.
+      </audio>
+    </div>
+  ) : null}
+</div>

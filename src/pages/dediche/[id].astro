@@ -1,0 +1,144 @@
+---
+// src/pages/dediche/[id].astro
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AudioEmbed from '../../components/AudioEmbed.astro';
+
+export async function getStaticPaths() {
+  const dataDir = join(process.cwd(), 'data', 'dedications');
+  if (!existsSync(dataDir)) return [];
+
+  const files = readdirSync(dataDir).filter(f => f.endsWith('.json')).sort();
+  const dedications = files.map(f => JSON.parse(readFileSync(join(dataDir, f), 'utf-8')));
+  const published = dedications.filter(d => d.status === 'published');
+
+  return published.map((ded, idx) => ({
+    params: { id: ded.id },
+    props: {
+      dedication: ded,
+      prev: idx < published.length - 1 ? published[idx + 1] : null,
+      next: idx > 0 ? published[idx - 1] : null,
+    },
+  }));
+}
+
+const { dedication, prev, next } = Astro.props;
+const base = (import.meta.env.BASE_URL ?? '/').replace(/([^/])$/, '$1/');
+
+const [y, m, d] = dedication.date.split('-');
+const MONTHS = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const dateLabel = `${parseInt(d)} ${MONTHS[parseInt(m)-1]} ${y}`;
+
+const imgSrc = dedication.image?.path ? base + dedication.image.path.replace(/^\//, '') : null;
+const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
+---
+
+<BaseLayout
+  title={dedication.seo?.title ?? `${dedication.song_title} — ${dedication.artist} | DDGPilliSite`}
+  description={dedication.seo?.description ?? dedication.dedication_text?.slice(0, 155)}
+  ogTitle={dedication.seo?.title}
+  ogDescription={dedication.seo?.description}
+  ogImage={ogImg}
+>
+
+<article style="padding:8rem 0 5rem; min-height:100vh; position:relative; overflow:hidden;">
+  <!-- Ambient orbs -->
+  <div style="position:absolute;width:500px;height:500px;top:-100px;left:-150px;border-radius:50%;filter:blur(90px);pointer-events:none;background:radial-gradient(circle,rgba(124,58,237,0.25) 0%,transparent 70%);z-index:0;"></div>
+  <div style="position:absolute;width:350px;height:350px;bottom:0;right:-100px;border-radius:50%;filter:blur(80px);pointer-events:none;background:radial-gradient(circle,rgba(236,72,153,0.2) 0%,transparent 70%);z-index:0;"></div>
+
+  <div class="container-narrow" style="position:relative;z-index:1;">
+
+    <!-- Back link -->
+    <a href={`${base}archive/`} style="display:inline-flex;align-items:center;gap:0.5rem;color:var(--text-muted);font-size:0.875rem;margin-bottom:2rem;transition:var(--transition);"
+       onmouseenter="this.style.color='var(--accent)'" onmouseleave="this.style.color='var(--text-muted)'">
+      ← Archivio
+    </a>
+
+    <!-- Date / day -->
+    <div class="hero-date anim-1" style="margin-bottom:1rem;">
+      {dedication.day_name ? `${dedication.day_name}, ` : ''}{dateLabel}
+    </div>
+
+    <!-- Song title -->
+    <h1 class="hero-song anim-1" style="font-family:var(--font-serif);font-size:clamp(2rem,4vw,3rem);margin-bottom:0.4rem;">
+      {dedication.song_title}
+    </h1>
+    <p class="hero-artist anim-2">{dedication.artist}</p>
+
+    <!-- Image -->
+    {imgSrc && (
+      <div style="margin:2rem 0;" class="anim-2">
+        <img
+          src={imgSrc}
+          alt={dedication.image?.alt ?? ''}
+          style="width:100%;max-width:480px;border-radius:var(--radius-lg);box-shadow:0 0 60px rgba(124,58,237,0.3);display:block;margin:0 auto;"
+          loading="lazy"
+          width="480"
+          height="600"
+        />
+      </div>
+    )}
+
+    <!-- Audio embed -->
+    <div class="anim-3" style="margin-bottom:2rem;">
+      <AudioEmbed url={dedication.audio.url} type={dedication.audio.type} />
+    </div>
+
+    <!-- Dedication text -->
+    <div class="card" style="padding:2rem;margin-bottom:2rem;" class="anim-3">
+      <p style="font-size:0.8rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;">
+        {dedication.dedication_title}
+      </p>
+      <p style="color:var(--text-dim);font-size:1.05rem;line-height:1.9;white-space:pre-line;">
+        {dedication.dedication_text}
+      </p>
+    </div>
+
+    <!-- CTA buttons -->
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2.5rem;" class="anim-4">
+      <a href={dedication.audio.url} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg">
+        ▶ Ascolta
+      </a>
+      <a href={dedication.vote.url} target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg">
+        ⭐ Votami
+      </a>
+    </div>
+
+    <!-- Tags -->
+    {dedication.tags && dedication.tags.length > 0 && (
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:2.5rem;" class="anim-4">
+        {dedication.tags.map((tag: string) => <span class="tag">{tag}</span>)}
+      </div>
+    )}
+
+    <!-- Prev / Next navigation -->
+    <nav class="ded-nav" aria-label="Navigazione dediche">
+      {prev ? (
+        <a href={`${base}dediche/${prev.id}/`} class="ded-nav-link">
+          <div class="ded-nav-label">← Precedente</div>
+          <div class="ded-nav-song">{prev.song_title}</div>
+          <div style="font-size:0.8rem;color:var(--magenta-soft);margin-top:0.2rem;">{prev.artist}</div>
+        </a>
+      ) : <div></div>}
+
+      {next ? (
+        <a href={`${base}dediche/${next.id}/`} class="ded-nav-link next">
+          <div class="ded-nav-label">Successiva →</div>
+          <div class="ded-nav-song">{next.song_title}</div>
+          <div style="font-size:0.8rem;color:var(--magenta-soft);margin-top:0.2rem;">{next.artist}</div>
+        </a>
+      ) : <div></div>}
+    </nav>
+
+    <!-- Back to archive -->
+    <div style="text-align:center;margin-top:3rem;">
+      <a href={`${base}archive/`} class="btn btn-secondary">
+        ← Torna all'archivio
+      </a>
+    </div>
+
+  </div>
+</article>
+
+</BaseLayout>

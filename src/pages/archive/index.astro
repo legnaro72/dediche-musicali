@@ -1,0 +1,133 @@
+---
+// src/pages/archive/index.astro
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DedicationCard from '../../components/DedicationCard.astro';
+
+const dataDir = join(process.cwd(), 'data', 'dedications');
+const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
+
+let all: any[] = [];
+if (existsSync(dataDir)) {
+  const files = readdirSync(dataDir).filter(f => f.endsWith('.json')).sort().reverse();
+  all = files
+    .map(f => JSON.parse(readFileSync(join(dataDir, f), 'utf-8')))
+    .filter(d => d.status === 'published' && d.date <= today);
+}
+
+// Ricava liste per filtri
+const artists = [...new Set(all.map(d => d.artist))].sort();
+const months = [...new Set(all.map(d => d.date.substring(0, 7)))].sort().reverse();
+const MONTH_NAMES: Record<string, string> = {
+  '01':'Gennaio','02':'Febbraio','03':'Marzo','04':'Aprile',
+  '05':'Maggio','06':'Giugno','07':'Luglio','08':'Agosto',
+  '09':'Settembre','10':'Ottobre','11':'Novembre','12':'Dicembre'
+};
+---
+
+<BaseLayout
+  title="Archivio Dediche | DDGPilliSite"
+  description="Tutte le dediche musicali pubblicate su DDGPilliSite. Cerca, filtra e rileggi ogni dedica."
+>
+
+<section style="padding:9rem 0 5rem;">
+  <div class="container">
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:3rem;" class="anim-1">
+      <span class="section-label">Raccolta</span>
+      <h1 class="section-title" style="font-family:var(--font-serif)">Archivio Dediche</h1>
+      <div class="divider"></div>
+      <p style="color:var(--text-dim);max-width:500px;margin:0 auto;">
+        {all.length} {all.length === 1 ? 'dedica pubblicata' : 'dediche pubblicate'}
+      </p>
+    </div>
+
+    <!-- Search & Filters -->
+    <div style="display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:2.5rem;" class="anim-2">
+      <input
+        type="search"
+        id="search-input"
+        class="search-bar"
+        placeholder="🔍  Cerca canzone, artista, testo..."
+        style="flex:1;min-width:220px;"
+        autocomplete="off"
+      />
+      <select id="filter-artist" class="filter-select">
+        <option value="">Tutti gli artisti</option>
+        {artists.map(a => <option value={a}>{a}</option>)}
+      </select>
+      <select id="filter-month" class="filter-select">
+        <option value="">Tutti i mesi</option>
+        {months.map(m => {
+          const [y, mo] = m.split('-');
+          return <option value={m}>{MONTH_NAMES[mo]} {y}</option>;
+        })}
+      </select>
+    </div>
+
+    <!-- Grid -->
+    <div class="archive-grid" id="archive-grid">
+      {all.map((d: any) => (
+        <DedicationCard
+          id={d.id}
+          date={d.date}
+          day_name={d.day_name}
+          song_title={d.song_title}
+          artist={d.artist}
+          image={d.image}
+          tags={d.tags}
+        />
+      ))}
+    </div>
+
+    <!-- No result -->
+    <div id="no-result" class="no-result" style="display:none;">
+      <span class="emoji">🔍</span>
+      Nessuna dedica trovata con questi filtri.
+    </div>
+
+  </div>
+</section>
+
+<script>
+  // Dati lato client per il filtro live
+  const grid = document.getElementById('archive-grid');
+  const noResult = document.getElementById('no-result');
+  const cards = Array.from(grid?.querySelectorAll('.dedication-card') ?? []) as HTMLElement[];
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const filterArtist = document.getElementById('filter-artist') as HTMLSelectElement;
+  const filterMonth = document.getElementById('filter-month') as HTMLSelectElement;
+
+  function applyFilters() {
+    const q = searchInput.value.toLowerCase();
+    const artist = filterArtist.value.toLowerCase();
+    const month = filterMonth.value; // YYYY-MM
+
+    let visible = 0;
+    cards.forEach(card => {
+      const song   = (card.querySelector('.dedication-card-song')?.textContent ?? '').toLowerCase();
+      const art    = (card.querySelector('.dedication-card-artist')?.textContent ?? '').toLowerCase();
+      const date   = (card.querySelector('.dedication-card-date')?.textContent ?? '');
+      const href   = (card as HTMLAnchorElement).href ?? '';
+
+      const matchQ = !q || song.includes(q) || art.includes(q);
+      const matchA = !artist || art.includes(artist);
+      // month filter: card href contains the date; find from href slug
+      const matchM = !month || date.includes(month.split('-')[1]) || href.includes(month.replace('-',''));
+
+      const show = matchQ && matchA && matchM;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    if (noResult) noResult.style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  searchInput?.addEventListener('input', applyFilters);
+  filterArtist?.addEventListener('change', applyFilters);
+  filterMonth?.addEventListener('change', applyFilters);
+</script>
+
+</BaseLayout>

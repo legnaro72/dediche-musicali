@@ -1,0 +1,165 @@
+---
+// src/pages/index.astro
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AudioEmbed from '../components/AudioEmbed.astro';
+import DedicationCard from '../components/DedicationCard.astro';
+
+const dataDir = join(process.cwd(), 'data', 'dedications');
+
+// Carica tutte le dediche pubblicate ordinate per data
+let all: any[] = [];
+if (existsSync(dataDir)) {
+  const files = readdirSync(dataDir).filter(f => f.endsWith('.json')).sort();
+  all = files.map(f => JSON.parse(readFileSync(join(dataDir, f), 'utf-8')));
+}
+
+const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
+
+// La dedica più recente con date <= oggi e status published/scheduled
+const published = all
+  .filter(d => d.status === 'published' && d.date <= today)
+  .sort((a, b) => b.date.localeCompare(a.date));
+
+const dedication = published[0] ?? null;
+
+// Ultime 4 dediche (esclusa quella in hero)
+const recent = published.slice(1, 5);
+
+const base = (import.meta.env.BASE_URL ?? '/').replace(/([^/])$/, '$1/');
+
+function fmtDate(dateStr: string, dayName?: string) {
+  const [y, m, d] = dateStr.split('-');
+  const months = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+  const label = `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+  return dayName ? `${dayName}, ${label}` : label;
+}
+---
+
+<BaseLayout
+  title={dedication ? `${dedication.song_title} — ${dedication.artist} | DDGPilliSite` : 'DDGPilliSite — Dediche Musicali'}
+  description={dedication?.seo?.description ?? 'Una nuova dedica musicale ogni giorno.'}
+  ogTitle={dedication?.seo?.title}
+  ogDescription={dedication?.seo?.description}
+  ogImage={dedication?.image?.path?.replace('.webp', '-og.webp')}
+>
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <!-- Ambient orbs -->
+    <div class="hero-orb" style="width:500px;height:500px;top:-100px;left:-150px;background:radial-gradient(circle,rgba(124,58,237,0.35) 0%,transparent 70%)"></div>
+    <div class="hero-orb" style="width:400px;height:400px;bottom:-80px;right:-100px;background:radial-gradient(circle,rgba(236,72,153,0.25) 0%,transparent 70%)"></div>
+
+    <div class="container hero-content">
+      <!-- Immagine -->
+      <div style="display:flex;justify-content:center;" class="anim-1">
+        {dedication?.image?.path ? (
+          <img
+            src={base + (dedication.image.path).replace(/^\//, '')}
+            alt={dedication.image.alt ?? ''}
+            class="hero-image"
+            width="420"
+            height="525"
+            loading="eager"
+          />
+        ) : (
+          <div class="img-placeholder">♪</div>
+        )}
+      </div>
+
+      <!-- Testo -->
+      <div>
+        {dedication ? (
+          <>
+            <div class="hero-date anim-1">
+              {fmtDate(dedication.date, dedication.day_name)}
+            </div>
+            <h1 class="hero-song anim-2">{dedication.song_title}</h1>
+            <p class="hero-artist anim-2">{dedication.artist}</p>
+            <p class="hero-ded-label anim-3">{dedication.dedication_title}</p>
+            <p class="hero-text anim-3">{dedication.dedication_text}</p>
+
+            <div class="hero-actions anim-4">
+              <a
+                href={dedication.audio?.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-primary btn-lg"
+              >
+                ▶ Ascolta
+              </a>
+              <a
+                href={dedication.vote?.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-secondary btn-lg"
+              >
+                ⭐ Votami
+              </a>
+              <a href={`${base}dediche/${dedication.id}/`} class="btn btn-secondary btn-lg">
+                Leggi tutto →
+              </a>
+            </div>
+
+            {dedication.tags && dedication.tags.length > 0 && (
+              <div style="margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:0.5rem;" class="anim-4">
+                {dedication.tags.map((tag: string) => (
+                  <span class="tag">{tag}</span>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <div>
+            <h1 class="hero-song anim-1" style="font-family:var(--font-serif)">Nessuna dedica oggi 🎵</h1>
+            <p class="hero-text anim-2">Torna domani per la prossima dedica musicale!</p>
+            <a href={`${base}archive/`} class="btn btn-primary btn-lg anim-3">Vedi archivio</a>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ AUDIO EMBED ═══ -->
+  {dedication && (
+    <section style="padding:2rem 0;background:var(--bg-surface);">
+      <div class="container-narrow reveal">
+        <AudioEmbed url={dedication.audio.url} type={dedication.audio.type} />
+      </div>
+    </section>
+  )}
+
+  <!-- ═══ RECENT DEDICHE ═══ -->
+  {recent.length > 0 && (
+    <section style="padding:5rem 0;">
+      <div class="container">
+        <div style="text-align:center;margin-bottom:3rem;" class="reveal">
+          <span class="section-label">Archivio</span>
+          <h2 class="section-title">Dediche recenti</h2>
+          <div class="divider"></div>
+        </div>
+        <div class="archive-grid reveal">
+          {recent.map((d: any) => (
+            <DedicationCard
+              id={d.id}
+              date={d.date}
+              day_name={d.day_name}
+              song_title={d.song_title}
+              artist={d.artist}
+              image={d.image}
+              tags={d.tags}
+            />
+          ))}
+        </div>
+        <div style="text-align:center;margin-top:3rem;" class="reveal">
+          <a href={`${base}archive/`} class="btn btn-secondary">
+            Vedi tutto l'archivio →
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+
+</BaseLayout>
