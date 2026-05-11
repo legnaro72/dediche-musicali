@@ -7,6 +7,7 @@ Uso:
 """
 import sys
 import os
+import re
 import argparse
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -29,7 +30,7 @@ def validate_dedication(ded: dict, seen_ids: set, active_dates: dict) -> list:
         errors.append("Campo 'id' mancante")
     elif ded_id in seen_ids:
         errors.append(f"ID duplicato: '{ded_id}'")
-    elif not re.match(r'^[a-z0-9\-]+$', ded_id) if __import__('re').match else False:
+    elif not re.match(r'^[a-z0-9\-]+$', ded_id):
         errors.append(f"ID '{ded_id}' non valido (solo lettere minuscole, numeri, trattini)")
 
     # date
@@ -58,37 +59,38 @@ def validate_dedication(ded: dict, seen_ids: set, active_dates: dict) -> list:
         if not ded.get(field, '').strip():
             errors.append(f"Campo '{field}' mancante o vuoto")
 
-    # audio_url
-    audio_url = ded.get('audio_url', '').strip()
+    # audio (struttura annidata: ded['audio']['url'] e ded['audio']['type'])
+    audio = ded.get('audio', {})
+    audio_url = audio.get('url', '').strip() if isinstance(audio, dict) else ''
+    audio_type = audio.get('type', '').strip() if isinstance(audio, dict) else ''
     if not audio_url:
-        errors.append("Campo 'audio_url' mancante")
+        errors.append("Campo 'audio.url' mancante")
     elif not is_valid_url(audio_url):
-        errors.append(f"audio_url non è un URL https valido: '{audio_url}'")
-
-    # audio_type
-    audio_type = ded.get('audio_type', '').strip()
+        errors.append(f"audio.url non è un URL https valido: '{audio_url}'")
     if audio_type and audio_type not in VALID_AUDIO_TYPES:
-        errors.append(f"audio_type '{audio_type}' non valido. Ammessi: {sorted(VALID_AUDIO_TYPES)}")
+        errors.append(f"audio.type '{audio_type}' non valido. Ammessi: {sorted(VALID_AUDIO_TYPES)}")
 
-    # image_mode
-    image_mode = ded.get('image_mode', 'auto').strip()
+    # image_mode (struttura annidata: ded['image']['mode'])
+    image = ded.get('image', {})
+    image_mode = image.get('mode', 'auto').strip() if isinstance(image, dict) else 'auto'
     if image_mode and image_mode not in VALID_IMAGE_MODES:
-        errors.append(f"image_mode '{image_mode}' non valido. Ammessi: {sorted(VALID_IMAGE_MODES)}")
+        errors.append(f"image.mode '{image_mode}' non valido. Ammessi: {sorted(VALID_IMAGE_MODES)}")
 
-    # vote_url
-    vote_url = ded.get('vote_url', '').strip()
+    # vote_url (struttura annidata: ded['vote']['url'])
+    vote = ded.get('vote', {})
+    vote_url = vote.get('url', '').strip() if isinstance(vote, dict) else ''
     default_vote_url = os.environ.get('DEFAULT_VOTE_URL', '').strip()
     if not vote_url and not default_vote_url:
-        errors.append("vote_url vuoto e DEFAULT_VOTE_URL non configurato")
+        errors.append("vote.url vuoto e DEFAULT_VOTE_URL non configurato")
     elif vote_url and not is_valid_url(vote_url):
-        errors.append(f"vote_url non è un URL https valido: '{vote_url}'")
+        errors.append(f"vote.url non è un URL https valido: '{vote_url}'")
 
     return errors
 
 
 def validate_all(dedications: list) -> bool:
     """Valida tutte le dediche. Restituisce True se tutte passano."""
-    import re
+    # re già importato a livello modulo
     seen_ids = set()
     active_dates = {}
     total_errors = 0
