@@ -56,14 +56,16 @@ function fmtDate(dateStr: string, dayName?: string) {
       <!-- Immagine -->
       <div style="display:flex;justify-content:center;" class="anim-1">
         {dedication?.image?.path ? (
-          <img
-            src={base + (dedication.image.path).replace(/^\//, '')}
-            alt={dedication.image.alt ?? ''}
-            class="hero-image"
-            width="420"
-            height="525"
-            loading="eager"
-          />
+          <div class="hero-image-frame" id="hero-image-frame">
+            <img
+              src={base + (dedication.image.path).replace(/^\//, '')}
+              alt={dedication.image.alt ?? ''}
+              class="hero-image"
+              width="420"
+              height="525"
+              loading="eager"
+            />
+          </div>
         ) : (
           <div class="img-placeholder">♪</div>
         )}
