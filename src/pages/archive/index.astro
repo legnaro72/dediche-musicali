@@ -78,6 +78,8 @@ const MONTH_NAMES: Record<string, string> = {
           artist={d.artist}
           image={d.image}
           tags={d.tags}
+          dedication_text={d.dedication_text}
+          short_phrase={d.short_phrase}
         />
       ))}
     </div>
@@ -100,22 +102,29 @@ const MONTH_NAMES: Record<string, string> = {
   const filterArtist = document.getElementById('filter-artist') as HTMLSelectElement;
   const filterMonth = document.getElementById('filter-month') as HTMLSelectElement;
 
+  function normalizeSearch(value: string) {
+    return value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   function applyFilters() {
-    const q = searchInput.value.toLowerCase();
-    const artist = filterArtist.value.toLowerCase();
+    const q = normalizeSearch(searchInput.value);
+    const artist = normalizeSearch(filterArtist.value);
     const month = filterMonth.value; // YYYY-MM
 
     let visible = 0;
     cards.forEach(card => {
-      const song   = (card.querySelector('.dedication-card-song')?.textContent ?? '').toLowerCase();
-      const art    = (card.querySelector('.dedication-card-artist')?.textContent ?? '').toLowerCase();
-      const date   = (card.querySelector('.dedication-card-date')?.textContent ?? '');
-      const href   = (card as HTMLAnchorElement).href ?? '';
+      const searchText = normalizeSearch(card.dataset.search ?? '');
+      const cardArtist = normalizeSearch(card.dataset.artist ?? '');
+      const cardMonth = card.dataset.month ?? '';
 
-      const matchQ = !q || song.includes(q) || art.includes(q);
-      const matchA = !artist || art.includes(artist);
-      // month filter: card href contains the date; find from href slug
-      const matchM = !month || date.includes(month.split('-')[1]) || href.includes(month.replace('-',''));
+      const matchQ = !q || searchText.includes(q);
+      const matchA = !artist || cardArtist === artist;
+      const matchM = !month || cardMonth === month;
 
       const show = matchQ && matchA && matchM;
       card.style.display = show ? '' : 'none';

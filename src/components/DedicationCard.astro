@@ -9,10 +9,23 @@ export interface Props {
   artist: string;
   image?: { path?: string; alt?: string };
   tags?: string[];
+  dedication_text?: string;
+  short_phrase?: string;
   class?: string;
 }
 
-const { id, date, day_name, song_title, artist, image, tags, class: className = '' } = Astro.props;
+const {
+  id,
+  date,
+  day_name,
+  song_title,
+  artist,
+  image,
+  tags,
+  dedication_text = '',
+  short_phrase = '',
+  class: className = '',
+} = Astro.props;
 
 const base = (import.meta.env.BASE_URL ?? '/').replace(/([^/])$/, '$1/');
 const href = `${base}dediche/${id}/`;
@@ -23,9 +36,23 @@ const imgAlt = image?.alt ?? `Dedica: ${song_title} di ${artist}`;
 const [year, month, day] = date.split('-');
 const months = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
 const dateLabel = `${parseInt(day)} ${months[parseInt(month)-1]} ${year}`;
+const searchText = [
+  song_title,
+  artist,
+  dedication_text,
+  short_phrase,
+  ...(tags ?? []),
+].join(' ');
+const monthValue = date.substring(0, 7);
 ---
 
-<a href={href} class={`dedication-card ${className}`}>
+<a
+  href={href}
+  class={`dedication-card ${className}`}
+  data-artist={artist}
+  data-month={monthValue}
+  data-search={searchText}
+>
   <div class="dedication-card-img-wrap">
     {imgSrc ? (
       <DedicationImage
