@@ -107,24 +107,9 @@ def fetch_source_image(image_source: str) -> 'Image | None':
 # ── Crop & Resize ──────────────────────────────────────────────────────────────
 
 def smart_crop(img: 'Image', target_w: int, target_h: int) -> 'Image':
-    """Crop intelligente centrato con preferenza per la parte alta."""
-    from PIL import Image
-    logger.info(f'    Applying smart crop → {target_w}x{target_h}')
-    src_w, src_h = img.size
-    src_ratio = src_w / src_h
-    tgt_ratio = target_w / target_h
-    if src_ratio > tgt_ratio:
-        # Immagine più larga: crop laterale
-        new_w = int(src_h * tgt_ratio)
-        x = (src_w - new_w) // 2
-        img = img.crop((x, 0, x + new_w, src_h))
-    else:
-        # Immagine più alta: crop verticale, preferisce la parte alta
-        new_h = int(src_w / tgt_ratio)
-        y = min(src_h - new_h, int(src_h * 0.15))  # 15% dall'alto max
-        y = max(0, y)
-        img = img.crop((0, y, src_w, y + new_h))
-    return img.resize((target_w, target_h), Image.LANCZOS)
+    """Delegato a smart_crop module con upper-middle bias."""
+    from scripts.smart_crop import smart_vertical_crop
+    return smart_vertical_crop(img, target_w, target_h)
 
 
 # ── OG opzionale con branding minimale ────────────────────────────────────────
@@ -179,13 +164,12 @@ def process_raw(ded: dict, fonts: dict,
                 vertical_path: 'Path', og_path: 'Path') -> bool:
     """
     Pipeline completa image_mode=raw:
-    1. Fetch immagine (locale o remota)
-    2. Smart crop verticale
-    3. Smart crop OG
-    4. Salva WebP (no overlay, no testo)
-    Restituisce True se OK, False se fallisce.
+    - Portrait source: smart crop 1080x1350 + smart OG crop (upper-middle bias)
+    - Landscape source: resize preservando ratio + smart OG crop
+    - Nessun overlay, nessun testo.
     """
     from PIL import Image
+    from scripts.smart_crop import is_landscape, smart_vertical_crop, smart_og_crop
 
     image_obj = ded.get('image', {})
     if isinstance(image_obj, dict):
@@ -202,15 +186,29 @@ def process_raw(ded: dict, fonts: dict,
         return False
 
     try:
-        # Verticale 1080x1350 — completamente pulita
+        landscape = is_landscape(img)
+        if landscape:
+            logger.info('    Landscape image detected — landscape pan mode enabled')
+            logger.info('    Full image preserved (no portrait crop)')
+            # Ridimensiona mantenendo il ratio (max 1200px wide)
+            max_w = 1200
+            scale = min(1.0, max_w / img.width)
+            new_w = int(img.width * scale)
+            new_h = int(img.height * scale)
+            v = img.resize((new_w, new_h), Image.LANCZOS)
+        else:
+            logger.info('    Portrait image detected')
+            logger.info('    Applying smart portrait crop')
+            v = smart_vertical_crop(img, 1080, 1350)
+
         logger.info('    Generating vertical WebP...')
-        v = smart_crop(img, 1080, 1350)
         v.save(str(vertical_path), 'WEBP', quality=92)
         logger.info(f'    ✓ {vertical_path.name}')
 
-        # OpenGraph 1200x630
+        # OpenGraph — sempre smart_og_crop
         logger.info('    Generating OpenGraph WebP...')
-        og_base = smart_crop(img, 1200, 630)
+        og_base = smart_og_crop(img, 1200, 630)
+
         raw_og_mode = os.environ.get('RAW_OG_MODE', 'branded').strip().lower()
         if raw_og_mode == 'clean':
             og_final = og_base

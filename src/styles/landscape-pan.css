@@ -1,0 +1,52 @@
+/* landscape-pan.css — Animazione pan orizzontale cinematica per immagini landscape.
+   Importato in global.css. Rispetta prefers-reduced-motion. */
+
+/* Contenitore che garantisce overflow hidden per il pan */
+.landscape-pan-wrap {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* L'immagine landscape parte da sinistra e scorre verso destra, poi si centra */
+.landscape-pan {
+  object-fit: cover;
+  object-position: left center;
+  will-change: object-position;
+  width: 100%;
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .landscape-pan {
+    animation: landscapePan 14s cubic-bezier(0.45, 0, 0.55, 1) 1 forwards;
+  }
+}
+
+@keyframes landscapePan {
+  0%   { object-position: left center;   }
+  65%  { object-position: right center;  }
+  100% { object-position: center center; }
+}
+
+/* Versione più leggera per mobile */
+@media (max-width: 640px) {
+  @keyframes landscapePan {
+    0%   { object-position: left center;   }
+    60%  { object-position: right center;  }
+    100% { object-position: center center; }
+  }
+
+  .landscape-pan {
+    animation-duration: 10s;
+  }
+}
+
+/* Se prefers-reduced-motion è attivo — nessuna animazione, centrata */
+@media (prefers-reduced-motion: reduce) {
+  .landscape-pan {
+    animation: none !important;
+    object-position: center center;
+  }
+}

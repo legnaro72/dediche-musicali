@@ -1,5 +1,6 @@
 ---
 // src/components/DedicationCard.astro
+import DedicationImage from './DedicationImage.astro';
 export interface Props {
   id: string;
   date: string;
@@ -27,13 +28,13 @@ const dateLabel = `${parseInt(day)} ${months[parseInt(month)-1]} ${year}`;
 <a href={href} class={`dedication-card ${className}`}>
   <div class="dedication-card-img-wrap">
     {imgSrc ? (
-      <img
+      <DedicationImage
         src={imgSrc}
         alt={imgAlt}
-        class="dedication-card-img"
-        loading="lazy"
-        width="540"
-        height="675"
+        width={540}
+        height={675}
+        wrapClass="dedication-card-img"
+        wrapStyle="aspect-ratio:4/5;"
       />
     ) : (
       <div class="dedication-card-img" style="background:linear-gradient(135deg,rgba(124,58,237,0.3),rgba(236,72,153,0.15)); display:flex; align-items:center; justify-content:center; font-size:3rem;">

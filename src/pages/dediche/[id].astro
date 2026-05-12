@@ -4,6 +4,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import AudioEmbed from '../../components/AudioEmbed.astro';
+import DedicationImage from '../../components/DedicationImage.astro';
 
 export async function getStaticPaths() {
   const dataDir = join(process.cwd(), 'data', 'dedications');
@@ -69,13 +70,14 @@ const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
     <!-- Image -->
     {imgSrc && (
       <div style="margin:2rem 0;" class="anim-2">
-        <img
+        <DedicationImage
           src={imgSrc}
           alt={dedication.image?.alt ?? ''}
-          style="width:100%;max-width:480px;border-radius:var(--radius-lg);box-shadow:0 0 60px rgba(124,58,237,0.3);display:block;margin:0 auto;"
-          loading="lazy"
-          width="480"
-          height="600"
+          width={480}
+          height={600}
+          wrapStyle="max-width:480px;margin:0 auto;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 0 60px rgba(124,58,237,0.3);aspect-ratio:4/5;"
+          style="border-radius:var(--radius-lg);"
+          loading="eager"
         />
       </div>
     )}

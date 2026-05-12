@@ -177,20 +177,9 @@ def _local_gradient_bg(W: int, H: int, palette: dict):
 
 
 def _smart_crop(img, target_w: int, target_h: int):
-    """Ritaglia intelligente: crop dal centro."""
-    from PIL import Image
-    src_w, src_h = img.size
-    src_ratio = src_w / src_h
-    tgt_ratio = target_w / target_h
-    if src_ratio > tgt_ratio:
-        new_w = int(src_h * tgt_ratio)
-        x = (src_w - new_w) // 2
-        img = img.crop((x, 0, x + new_w, src_h))
-    else:
-        new_h = int(src_w / tgt_ratio)
-        y = (src_h - new_h) // 3  # preferisce parte alta
-        img = img.crop((0, y, src_w, y + new_h))
-    return img.resize((target_w, target_h), Image.LANCZOS)
+    """Crop centrato generico — usato solo per il template verticale premium."""
+    from scripts.smart_crop import smart_vertical_crop
+    return smart_vertical_crop(img, target_w, target_h)
 
 
 def apply_premium_template_vertical(bg_img, ded: dict, fonts: dict,
@@ -287,7 +276,8 @@ def apply_premium_template_og(bg_img, ded: dict, fonts: dict,
     if bg_img is None:
         base = _local_gradient_bg(W, H, palette)
     else:
-        base = _smart_crop(bg_img, W, H)
+        from scripts.smart_crop import smart_og_crop
+        base = smart_og_crop(bg_img, W, H)
 
     base = _draw_gradient_overlay(
         base.convert('RGBA'),
