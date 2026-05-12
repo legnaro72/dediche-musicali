@@ -44,6 +44,7 @@ from scripts.image_attribution import save_attribution
 from scripts.premium_template import (
     ensure_fonts, apply_premium_template_vertical, apply_premium_template_og,
 )
+from scripts.raw_image_handler import process_raw
 
 logger = setup_logging('generate_image')
 
@@ -93,6 +94,15 @@ def generate_for_dedication(ded: dict, fonts: dict,
         return True
 
     ded = _enrich_ded(ded)
+
+    # ── image_mode = raw ─────────────────────────────────────────────────────
+    if image_mode == 'raw':
+        logger.info('  Image mode: raw (nessun overlay, solo crop+resize+WebP)')
+        ok = process_raw(ded, fonts, vertical_path, og_path)
+        if ok:
+            return True
+        logger.warning('  raw: fallback a modalità auto...')
+        image_mode = 'auto'  # prosegue con auto come fallback
 
     # ── image_mode = upload ──────────────────────────────────────────────────
     if image_mode == 'upload' and image_source:
