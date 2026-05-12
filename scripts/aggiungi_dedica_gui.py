@@ -315,8 +315,34 @@ def refresh_text_preview_if_empty(_event=None):
         refresh_text_preview()
 
 
+def set_text_target(target: str):
+    active_text_target.set(target)
+
+
+def insert_emoji(emoji: str):
+    target = active_text_target.get()
+    if target == "short_phrase":
+        short_phrase_entry.insert("insert", emoji)
+        short_phrase_entry.focus_set()
+    else:
+        dedication_text_box.insert("insert", emoji)
+        dedication_text_box.focus_set()
+
+
+def insert_custom_emoji():
+    value = custom_emoji_entry.get().strip()
+    if value:
+        insert_emoji(value)
+
+
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
+QUICK_EMOJIS = ["🎵", "❤️", "✨", "🌙", "🌹", "😊", "🙏", "🎧"]
+EXTENDED_EMOJIS = [
+    "🎶", "💙", "💛", "💜", "💫", "🌟", "☀️", "🌻",
+    "🔥", "😍", "🥹", "🕊️", "🎤", "💭", "🌈", "🍀",
+    "⭐", "💌", "🤍", "🫶", "🌊", "🎹", "🎸", "🪩",
+]
 
 app = ctk.CTk()
 app.title("DDGPilliSite — Aggiungi dedica")
@@ -325,6 +351,7 @@ app.minsize(720, 760)
 
 frame = ctk.CTkScrollableFrame(app, corner_radius=24)
 frame.pack(padx=32, pady=32, fill="both", expand=True)
+active_text_target = ctk.StringVar(value="dedication_text")
 
 title = ctk.CTkLabel(
     frame,
@@ -442,6 +469,7 @@ dedication_text_box = ctk.CTkTextbox(
     wrap="word",
 )
 dedication_text_box.pack(pady=(0, 8))
+dedication_text_box.bind("<FocusIn>", lambda _event: set_text_target("dedication_text"))
 
 short_phrase_entry = ctk.CTkEntry(
     frame,
@@ -450,6 +478,69 @@ short_phrase_entry = ctk.CTkEntry(
     placeholder_text="Short phrase",
 )
 short_phrase_entry.pack(pady=8)
+short_phrase_entry.bind("<FocusIn>", lambda _event: set_text_target("short_phrase"))
+
+emoji_label = ctk.CTkLabel(
+    frame,
+    text="Emoji rapide",
+    font=ctk.CTkFont(size=13, weight="bold"),
+    text_color="#b8b8b8",
+)
+emoji_label.pack(anchor="w", padx=70, pady=(8, 2))
+
+emoji_row = ctk.CTkFrame(frame, fg_color="transparent")
+emoji_row.pack(pady=(0, 8))
+
+for emoji in QUICK_EMOJIS:
+    emoji_button = ctk.CTkButton(
+        emoji_row,
+        text=emoji,
+        width=42,
+        height=36,
+        command=lambda value=emoji: insert_emoji(value),
+    )
+    emoji_button.pack(side="left", padx=4)
+
+emoji_extended_label = ctk.CTkLabel(
+    frame,
+    text="Emoji estese",
+    font=ctk.CTkFont(size=13, weight="bold"),
+    text_color="#b8b8b8",
+)
+emoji_extended_label.pack(anchor="w", padx=70, pady=(2, 2))
+
+emoji_grid = ctk.CTkFrame(frame, fg_color="transparent")
+emoji_grid.pack(pady=(0, 8))
+
+for index, emoji in enumerate(EXTENDED_EMOJIS):
+    emoji_button = ctk.CTkButton(
+        emoji_grid,
+        text=emoji,
+        width=40,
+        height=34,
+        command=lambda value=emoji: insert_emoji(value),
+    )
+    emoji_button.grid(row=index // 8, column=index % 8, padx=3, pady=3)
+
+custom_emoji_row = ctk.CTkFrame(frame, fg_color="transparent")
+custom_emoji_row.pack(pady=(0, 8))
+
+custom_emoji_entry = ctk.CTkEntry(
+    custom_emoji_row,
+    width=360,
+    height=38,
+    placeholder_text="Emoji o testo speciale libero",
+)
+custom_emoji_entry.pack(side="left", padx=(0, 10))
+
+custom_emoji_button = ctk.CTkButton(
+    custom_emoji_row,
+    text="Inserisci",
+    width=120,
+    height=38,
+    command=insert_custom_emoji,
+)
+custom_emoji_button.pack(side="left")
 
 button = ctk.CTkButton(
     frame,
