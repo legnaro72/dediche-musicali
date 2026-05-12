@@ -57,10 +57,10 @@
 .hero-image-frame.landscape-frame .hero-image,
 .image-frame.landscape-frame img,
 .image-frame.landscape-frame .ded-image {
-  width: auto;
-  height: 100%;
-  max-width: none;
-  object-fit: unset;
+  width: auto !important;
+  height: 100% !important;
+  max-width: none !important;
+  object-fit: unset !important;
 }
 
 /* Animazione attiva solo se prefers-reduced-motion non è impostato */
