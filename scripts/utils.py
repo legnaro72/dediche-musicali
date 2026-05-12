@@ -19,7 +19,7 @@ IMAGES_DIR      = ROOT_DIR / 'public' / 'images' / 'dedications'
 FONTS_DIR       = ROOT_DIR / 'public' / 'fonts'
 
 VALID_STATUSES    = {'draft', 'scheduled', 'published', 'disabled'}
-VALID_IMAGE_MODES = {'auto', 'upload', 'none'}
+VALID_IMAGE_MODES = {'auto', 'upload', 'raw', 'none'}
 VALID_AUDIO_TYPES = {'spotify', 'youtube', 'soundcloud', 'mp3', 'cloud', 'other'}
 
 ITALIAN_DAYS   = ['lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato', 'domenica']
