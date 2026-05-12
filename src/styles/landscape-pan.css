@@ -1,52 +1,106 @@
-/* landscape-pan.css — Animazione pan orizzontale cinematica per immagini landscape.
-   Importato in global.css. Rispetta prefers-reduced-motion. */
+/*
+  landscape-pan.css — Animazione pan orizzontale cinematica.
+  Usa transform:translateX() (supporto universale).
+  La classe .landscape-frame viene aggiunta dal JS globale in BaseLayout.
+  --frame-w è misurata da JS e impostata come CSS custom property sul frame.
+*/
 
-/* Contenitore che garantisce overflow hidden per il pan */
-.landscape-pan-wrap {
+/* ── Hero image frame ────────────────────────────────────────────────────────
+   Wrapper che rimpiazza le proprietà frame di .hero-image.
+   Porta: max-width, aspect-ratio, overflow, border-radius, box-shadow, float.
+*/
+.hero-image-frame {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 60px rgba(124, 58, 237, 0.4), var(--shadow-card);
+  animation: float 5s ease-in-out infinite;
+  --frame-w: 420px;    /* sovrascritto da JS con il valore reale in px */
+}
+
+/* ── Immagine dentro il frame hero ──────────────────────────────────────────── */
+.hero-image-frame .hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Generic image frame (archivio, pagina dettaglio) ───────────────────────── */
+.image-frame {
   overflow: hidden;
   width: 100%;
   height: 100%;
-  position: relative;
+  --frame-w: 420px;
 }
 
-/* L'immagine landscape parte da sinistra e scorre verso destra, poi si centra */
-.landscape-pan {
-  object-fit: cover;
-  object-position: left center;
-  will-change: object-position;
+.image-frame img,
+.image-frame .ded-image {
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
+/* ── LANDSCAPE MODE ──────────────────────────────────────────────────────────
+   Classe .landscape-frame aggiunta da JS quando img.naturalWidth > img.naturalHeight*1.15
+*/
+
+/* Rimuove float dal hero frame per non interferire col pan */
+.hero-image-frame.landscape-frame {
+  animation: none;
+}
+
+/* L'immagine landscape scorre: height=100%, width=auto per preservare tutto */
+.hero-image-frame.landscape-frame .hero-image,
+.image-frame.landscape-frame img,
+.image-frame.landscape-frame .ded-image {
+  width: auto;
+  height: 100%;
+  max-width: none;
+  object-fit: unset;
+}
+
+/* Animazione attiva solo se prefers-reduced-motion non è impostato */
 @media (prefers-reduced-motion: no-preference) {
-  .landscape-pan {
-    animation: landscapePan 14s cubic-bezier(0.45, 0, 0.55, 1) 1 forwards;
+  .hero-image-frame.landscape-frame .hero-image,
+  .image-frame.landscape-frame img,
+  .image-frame.landscape-frame .ded-image {
+    animation: landscapePan 14s ease-in-out 1 forwards;
   }
 }
 
 @keyframes landscapePan {
-  0%   { object-position: left center;   }
-  65%  { object-position: right center;  }
-  100% { object-position: center center; }
+  0%   { transform: translateX(0); }
+  65%  { transform: translateX(calc(-100% + var(--frame-w, 420px))); }
+  100% { transform: translateX(calc((-100% + var(--frame-w, 420px)) / 2)); }
 }
 
-/* Versione più leggera per mobile */
-@media (max-width: 640px) {
-  @keyframes landscapePan {
-    0%   { object-position: left center;   }
-    60%  { object-position: right center;  }
-    100% { object-position: center center; }
-  }
-
-  .landscape-pan {
-    animation-duration: 10s;
-  }
-}
-
-/* Se prefers-reduced-motion è attivo — nessuna animazione, centrata */
+/* ── Accessibility: prefers-reduced-motion ──────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .landscape-pan {
-    animation: none !important;
-    object-position: center center;
+  .hero-image-frame {
+    animation: none;
+  }
+  /* Immagine landscape centrata, nessun pan */
+  .hero-image-frame.landscape-frame .hero-image,
+  .image-frame.landscape-frame img,
+  .image-frame.landscape-frame .ded-image {
+    animation: none;
+    transform: translateX(calc((-100% + var(--frame-w, 420px)) / 2));
+  }
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .hero-image-frame {
+    max-width: 100%;
+    --frame-w: 100vw;
+  }
+  @keyframes landscapePan {
+    0%   { transform: translateX(0); }
+    60%  { transform: translateX(calc(-100% + var(--frame-w, 100vw))); }
+    100% { transform: translateX(calc((-100% + var(--frame-w, 100vw)) / 2)); }
   }
 }

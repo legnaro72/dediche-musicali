@@ -111,5 +111,41 @@ const fullOgImage = ogImage
     );
     reveals.forEach(el => observer.observe(el));
   </script>
+
+  <!-- Landscape pan detection: aggiunge .landscape-frame al wrapper se l'img è orizzontale -->
+  <script>
+    function initLandscapePan() {
+      var imgs = document.querySelectorAll('.hero-image-frame img, .image-frame img');
+      imgs.forEach(function(el) {
+        function applyLandscape() {
+          // Threshold 1.15: width almeno 15% > height per considerarlo landscape
+          if (el.naturalWidth <= el.naturalHeight * 1.15) return;
+          var frame = el.closest('.hero-image-frame') || el.closest('.image-frame');
+          if (!frame || frame.classList.contains('landscape-frame')) return;
+          // Misura il frame width reale e imposta --frame-w
+          var fw = frame.getBoundingClientRect().width;
+          frame.style.setProperty('--frame-w', fw + 'px');
+          frame.classList.add('landscape-frame');
+        }
+        if (el.complete && el.naturalWidth > 0) {
+          applyLandscape();
+        } else {
+          el.addEventListener('load', applyLandscape, { once: true });
+        }
+      });
+    }
+    // Esegui appena il DOM è pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLandscapePan);
+    } else {
+      initLandscapePan();
+    }
+    // Riesegui su resize per aggiornare --frame-w
+    window.addEventListener('resize', function() {
+      document.querySelectorAll('.landscape-frame').forEach(function(frame) {
+        frame.style.setProperty('--frame-w', frame.getBoundingClientRect().width + 'px');
+      });
+    }, { passive: true });
+  </script>
 </body>
 </html>

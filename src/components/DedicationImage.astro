@@ -26,36 +26,14 @@ const {
 } = Astro.props;
 ---
 
-<div class={`landscape-pan-wrap ${wrapClass}`} style={wrapStyle}>
+<div class={`image-frame ${wrapClass}`} style={wrapStyle}>
   <img
     src={src}
     alt={alt}
     width={width}
     height={height}
     class={`ded-image ${className}`}
-    style={`width:100%;height:100%;object-fit:cover;${style}`}
+    style={style}
     loading={loading}
-    data-landscape-check
   />
 </div>
-
-<script>
-  // Rileva landscape al caricamento → applica pan cinematico
-  function initLandscapePan() {
-    document.querySelectorAll('img[data-landscape-check]').forEach(function(el) {
-      var img = /** @type {HTMLImageElement} */ (el);
-      function check() {
-        // Landscape se larghezza > altezza * 1.15 (threshold 15%)
-        if (img.naturalWidth > img.naturalHeight * 1.15) {
-          img.classList.add('landscape-pan');
-        }
-      }
-      if (img.complete && img.naturalWidth > 0) {
-        check();
-      } else {
-        img.addEventListener('load', check, { once: true });
-      }
-    });
-  }
-  initLandscapePan();
-</script>
