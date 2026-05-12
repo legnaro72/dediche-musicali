@@ -195,6 +195,17 @@ def add_to_active_text(value: str) -> None:
     st.session_state[key] = f"{current}{value}"
 
 
+def add_custom_to_active_text() -> None:
+    value = st.session_state.get("custom_emoji", "").strip()
+    if value:
+        add_to_active_text(value)
+
+
+def clear_texts() -> None:
+    st.session_state["dedication_text"] = ""
+    st.session_state["short_phrase"] = ""
+
+
 def render_emoji_picker() -> None:
     st.caption("Clicca prima nel testo o nella frase breve, poi inserisci l'emoji.")
     st.radio(
@@ -207,21 +218,31 @@ def render_emoji_picker() -> None:
     st.markdown("**Emoji rapide**")
     cols = st.columns(len(QUICK_EMOJIS))
     for col, emoji in zip(cols, QUICK_EMOJIS):
-        if col.button(emoji, key=f"quick_{emoji}"):
-            add_to_active_text(emoji)
+        col.button(
+            emoji,
+            key=f"quick_{emoji}",
+            on_click=add_to_active_text,
+            args=(emoji,),
+        )
 
     with st.expander("Emoji estese"):
         for row_start in range(0, len(EXTENDED_EMOJIS), 8):
             row = EXTENDED_EMOJIS[row_start:row_start + 8]
             cols = st.columns(len(row))
             for col, emoji in zip(cols, row):
-                if col.button(emoji, key=f"extended_{row_start}_{emoji}"):
-                    add_to_active_text(emoji)
+                col.button(
+                    emoji,
+                    key=f"extended_{row_start}_{emoji}",
+                    on_click=add_to_active_text,
+                    args=(emoji,),
+                )
 
-    custom = st.text_input("Emoji o testo speciale libero", key="custom_emoji")
-    if st.button("Inserisci nel campo attivo", use_container_width=True):
-        if custom.strip():
-            add_to_active_text(custom.strip())
+    st.text_input("Emoji o testo speciale libero", key="custom_emoji")
+    st.button(
+        "Inserisci nel campo attivo",
+        use_container_width=True,
+        on_click=add_custom_to_active_text,
+    )
 
 
 def init_state() -> None:
@@ -288,13 +309,16 @@ def main() -> None:
     st.text_input("short_phrase", key="short_phrase")
 
     col_preview, col_clear = st.columns(2)
-    if col_preview.button("Genera anteprima testo", use_container_width=True):
-        generate_preview()
-        st.rerun()
-    if col_clear.button("Pulisci testi", use_container_width=True):
-        st.session_state["dedication_text"] = ""
-        st.session_state["short_phrase"] = ""
-        st.rerun()
+    col_preview.button(
+        "Genera anteprima testo",
+        use_container_width=True,
+        on_click=generate_preview,
+    )
+    col_clear.button(
+        "Pulisci testi",
+        use_container_width=True,
+        on_click=clear_texts,
+    )
 
     render_emoji_picker()
 
