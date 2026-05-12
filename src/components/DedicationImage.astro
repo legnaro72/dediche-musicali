@@ -1,0 +1,39 @@
+---
+// src/components/DedicationImage.astro
+// Componente immagine con landscape-pan automatico (runtime JS detection).
+export interface Props {
+  src: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+  class?: string;
+  style?: string;
+  loading?: 'lazy' | 'eager';
+  wrapClass?: string;
+  wrapStyle?: string;
+}
+
+const {
+  src,
+  alt = '',
+  width = 480,
+  height = 600,
+  class: className = '',
+  style = '',
+  loading = 'lazy',
+  wrapClass = '',
+  wrapStyle = '',
+} = Astro.props;
+---
+
+<div class={`image-frame ${wrapClass}`} style={wrapStyle}>
+  <img
+    src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    class={`ded-image ${className}`}
+    style={style}
+    loading={loading}
+  />
+</div>
