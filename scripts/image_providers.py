@@ -24,12 +24,14 @@ def _get(url, params=None, headers=None):
 
 
 def _img_from_url(url: str):
-    """Scarica immagine da URL → PIL.Image RGB."""
-    from PIL import Image
+    """Scarica immagine da URL → PIL.Image RGB (EXIF-corretto)."""
+    from PIL import Image, ImageOps
     r = _get(url)
     if r:
         try:
-            return Image.open(io.BytesIO(r.content)).convert('RGB')
+            img = Image.open(io.BytesIO(r.content))
+            img = ImageOps.exif_transpose(img)  # corregge rotazione EXIF
+            return img.convert('RGB')
         except Exception as e:
             logger.warning(f'      Decode error: {e}')
     return None

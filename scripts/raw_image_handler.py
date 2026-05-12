@@ -34,14 +34,16 @@ def _cache_path_for_url(url: str) -> Path:
 
 
 def _download(url: str) -> 'Image':
-    """Scarica immagine da URL HTTPS → PIL.Image RGB."""
+    """Scarica immagine da URL HTTPS → PIL.Image RGB (EXIF-corretto)."""
     import requests
-    from PIL import Image
+    from PIL import Image, ImageOps
     logger.info(f'    Downloading image...')
     r = requests.get(url, timeout=20, allow_redirects=True,
                      headers={'User-Agent': 'DDGPilliSite/1.0'})
     r.raise_for_status()
-    return Image.open(io.BytesIO(r.content)).convert('RGB')
+    img = Image.open(io.BytesIO(r.content))
+    img = ImageOps.exif_transpose(img)  # corregge rotazione EXIF (foto smartphone)
+    return img.convert('RGB')
 
 
 def fetch_source_image(image_source: str) -> 'Image | None':
@@ -92,9 +94,11 @@ def fetch_source_image(image_source: str) -> 'Image | None':
         logger.warning(f'    raw: path fuori dalla directory del progetto — bloccato')
         return None
     try:
-        img = Image.open(path).convert('RGB')
+        from PIL import Image, ImageOps
+        img = Image.open(path)
+        img = ImageOps.exif_transpose(img)  # corregge rotazione EXIF
         logger.info(f'    Loaded local image: {path.name}')
-        return img
+        return img.convert('RGB')
     except Exception as e:
         logger.warning(f'    raw: errore apertura file: {e}')
         return None

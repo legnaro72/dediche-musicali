@@ -108,8 +108,9 @@ def generate_for_dedication(ded: dict, fonts: dict,
     if image_mode == 'upload' and image_source:
         src = Path(image_source)
         if src.exists():
-            from PIL import Image
-            bg = Image.open(src).convert('RGB')
+            from PIL import Image, ImageOps
+            img_raw = Image.open(src)
+            bg = ImageOps.exif_transpose(img_raw).convert('RGB')
             logger.info(f'  Uso immagine manuale: {src.name}')
         else:
             logger.warning(f'  image_source non trovato: {src} — uso fallback locale')
