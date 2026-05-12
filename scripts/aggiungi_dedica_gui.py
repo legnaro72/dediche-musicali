@@ -321,9 +321,9 @@ ctk.set_default_color_theme("blue")
 app = ctk.CTk()
 app.title("DDGPilliSite — Aggiungi dedica")
 app.geometry("720x820")
-app.resizable(False, False)
+app.minsize(720, 760)
 
-frame = ctk.CTkFrame(app, corner_radius=24)
+frame = ctk.CTkScrollableFrame(app, corner_radius=24)
 frame.pack(padx=32, pady=32, fill="both", expand=True)
 
 title = ctk.CTkLabel(
@@ -386,6 +386,15 @@ image_mode_menu = ctk.CTkOptionMenu(
 )
 image_mode_menu.pack(pady=8)
 
+image_hint = ctk.CTkLabel(
+    frame,
+    text="Con image_mode raw o upload devi scegliere un'immagine. Il caricamento su GitHub avviene col bottone finale.",
+    font=ctk.CTkFont(size=12),
+    text_color="#9ca3af",
+    wraplength=560,
+)
+image_hint.pack(pady=(0, 4))
+
 image_row = ctk.CTkFrame(frame, fg_color="transparent")
 image_row.pack(pady=8)
 
@@ -444,14 +453,14 @@ short_phrase_entry.pack(pady=8)
 
 button = ctk.CTkButton(
     frame,
-    text="Programma dedica",
-    width=260,
-    height=48,
+    text="Carica immagine e inserisci nel Google Sheet",
+    width=420,
+    height=52,
     corner_radius=18,
     font=ctk.CTkFont(size=16, weight="bold"),
     command=submit,
 )
-button.pack(pady=28)
+button.pack(pady=(22, 10))
 
 footer = ctk.CTkLabel(
     frame,
