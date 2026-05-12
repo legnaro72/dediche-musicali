@@ -14,6 +14,15 @@ import json
 import argparse
 from datetime import datetime
 
+# Carica variabili locali da .env solo in sviluppo.
+# In produzione GitHub Actions continuerà a usare i Secrets.
+try:
+    from dotenv import load_dotenv
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    load_dotenv(os.path.join(base_dir, ".env"))
+except Exception:
+    pass
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scripts.utils import (

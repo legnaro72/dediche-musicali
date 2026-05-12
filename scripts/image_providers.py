@@ -35,35 +35,121 @@ def _img_from_url(url: str):
     return None
 
 
-# ── Gemini ────────────────────────────────────────────────────────────────────
+# ── Gemini: image generation (richiede billing) ───────────────────────────────
 def try_gemini(prompt: str):
     api_key = os.environ.get('GEMINI_API_KEY', '').strip()
     if not api_key:
         logger.info('      Gemini: GEMINI_API_KEY assente — skip')
         return None, None
     try:
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        # Tenta Imagen (disponibile nel free tier di Google AI Studio)
-        model = genai.ImageGenerationModel('imagen-3.0-generate-001')
-        result = model.generate_images(
-            prompt=prompt, number_of_images=1,
-            aspect_ratio='3:4', person_generation='DONT_ALLOW',
-        )
-        if result.images:
-            from PIL import Image
-            img = Image.open(io.BytesIO(result.images[0]._image_bytes)).convert('RGB')
-            logger.info('      ✓ Gemini: immagine generata')
-            return img, {
-                'provider': 'gemini', 'model': 'imagen-3.0-generate-001',
-                'prompt_summary': prompt[:200], 'license': 'generated',
-                'source_page': 'gemini_api',
-            }
+        from google import genai
+        from google.genai import types as genai_types
+        client = genai.Client(api_key=api_key)
+
+        # Modelli image generation (richiedono billing attivo)
+        for model_name in (
+            'gemini-2.5-flash-image',
+            'gemini-3.1-flash-image-preview',
+        ):
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=genai_types.GenerateContentConfig(
+                        response_modalities=['IMAGE', 'TEXT'],
+                    ),
+                )
+                for cand in (response.candidates or []):
+                    for part in (cand.content.parts or []):
+                        if part.inline_data and part.inline_data.data:
+                            from PIL import Image
+                            img = Image.open(
+                                io.BytesIO(part.inline_data.data)
+                            ).convert('RGB')
+                            logger.info(f'      ✓ Gemini: immagine generata ({model_name})')
+                            return img, {
+                                'provider': 'gemini', 'model': model_name,
+                                'prompt_summary': prompt[:200],
+                                'license': 'generated', 'source_page': 'gemini_api',
+                            }
+            except Exception as e:
+                err = str(e)
+                # Billing / quota = 0 → inutile ritentare altri modelli
+                if 'paid plan' in err or ('RESOURCE_EXHAUSTED' in err and 'limit: 0' in err):
+                    logger.warning('      Gemini: image generation richiede billing — skip (fallback a provider open)')
+                    return None, None
+                logger.warning(f'      Gemini {model_name}: {e}')
+
+        # Imagen 4 via generate_images
+        for img_model in ('imagen-4.0-fast-generate-001', 'imagen-4.0-generate-001'):
+            try:
+                response = client.models.generate_images(
+                    model=img_model, prompt=prompt,
+                    config=genai_types.GenerateImagesConfig(
+                        number_of_images=1, aspect_ratio='3:4',
+                        person_generation='DONT_ALLOW',
+                    ),
+                )
+                if response.generated_images:
+                    from PIL import Image
+                    img_bytes = response.generated_images[0].image.image_bytes
+                    img = Image.open(io.BytesIO(img_bytes)).convert('RGB')
+                    logger.info(f'      ✓ Gemini: immagine generata ({img_model})')
+                    return img, {
+                        'provider': 'gemini', 'model': img_model,
+                        'prompt_summary': prompt[:200],
+                        'license': 'generated', 'source_page': 'gemini_api',
+                    }
+            except Exception as e:
+                if 'paid plan' in str(e):
+                    logger.warning('      Gemini Imagen: solo piani a pagamento — skip')
+                    return None, None
+                logger.warning(f'      Gemini {img_model}: {e}')
+
+        logger.warning('      Gemini: nessun modello image disponibile')
     except ImportError:
-        logger.warning('      Gemini: google-generativeai non installato')
+        logger.warning('      Gemini: google-genai non installato')
     except Exception as e:
         logger.warning(f'      Gemini: {e}')
     return None, None
+
+
+# ── Gemini: keyword enhancement GRATUITO (text model) ────────────────────────
+def enhance_keywords_with_gemini(song_title: str, artist: str,
+                                  dedication_text: str, tags: str) -> str:
+    """
+    Usa gemini-2.0-flash (GRATUITO) per generare keyword di ricerca
+    ottimizzate in inglese da usare con Openverse/Wikimedia.
+    Restituisce una query stringa oppure '' se non disponibile.
+    """
+    api_key = os.environ.get('GEMINI_API_KEY', '').strip()
+    if not api_key:
+        return ''
+    try:
+        from google import genai
+        client = genai.Client(api_key=api_key)
+        excerpt = dedication_text[:150]
+        text_prompt = (
+            f'You are a visual search expert for a music dedication website.\n'
+            f'Song: "{song_title}" by {artist}\n'
+            f'Dedication: "{excerpt}"\nTags: {tags}\n\n'
+            f'Generate 3-4 English keywords for searching a beautiful landscape photo '
+            f'that evokes the emotional mood of this song. '
+            f'NO text, no artist faces, no album covers. '
+            f'Only landscapes, skies, cityscapes, nature scenes.\n'
+            f'Reply with ONLY the keywords, comma-separated, no explanation.'
+        )
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=text_prompt,
+        )
+        kws = response.text.strip().strip('"').strip("'")
+        if kws:
+            logger.info(f'      ✓ Gemini text: keyword migliorate → "{kws}"')
+            return kws
+    except Exception as e:
+        logger.warning(f'      Gemini text keywords: {e}')
+    return ''
 
 
 # ── Pexels ────────────────────────────────────────────────────────────────────

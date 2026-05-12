@@ -19,6 +19,16 @@ import os
 import argparse
 from pathlib import Path
 
+# Carica variabili locali da .env solo in sviluppo.
+# In produzione GitHub Actions continuerà a usare i Secrets.
+try:
+    from dotenv import load_dotenv
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    load_dotenv(os.path.join(base_dir, ".env"))
+except Exception:
+    pass
+
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scripts.utils import (
@@ -29,7 +39,7 @@ from scripts.utils import (
 from scripts.mood_engine import (
     detect_mood, generate_search_query, generate_gemini_prompt, MOOD_PALETTE,
 )
-from scripts.image_providers import fetch_background
+from scripts.image_providers import fetch_background, enhance_keywords_with_gemini
 from scripts.image_attribution import save_attribution
 from scripts.premium_template import (
     ensure_fonts, apply_premium_template_vertical, apply_premium_template_og,
@@ -117,6 +127,12 @@ def generate_for_dedication(ded: dict, fonts: dict,
 
     query  = generate_search_query(song_title, ded_text, short_phrase, tags)
     prompt = generate_gemini_prompt(song_title, artist, ded_text, short_phrase, tags)
+
+    # Prova a migliorare la query con Gemini text (GRATUITO) se disponibile
+    enhanced = enhance_keywords_with_gemini(song_title, artist, ded_text, tags)
+    if enhanced:
+        query = enhanced
+
     logger.info(f'  Query visiva: {query}')
 
     eff_provider = provider_override or os.environ.get('IMAGE_PROVIDER', 'auto')
