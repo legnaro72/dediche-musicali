@@ -1,6 +1,7 @@
 ---
 // src/layouts/BaseLayout.astro
 import '../styles/global.css';
+import '../styles/landscape-pan.css';
 export interface Props {
   title: string;
   description?: string;
@@ -109,6 +110,52 @@ const fullOgImage = ogImage
       { threshold: 0.1 }
     );
     reveals.forEach(el => observer.observe(el));
+  </script>
+
+  <!-- Landscape pan detection -->
+  <script>
+    function initLandscapePan() {
+      const imgs = document.querySelectorAll('.hero-image-frame img, .image-frame img');
+      imgs.forEach((el) => {
+        const applyLandscape = () => {
+          if (el.naturalWidth <= el.naturalHeight * 1.15) return;
+          
+          const frame = el.closest('.hero-image-frame') || el.closest('.image-frame');
+          if (!frame) return;
+
+          // Usiamo requestAnimationFrame per essere sicuri che il layout sia pronto
+          requestAnimationFrame(() => {
+            const fw = frame.getBoundingClientRect().width;
+            if (fw > 0) {
+              frame.style.setProperty('--frame-w', fw + 'px');
+              frame.classList.add('landscape-frame');
+              console.log('♪ Landscape pan activated:', el.src, 'Frame width:', fw);
+            }
+          });
+        };
+
+        if (el.complete && el.naturalWidth > 0) {
+          applyLandscape();
+        } else {
+          el.addEventListener('load', applyLandscape, { once: true });
+        }
+      });
+    }
+
+    // Esegui al caricamento e sui cambiamenti di dimensione
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLandscapePan);
+    } else {
+      initLandscapePan();
+    }
+
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('.landscape-frame').forEach((frame) => {
+        requestAnimationFrame(() => {
+          frame.style.setProperty('--frame-w', frame.getBoundingClientRect().width + 'px');
+        });
+      });
+    }, { passive: true });
   </script>
 </body>
 </html>
