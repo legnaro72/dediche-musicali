@@ -1,5 +1,6 @@
 import base64
 import datetime
+import json
 import os
 import re
 from pathlib import Path
@@ -117,9 +118,9 @@ def build_row(
 
 def get_github_token() -> str:
     token = (
-        os.environ.get("GITHUB_TOKEN")
-        or os.environ.get("GH_TOKEN")
-        or os.environ.get("GITHUB_PAT")
+        get_secret_or_env("GITHUB_TOKEN")
+        or get_secret_or_env("GH_TOKEN")
+        or get_secret_or_env("GITHUB_PAT")
         or ""
     ).strip()
     if not token:
@@ -128,6 +129,34 @@ def get_github_token() -> str:
             "oppure GITHUB_PAT con permesso Contents: write."
         )
     return token
+
+
+def get_secret_or_env(name: str, default: str = "") -> str:
+    try:
+        value = st.secrets.get(name, "")
+    except Exception:
+        value = ""
+    return str(value or os.environ.get(name, default) or "").strip()
+
+
+def get_google_credentials(scopes: list[str]) -> Credentials:
+    service_account_json = get_secret_or_env("GOOGLE_SERVICE_ACCOUNT_JSON")
+    if service_account_json:
+        return Credentials.from_service_account_info(
+            json.loads(service_account_json),
+            scopes=scopes,
+        )
+
+    if SERVICE_ACCOUNT_FILE.exists():
+        return Credentials.from_service_account_file(
+            SERVICE_ACCOUNT_FILE,
+            scopes=scopes,
+        )
+
+    raise ValueError(
+        "Credenziali Google mancanti. Su Streamlit Cloud configura il secret "
+        "GOOGLE_SERVICE_ACCOUNT_JSON con il JSON completo del service account."
+    )
 
 
 def upload_image_to_github(uploaded_file, date_value: str) -> str:
@@ -179,12 +208,12 @@ def append_to_google_sheet(row: list[str]) -> None:
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive",
     ]
-    credentials = Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE,
-        scopes=scopes,
-    )
+    credentials = get_google_credentials(scopes)
+    sheet_id = get_secret_or_env("GOOGLE_SHEET_ID", GOOGLE_SHEET_ID)
+    if not sheet_id:
+        raise ValueError("GOOGLE_SHEET_ID mancante nei secrets o nell'ambiente.")
     client = gspread.authorize(credentials)
-    sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1
+    sheet = client.open_by_key(sheet_id).sheet1
     sheet.append_row(row, value_input_option="USER_ENTERED")
 
 
