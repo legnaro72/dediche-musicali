@@ -513,7 +513,6 @@ def save_dedication(prefix: str, uploaded_file, mode: str, row_number: int | Non
         with st.spinner("Inserimento nel Google Sheet..."):
             append_to_google_sheet(row)
 
-    set_form_state(prefix, values)
     return values
 
 
