@@ -95,6 +95,27 @@ const fullOgImage = ogImage
     <slot />
   </main>
 
+  <div class="app-install" data-app-install hidden>
+    <div class="app-install-copy">
+      <strong>DDGPilli come app</strong>
+      <span data-app-install-text>Installa sulla Home per aprirla a schermo intero.</span>
+    </div>
+    <div class="app-install-actions">
+      <button class="app-install-btn" type="button" data-app-install-btn>Installa</button>
+      <button class="app-install-close" type="button" aria-label="Nascondi invito installazione" data-app-install-close>×</button>
+    </div>
+  </div>
+
+  <div class="app-install-modal" data-app-install-modal hidden>
+    <div class="app-install-dialog" role="dialog" aria-modal="true" aria-labelledby="install-title">
+      <button class="app-install-dialog-close" type="button" aria-label="Chiudi" data-app-install-modal-close>×</button>
+      <h2 id="install-title">Aggiungi alla Home</h2>
+      <p data-app-install-modal-text>
+        Apri il menu del browser e scegli "Aggiungi a schermata Home".
+      </p>
+    </div>
+  </div>
+
   {enableBackgroundMusic && (
     <div class="ambient-audio" data-background-music-control>
       <button
@@ -199,6 +220,85 @@ const fullOgImage = ogImage
     }, { passive: true });
   </script>
 
+  <script>
+    (() => {
+      const root = document.querySelector('[data-app-install]');
+      const installButton = document.querySelector('[data-app-install-btn]');
+      const closeButton = document.querySelector('[data-app-install-close]');
+      const installText = document.querySelector('[data-app-install-text]');
+      const modal = document.querySelector('[data-app-install-modal]');
+      const modalText = document.querySelector('[data-app-install-modal-text]');
+      const modalClose = document.querySelector('[data-app-install-modal-close]');
+      if (!(root instanceof HTMLElement) || !(installButton instanceof HTMLButtonElement)) return;
+
+      const dismissedKey = 'ddgpilli-install-dismissed';
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true;
+      const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+      let deferredPrompt: any = null;
+
+      const show = () => {
+        if (isStandalone || localStorage.getItem(dismissedKey) === 'true') return;
+        root.hidden = false;
+      };
+
+      const openGuide = (message: string) => {
+        if (modalText) modalText.textContent = message;
+        if (modal instanceof HTMLElement) modal.hidden = false;
+      };
+
+      if (isIos) {
+        installButton.textContent = 'Come fare';
+        if (installText) installText.textContent = 'Su iPhone si aggiunge dal pulsante Condividi di Safari.';
+        setTimeout(show, 1200);
+      }
+
+      window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        deferredPrompt = event;
+        installButton.textContent = 'Installa';
+        if (installText) installText.textContent = 'Aggiungila alla Home e aprila senza barra browser.';
+        show();
+      });
+
+      window.addEventListener('appinstalled', () => {
+        root.hidden = true;
+        localStorage.setItem(dismissedKey, 'true');
+      });
+
+      installButton.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          await deferredPrompt.userChoice.catch(() => null);
+          deferredPrompt = null;
+          root.hidden = true;
+          return;
+        }
+
+        if (isIos) {
+          openGuide('Su iPhone: apri Safari, tocca Condividi, poi scegli "Aggiungi a schermata Home". Dopo il salvataggio si apre come app standalone.');
+          return;
+        }
+
+        openGuide('Se il browser non mostra il prompt automatico, apri il menu del browser e scegli "Installa app" oppure "Aggiungi alla schermata Home".');
+      });
+
+      closeButton?.addEventListener('click', () => {
+        root.hidden = true;
+        localStorage.setItem(dismissedKey, 'true');
+      });
+
+      modalClose?.addEventListener('click', () => {
+        if (modal instanceof HTMLElement) modal.hidden = true;
+      });
+
+      modal?.addEventListener('click', (event) => {
+        if (event.target === modal && modal instanceof HTMLElement) modal.hidden = true;
+      });
+    })();
+  </script>
+
   {enableBackgroundMusic && (
     <script>
       (() => {
@@ -216,6 +316,7 @@ const fullOgImage = ogImage
           audioVolume: 0.3,
         };
         let enabled = true;
+        let waitingForGesture = false;
         let unlockRegistered = false;
 
         const trackAudioEvent = (eventName) => {
@@ -224,6 +325,7 @@ const fullOgImage = ogImage
         };
 
         const applyUi = (isWaiting = false) => {
+          waitingForGesture = isWaiting;
           button.setAttribute('aria-pressed', String(enabled));
           button.setAttribute('aria-label', enabled ? 'Disattiva musica di sottofondo' : 'Attiva musica di sottofondo');
           root.classList.toggle('is-off', !enabled);
@@ -289,6 +391,11 @@ const fullOgImage = ogImage
         };
 
         button.addEventListener('click', () => {
+          if (enabled && waitingForGesture) {
+            playAudio(true);
+            return;
+          }
+
           enabled = !enabled;
           localStorage.setItem(storageKey, String(enabled));
           if (enabled) playAudio(true);

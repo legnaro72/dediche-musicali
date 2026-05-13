@@ -281,6 +281,106 @@ section { position:relative; z-index:1; }
 .audio-embed { border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border); }
 .audio-embed iframe { display:block; width:100%; border:none; }
 
+/* Install prompt */
+.app-install {
+  position:fixed;
+  left:clamp(1rem,4vw,1.5rem);
+  right:clamp(1rem,4vw,1.5rem);
+  bottom:clamp(5rem,10vw,5.5rem);
+  z-index:130;
+  max-width:520px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  padding:0.85rem 0.9rem 0.85rem 1rem;
+  border:1px solid rgba(255,255,255,0.16);
+  border-radius:var(--radius-md);
+  background:rgba(8,7,15,0.86);
+  color:var(--text-primary);
+  box-shadow:0 18px 48px rgba(0,0,0,0.38);
+  backdrop-filter:blur(18px);
+}
+.app-install[hidden],
+.app-install-modal[hidden] {
+  display:none;
+}
+.app-install-copy {
+  display:flex;
+  min-width:0;
+  flex-direction:column;
+  gap:0.18rem;
+}
+.app-install-copy strong {
+  font-size:0.9rem;
+}
+.app-install-copy span {
+  color:var(--text-dim);
+  font-size:0.78rem;
+  line-height:1.35;
+}
+.app-install-actions {
+  display:flex;
+  align-items:center;
+  gap:0.4rem;
+  flex:0 0 auto;
+}
+.app-install-btn {
+  min-height:38px;
+  padding:0 0.95rem;
+  border:0;
+  border-radius:var(--radius-full);
+  background:var(--gradient-btn);
+  color:#fff;
+  cursor:pointer;
+  font:700 0.82rem var(--font-sans);
+}
+.app-install-close,
+.app-install-dialog-close {
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:50%;
+  background:rgba(255,255,255,0.06);
+  color:var(--text-dim);
+  cursor:pointer;
+  font:700 1.1rem/1 var(--font-sans);
+}
+.app-install-modal {
+  position:fixed;
+  inset:0;
+  z-index:180;
+  display:grid;
+  place-items:center;
+  padding:1.25rem;
+  background:rgba(0,0,0,0.56);
+  backdrop-filter:blur(8px);
+}
+.app-install-dialog {
+  position:relative;
+  width:min(100%,390px);
+  padding:1.6rem;
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  background:#0f0d1a;
+  box-shadow:var(--shadow-card);
+}
+.app-install-dialog h2 {
+  margin-bottom:0.7rem;
+  font-size:1.25rem;
+}
+.app-install-dialog p {
+  color:var(--text-dim);
+  line-height:1.65;
+}
+.app-install-dialog-close {
+  position:absolute;
+  top:0.75rem;
+  right:0.75rem;
+}
+
 /* PWA background music */
 .ambient-audio {
   position:fixed;
@@ -375,8 +475,22 @@ section { position:relative; z-index:1; }
     right:1rem;
     bottom:1rem;
   }
+  .app-install {
+    bottom:4.8rem;
+  }
   .ambient-audio-toggle {
     padding:0.58rem 0.75rem;
+  }
+}
+@media(max-width:520px) {
+  .app-install {
+    align-items:flex-start;
+  }
+  .app-install-copy span {
+    max-width:220px;
+  }
+  .app-install-btn {
+    padding:0 0.75rem;
   }
 }
 @media(max-width:640px) {
