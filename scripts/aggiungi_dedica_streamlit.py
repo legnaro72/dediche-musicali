@@ -140,6 +140,17 @@ def get_secret_or_env(name: str, default: str = "") -> str:
 
 
 def get_google_credentials(scopes: list[str]) -> Credentials:
+    try:
+        service_account_info = st.secrets.get("gcp_service_account", None)
+    except Exception:
+        service_account_info = None
+
+    if service_account_info:
+        return Credentials.from_service_account_info(
+            dict(service_account_info),
+            scopes=scopes,
+        )
+
     service_account_json = get_secret_or_env("GOOGLE_SERVICE_ACCOUNT_JSON")
     if service_account_json:
         return Credentials.from_service_account_info(
@@ -154,8 +165,8 @@ def get_google_credentials(scopes: list[str]) -> Credentials:
         )
 
     raise ValueError(
-        "Credenziali Google mancanti. Su Streamlit Cloud configura il secret "
-        "GOOGLE_SERVICE_ACCOUNT_JSON con il JSON completo del service account."
+        "Credenziali Google mancanti. Su Streamlit Cloud configura la tabella "
+        "[gcp_service_account] nei secrets."
     )
 
 
