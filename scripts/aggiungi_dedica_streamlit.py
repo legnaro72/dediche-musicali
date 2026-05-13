@@ -415,6 +415,7 @@ def render_emoji_picker(prefix: str) -> None:
         use_container_width=True,
         on_click=add_custom_to_active_text,
         args=(prefix,),
+        key=f"{prefix}_insert_custom_emoji",
     )
 
 
@@ -479,12 +480,14 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
         use_container_width=True,
         on_click=generate_preview,
         args=(prefix,),
+        key=f"{prefix}_generate_preview",
     )
     col_clear.button(
         "Pulisci testi",
         use_container_width=True,
         on_click=clear_texts,
         args=(prefix,),
+        key=f"{prefix}_clear_texts",
     )
 
     render_emoji_picker(prefix)
@@ -539,11 +542,13 @@ def render_new_dedication() -> None:
     save_clicked = col_save.button(
         "Salva nel Google Sheet",
         use_container_width=True,
+        key="new_save_sheet",
     )
     publish_clicked = col_publish.button(
         "Pubblica subito",
         type="primary",
         use_container_width=True,
+        key="new_publish_now",
     )
 
     if save_clicked or publish_clicked:
@@ -569,7 +574,7 @@ def render_historical() -> None:
     st.title("Historical")
     st.caption("Legge le dediche dal Google Sheet e aggiorna la riga selezionata.")
 
-    if st.button("Ricarica Google Sheet"):
+    if st.button("Ricarica Google Sheet", key="hist_reload_sheet"):
         st.cache_data.clear()
 
     try:
@@ -598,11 +603,13 @@ def render_historical() -> None:
     save_clicked = col_save.button(
         "Salva modifiche",
         use_container_width=True,
+        key="hist_save_changes",
     )
     publish_clicked = col_publish.button(
         "Pubblica subito",
         type="primary",
         use_container_width=True,
+        key="hist_publish_now",
     )
 
     if save_clicked or publish_clicked:
