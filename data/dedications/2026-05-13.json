@@ -2,7 +2,7 @@
   "id": "2026-05-13-questa-domenica",
   "date": "2026-05-13",
   "day_name": "mercoledì",
-  "status": "scheduled",
+  "status": "published",
   "song_title": "Questa domenica",
   "artist": "Olly",
   "dedication_title": "La dedica del giorno",
@@ -17,10 +17,10 @@
   "image": {
     "path": "/images/dedications/2026-05-13.webp",
     "alt": "Dedica musicale Questa domenica di Olly",
-    "mode": "auto",
-    "source": ""
+    "mode": "raw",
+    "source": "public/images/upload/2026-05-13.webp"
   },
-  "short_phrase": "Alcune emozioni restano anche dopo l’ultima nota.",
+  "short_phrase": "Non la conosco bene ma è orecchiabile",
   "tags": [
     "malinconia",
     "romantica",
@@ -30,6 +30,7 @@
     "title": "Questa domenica – Olly | DDGPilliSite",
     "description": "Dedica musicale del giorno con “Questa domenica” di Olly."
   },
-  "created_at": "2026-05-12T10:01:13.956298+02:00",
-  "updated_at": "2026-05-12T10:01:13.956298+02:00"
+  "created_at": "2026-05-13T03:57:18.702508+02:00",
+  "updated_at": "2026-05-13T03:57:19.322568+02:00",
+  "date_it": "13 maggio 2026"
 }

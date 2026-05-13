@@ -1,35 +1,36 @@
 {
-  "id": "2026-05-12-su-di-noi",
-  "date": "2026-05-12",
-  "day_name": "martedì",
+  "id": "2026-05-13-questa-domenica",
+  "date": "2026-05-13",
+  "day_name": "mercoledì",
   "status": "published",
-  "song_title": "Su di noi",
-  "artist": "Pupo",
+  "song_title": "Questa domenica",
+  "artist": "Olly",
   "dedication_title": "La dedica del giorno",
-  "dedication_text": "Lontano dal mondo, portati dal vento\r\nRespira la tua libertà\r\nGiocare un momento, poi corrersi incontro\r\nPer fare l'amore qua e là  🎵",
+  "dedication_text": "Ci sono canzoni che sembrano parlare piano, ma arrivano dritte al cuore.\nQuesta domenica ha quel sapore dolce e malinconico dei momenti che vorresti fermare per sempre. 🎵",
   "audio": {
-    "url": "https://open.spotify.com/intl-it/track/7m1ggObu68CFrs08BaRKtR?si=b5579be337ca4b86",
+    "url": "https://open.spotify.com/intl-it/track/1VX2LLBpUPS2QJVou4WGz3?si=13962f4e5a374fc2",
     "type": "spotify"
   },
   "vote": {
     "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
   },
   "image": {
-    "path": "/images/dedications/2026-05-12.webp",
-    "alt": "Dedica musicale Su di noi di Pupo",
-    "mode": "auto",
-    "source": ""
+    "path": "/images/dedications/2026-05-13.webp",
+    "alt": "Dedica musicale Questa domenica di Olly",
+    "mode": "raw",
+    "source": "public/images/upload/2026-05-13.webp"
   },
-  "short_phrase": "Alcune emozioni restano per sempre.",
+  "short_phrase": "Non la conosco bene ma è orecchiabile",
   "tags": [
-    "musica",
-    "italiana",
-    "ricordi"
+    "malinconia",
+    "romantica",
+    "notte"
   ],
   "seo": {
-    "title": "Su di noi – Pupo | DDGPilliSite",
-    "description": "Dedica musicale del giorno con “Su di noi” di Pupo."
+    "title": "Questa domenica – Olly | DDGPilliSite",
+    "description": "Dedica musicale del giorno con “Questa domenica” di Olly."
   },
-  "created_at": "2026-05-12T10:01:13.951160+02:00",
-  "updated_at": "2026-05-12T10:01:15.336513+02:00"
+  "created_at": "2026-05-13T03:57:18.702508+02:00",
+  "updated_at": "2026-05-13T03:57:19.322568+02:00",
+  "date_it": "13 maggio 2026"
 }
