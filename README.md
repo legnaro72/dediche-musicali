@@ -244,6 +244,34 @@ git push origin main
 
 Il workflow `deploy.yml` si attiverà automaticamente e pubblicherà il sito.
 
+### PWA, HTTPS e installazione
+
+La Progressive Web App richiede HTTPS con certificato valido. GitHub Pages lo abilita automaticamente quando il dominio è configurato correttamente.
+
+File principali:
+- `public/manifest.json` configura installazione, modalità standalone, colori, icone e shortcut.
+- `public/sw.js` gestisce cache base, asset statici e navigazione offline best-effort.
+- `public/icons/` contiene icone Android/Desktop, maskable icon e asset Apple.
+- `public/pwa-config.json` contiene le opzioni modificabili dell'esperienza app.
+
+Configurazione audio:
+
+```json
+{
+  "backgroundMusic": "/dediche-musicali/background-music/main.mp3",
+  "audioDefaultEnabled": true,
+  "audioVolume": 0.3
+}
+```
+
+Per aggiornare la musica:
+1. Carica un MP3 leggero in `public/background-music/`.
+2. Aggiorna `backgroundMusic` in `public/pwa-config.json`.
+3. Regola `audioVolume` tra `0` e `1`.
+4. Imposta `audioDefaultEnabled` a `false` se non vuoi tentare l'avvio automatico.
+
+Nota iPhone/Safari: iOS può bloccare l'autoplay audio finché l'utente non interagisce con la pagina. Il sito tenta l'avvio automatico, poi usa il primo tap o tasto premuto come sblocco non invasivo e mantiene la preferenza in `localStorage`.
+
 ### Verifica
 
 Il sito sarà disponibile su:

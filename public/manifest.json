@@ -1,0 +1,56 @@
+{
+  "name": "DDGPilliSite - Dediche Musicali",
+  "short_name": "DDGPilli",
+  "description": "Una nuova dedica musicale ogni giorno.",
+  "id": "/dediche-musicali/",
+  "start_url": "/dediche-musicali/",
+  "scope": "/dediche-musicali/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "portrait-primary",
+  "background_color": "#08070f",
+  "theme_color": "#08070f",
+  "categories": ["music", "entertainment", "lifestyle"],
+  "lang": "it-IT",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/dediche-musicali/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/dediche-musicali/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/dediche-musicali/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/dediche-musicali/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Archivio",
+      "short_name": "Archivio",
+      "description": "Apri l'archivio delle dediche.",
+      "url": "/dediche-musicali/archive/",
+      "icons": [
+        {
+          "src": "/dediche-musicali/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
