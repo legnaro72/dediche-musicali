@@ -338,11 +338,12 @@ const fullOgImage = ogImage
         let config = {
           backgroundMusic: `${appBase}background-music/main.mp3`,
           audioDefaultEnabled: true,
-          audioVolume: 0.3,
+          audioVolume: 0.65,
         };
         let enabled = true;
         let waitingForGesture = false;
         let unlockRegistered = false;
+        let isPlaying = false;
 
         const trackAudioEvent = (eventName) => {
           if (typeof window.gtag === 'function') window.gtag('event', eventName, { event_category: 'pwa_audio' });
@@ -351,9 +352,9 @@ const fullOgImage = ogImage
 
         const applyUi = (isWaiting = false) => {
           waitingForGesture = isWaiting;
-          button.setAttribute('aria-pressed', String(enabled));
-          button.setAttribute('aria-label', enabled ? 'Disattiva musica di sottofondo' : 'Attiva musica di sottofondo');
-          root.classList.toggle('is-off', !enabled);
+          button.setAttribute('aria-pressed', String(isPlaying));
+          button.setAttribute('aria-label', isPlaying ? 'Disattiva musica di sottofondo' : 'Attiva musica di sottofondo');
+          root.classList.toggle('is-off', !isPlaying);
           root.classList.toggle('is-waiting', isWaiting && enabled);
           if (hint) hint.hidden = !(isWaiting && enabled);
         };
@@ -398,11 +399,20 @@ const fullOgImage = ogImage
           audio.loop = true;
           audio.preload = 'auto';
           audio.volume = Math.max(0, Math.min(1, Number(config.audioVolume) || 0.3));
+          audio.muted = false;
+          audio.playsInline = true;
+          audio.load();
           audio.addEventListener('progress', updateBufferedProgress);
           audio.addEventListener('canplay', () => setIntroProgress(92, 'Quasi pronto...'));
           audio.addEventListener('playing', () => {
+            isPlaying = true;
+            applyUi(false);
             setIntroProgress(100, 'Musica avviata');
             window.setTimeout(hideIntro, 250);
+          });
+          audio.addEventListener('pause', () => {
+            isPlaying = false;
+            applyUi(false);
           });
           audio.addEventListener('error', () => {
             setIntroProgress(0, 'Audio non disponibile: controlla il file MP3.');
@@ -410,6 +420,37 @@ const fullOgImage = ogImage
           });
           return audio;
         };
+
+        const waitForPlayback = (current) => new Promise((resolve, reject) => {
+          if (!current.paused && current.readyState >= 2) {
+            resolve(true);
+            return;
+          }
+
+          const timeout = window.setTimeout(() => {
+            cleanup();
+            reject(new Error('Audio playback timeout'));
+          }, 6500);
+
+          const onPlaying = () => {
+            cleanup();
+            resolve(true);
+          };
+
+          const onError = () => {
+            cleanup();
+            reject(current.error || new Error('Audio playback error'));
+          };
+
+          function cleanup() {
+            window.clearTimeout(timeout);
+            current.removeEventListener('playing', onPlaying);
+            current.removeEventListener('error', onError);
+          }
+
+          current.addEventListener('playing', onPlaying, { once: true });
+          current.addEventListener('error', onError, { once: true });
+        });
 
         const registerUnlock = () => {
           if (unlockRegistered) return;
@@ -425,14 +466,25 @@ const fullOgImage = ogImage
 
         const playAudio = async (fromGesture = false) => {
           if (!enabled) return;
+          const current = ensureAudio();
           try {
             if (fromGesture) startSoftProgress();
-            await ensureAudio().play();
+            const playResult = current.play();
+            if (playResult && typeof playResult.catch === 'function') {
+              playResult.catch((error) => {
+                console.warn('Background audio play() rejected:', error);
+                setIntroProgress(0, 'Audio bloccato dal browser. Tocca Audio per riprovare.');
+                applyUi(true);
+              });
+            }
+            await waitForPlayback(current);
+            isPlaying = true;
             applyUi(false);
             trackAudioEvent(fromGesture ? 'background_audio_unlocked' : 'background_audio_started');
-          } catch {
+          } catch (error) {
             if (progressTimer) window.clearInterval(progressTimer);
-            setIntroProgress(0, 'Tocca Entra per autorizzare audio.');
+            console.warn('Background audio non avviato:', error);
+            setIntroProgress(0, fromGesture ? 'Audio non avviato. Tocca Audio per riprovare.' : 'Tocca Entra per autorizzare audio.');
             applyUi(true);
             registerUnlock();
           }
@@ -440,6 +492,9 @@ const fullOgImage = ogImage
 
         const stopAudio = () => {
           if (audio) audio.pause();
+          isPlaying = false;
+          enabled = false;
+          localStorage.setItem(storageKey, 'false');
           applyUi(false);
           trackAudioEvent('background_audio_stopped');
         };
@@ -467,15 +522,18 @@ const fullOgImage = ogImage
         };
 
         button.addEventListener('click', () => {
-          if (enabled && waitingForGesture) {
-            playAudio(true);
+          if (isPlaying) {
+            stopAudio();
             return;
           }
 
-          enabled = !enabled;
-          localStorage.setItem(storageKey, String(enabled));
-          if (enabled) playAudio(true);
-          else stopAudio();
+          enabled = true;
+          localStorage.setItem(storageKey, 'true');
+          if (waitingForGesture) {
+            playAudio(true);
+            return;
+          }
+          playAudio(true);
         });
 
         introStart?.addEventListener('click', () => {
