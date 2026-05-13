@@ -34,6 +34,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from scripts.utils import (
     setup_logging, load_all_dedications, load_json,
     get_dedication_json_path, get_italian_day_name, format_date_italian,
+    get_dedication_storage_id, load_dedications_for_date,
     IMAGES_DIR,
 )
 from scripts.mood_engine import (
@@ -69,6 +70,10 @@ def generate_for_dedication(ded: dict, fonts: dict,
     if not date_str:
         logger.error('  Dedica senza data')
         return False
+    storage_id = get_dedication_storage_id(ded)
+    if not storage_id:
+        logger.error('  Dedica senza id')
+        return False
 
     # Recupera image_mode (supporta struttura piatta e annidata)
     image_obj = ded.get('image', {})
@@ -86,8 +91,10 @@ def generate_for_dedication(ded: dict, fonts: dict,
         return True
 
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
-    vertical_path = IMAGES_DIR / f'{date_str}.webp'
-    og_path       = IMAGES_DIR / f'{date_str}-og.webp'
+    vertical_path = IMAGES_DIR / f'{storage_id}.webp'
+    og_path       = IMAGES_DIR / f'{storage_id}-og.webp'
+    if isinstance(image_obj, dict):
+        image_obj['path'] = f'/images/dedications/{storage_id}.webp'
 
     if dry_run:
         logger.info(f'  [DRY RUN] Genererebbe: {vertical_path.name}, {og_path.name}')
@@ -121,7 +128,7 @@ def generate_for_dedication(ded: dict, fonts: dict,
         )
         palette = MOOD_PALETTE.get(mood, MOOD_PALETTE['default'])
         return _save_images(bg, ded, fonts, palette, vertical_path, og_path,
-                            date_str, attribution=None)
+                            storage_id, attribution=None)
 
     # ── image_mode = auto ────────────────────────────────────────────────────
     song_title    = ded.get('song_title', '')
@@ -150,7 +157,7 @@ def generate_for_dedication(ded: dict, fonts: dict,
     bg, attribution = fetch_background(prompt, query, eff_provider)
 
     return _save_images(bg, ded, fonts, palette, vertical_path, og_path,
-                        date_str, attribution)
+                        storage_id, attribution)
 
 
 def _save_images(bg, ded, fonts, palette,
@@ -188,7 +195,7 @@ def _save_images(bg, ded, fonts, palette,
 
 def main():
     parser = argparse.ArgumentParser(description='Genera immagini premium DDGPilliSite')
-    parser.add_argument('--date', help='Data specifica (YYYY-MM-DD)')
+    parser.add_argument('--date', help='Data specifica (YYYY-MM-DD) oppure id dedica')
     parser.add_argument('--all', action='store_true',
                         help='Genera per tutte le dediche scheduled/published')
     parser.add_argument('--provider', default='auto',
@@ -205,14 +212,21 @@ def main():
     if args.date:
         path = get_dedication_json_path(args.date)
         ded = load_json(path)
-        if not ded:
+        dedications = [ded] if ded else load_dedications_for_date(
+            args.date,
+            statuses=('scheduled', 'published'),
+        )
+        if not dedications:
             logger.error(f'Dedica non trovata: {args.date}')
-            logger.error(f'Cercata in: {path}')
+            logger.error(f'Cercata anche in: {path}')
             sys.exit(1)
-        ok = generate_for_dedication(ded, fonts,
-                                     provider_override=args.provider,
-                                     dry_run=args.dry_run)
-        sys.exit(0 if ok else 1)
+        errors = 0
+        for ded in dedications:
+            if not generate_for_dedication(ded, fonts,
+                                           provider_override=args.provider,
+                                           dry_run=args.dry_run):
+                errors += 1
+        sys.exit(0 if errors == 0 else 1)
 
     elif args.all:
         dedications = load_all_dedications()

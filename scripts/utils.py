@@ -107,8 +107,62 @@ def load_all_dedications() -> list:
     return dedications
 
 
-def get_dedication_json_path(date_str: str) -> Path:
-    return DATA_DIR / f'{date_str}.json'
+def get_dedication_json_path(identifier: str) -> Path:
+    return DATA_DIR / f'{identifier}.json'
+
+
+def get_dedication_storage_id(ded: dict) -> str:
+    """Restituisce l'identificatore stabile usato per nuovi file JSON/immagini."""
+    return (ded.get('id') or ded.get('date') or '').strip()
+
+
+def find_existing_dedication_path(ded_id: str = '', date_str: str = ''):
+    """Trova un JSON esistente per id oppure, per compatibilita', per data legacy."""
+    if not DATA_DIR.exists():
+        return None
+
+    ded_id = (ded_id or '').strip()
+    date_str = (date_str or '').strip()
+
+    if ded_id:
+        id_path = get_dedication_json_path(ded_id)
+        if id_path.exists():
+            return id_path
+
+    if date_str:
+        legacy_path = get_dedication_json_path(date_str)
+        if legacy_path.exists():
+            legacy = load_json(legacy_path)
+            if legacy and (not ded_id or legacy.get('id') == ded_id):
+                return legacy_path
+
+    for json_file in sorted(DATA_DIR.glob('*.json')):
+        data = load_json(json_file)
+        if not data:
+            continue
+        if ded_id and data.get('id') == ded_id:
+            return json_file
+        if date_str and not ded_id and data.get('date') == date_str:
+            return json_file
+    return None
+
+
+def get_dedication_storage_path(ded: dict) -> Path:
+    """Percorso JSON append-only: legacy se esiste, altrimenti {id}.json."""
+    ded_id = (ded.get('id') or '').strip()
+    date_str = (ded.get('date') or '').strip()
+    existing = find_existing_dedication_path(ded_id, date_str)
+    if existing:
+        return existing
+    storage_id = get_dedication_storage_id(ded)
+    return get_dedication_json_path(storage_id)
+
+
+def load_dedications_for_date(date_str: str, statuses=None) -> list:
+    dedications = [d for d in load_all_dedications() if d.get('date') == date_str]
+    if statuses is not None:
+        dedications = [d for d in dedications if d.get('status') in statuses]
+    return sorted(dedications, key=lambda d: (str(d.get('daily_order', '')), d.get('id', '')))
 
 
 # ── Text helpers ──────────────────────────────────────────────────────────────

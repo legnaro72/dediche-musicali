@@ -129,6 +129,50 @@ class AppendOnlyPublishTest(unittest.TestCase):
         self.assertTrue(sync_ok)
         self.assertEqual(self.read_dedication('2026-05-12'), before)
 
+    def test_publish_all_dedications_for_same_date(self):
+        first = make_dedication('2026-05-14', 'scheduled')
+        first['id'] = '2026-05-14-first-song'
+        second = make_dedication('2026-05-14', 'scheduled')
+        second['id'] = '2026-05-14-second-song'
+        (self.data_dir / f"{first['id']}.json").write_text(json.dumps(first), encoding='utf-8')
+        (self.data_dir / f"{second['id']}.json").write_text(json.dumps(second), encoding='utf-8')
+
+        fake_generate = types.ModuleType('scripts.generate_image')
+        fake_generate.ensure_fonts = lambda: {}
+        fake_generate.generate_for_dedication = lambda ded, fonts, dry_run=False: True
+
+        with patch.dict(sys.modules, {'scripts.generate_image': fake_generate}):
+            publish_ok = publish_daily.publish('2026-05-14')
+
+        self.assertTrue(publish_ok)
+        first_after = json.loads((self.data_dir / f"{first['id']}.json").read_text(encoding='utf-8'))
+        second_after = json.loads((self.data_dir / f"{second['id']}.json").read_text(encoding='utf-8'))
+        self.assertEqual(first_after['status'], 'published')
+        self.assertEqual(second_after['status'], 'published')
+        self.assertEqual(first_after['image']['path'], '/images/dedications/2026-05-14-first-song.webp')
+        self.assertEqual(second_after['image']['path'], '/images/dedications/2026-05-14-second-song.webp')
+
+    def test_publish_can_target_one_dedication_for_same_date(self):
+        first = make_dedication('2026-05-15', 'scheduled')
+        first['id'] = '2026-05-15-first-song'
+        second = make_dedication('2026-05-15', 'scheduled')
+        second['id'] = '2026-05-15-second-song'
+        (self.data_dir / f"{first['id']}.json").write_text(json.dumps(first), encoding='utf-8')
+        (self.data_dir / f"{second['id']}.json").write_text(json.dumps(second), encoding='utf-8')
+
+        fake_generate = types.ModuleType('scripts.generate_image')
+        fake_generate.ensure_fonts = lambda: {}
+        fake_generate.generate_for_dedication = lambda ded, fonts, dry_run=False: True
+
+        with patch.dict(sys.modules, {'scripts.generate_image': fake_generate}):
+            publish_ok = publish_daily.publish('2026-05-15', target_id=first['id'])
+
+        self.assertTrue(publish_ok)
+        first_after = json.loads((self.data_dir / f"{first['id']}.json").read_text(encoding='utf-8'))
+        second_after = json.loads((self.data_dir / f"{second['id']}.json").read_text(encoding='utf-8'))
+        self.assertEqual(first_after['status'], 'published')
+        self.assertEqual(second_after['status'], 'scheduled')
+
 
 if __name__ == '__main__':
     unittest.main()

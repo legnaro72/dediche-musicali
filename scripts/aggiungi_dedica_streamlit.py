@@ -179,13 +179,13 @@ def load_sheet_records() -> list[dict]:
     return records
 
 
-def upload_image_to_github(uploaded_file, date_value: str) -> str:
+def upload_image_to_github(uploaded_file, asset_id: str) -> str:
     original_name = uploaded_file.name or ""
     ext = Path(original_name).suffix.lower()
     if ext not in VALID_IMAGE_EXTS:
         raise ValueError("Formato immagine non supportato. Usa JPG, JPEG, PNG oppure WEBP.")
 
-    upload_name = f"{date_value}{ext}"
+    upload_name = f"{asset_id}{ext}"
     repo_path = f"{UPLOAD_DIR}/{upload_name}"
     token = get_github_token()
     api_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{repo_path}"
@@ -209,7 +209,7 @@ def upload_image_to_github(uploaded_file, date_value: str) -> str:
 
     content_b64 = base64.b64encode(uploaded_file.getvalue()).decode("ascii")
     payload = {
-        "message": f"Upload immagine dedica {date_value}",
+        "message": f"Upload immagine dedica {asset_id}",
         "content": content_b64,
         "branch": GITHUB_BRANCH,
     }
@@ -223,7 +223,7 @@ def upload_image_to_github(uploaded_file, date_value: str) -> str:
     return repo_path
 
 
-def dispatch_daily_publish(date_value: str, force_republish: bool = True) -> None:
+def dispatch_daily_publish(date_value: str, dedication_id: str = '', force_republish: bool = True) -> None:
     token = get_github_token()
     api_url = (
         f"https://api.github.com/repos/{GITHUB_REPO}/actions/workflows/"
@@ -238,6 +238,7 @@ def dispatch_daily_publish(date_value: str, force_republish: bool = True) -> Non
         "ref": GITHUB_BRANCH,
         "inputs": {
             "date": date_value,
+            "dedication_id": dedication_id,
             "force_republish": "true" if force_republish else "false",
             "dry_run": "false",
         },
@@ -462,8 +463,12 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
         st.caption(f"Immagine attuale: {existing_image_source}")
     if uploaded_file:
         date_text = st.session_state.get(f"{prefix}_date", "")
-        preview_date = normalize_date(date_text) if date_text else "YYYY-MM-DD"
-        st.info(f"Verra' caricata come {preview_date}{Path(uploaded_file.name).suffix.lower()}")
+        song = st.session_state.get(f"{prefix}_song_title", "")
+        artist = st.session_state.get(f"{prefix}_artist", "")
+        preview_id = st.session_state.get(f"{prefix}_id", "").strip()
+        if not preview_id and date_text and song and artist:
+            preview_id = make_default_id(normalize_date(date_text), song, artist)
+        st.info(f"Verra' caricata come {preview_id or 'ID-DELLA-DEDICA'}{Path(uploaded_file.name).suffix.lower()}")
 
     st.subheader("Testi")
     st.text_area(
@@ -506,7 +511,7 @@ def save_dedication(prefix: str, uploaded_file, mode: str, row_number: int | Non
     values = prepare_values(collect_form_state(prefix))
     if uploaded_file is not None:
         with st.spinner("Caricamento immagine su GitHub..."):
-            values["image_source"] = upload_image_to_github(uploaded_file, values["date"])
+            values["image_source"] = upload_image_to_github(uploaded_file, values["id"])
 
     if values["image_mode"] in ("raw", "upload") and not values["image_source"]:
         raise ValueError(f"Seleziona un'immagine o compila image_source per image_mode={values['image_mode']}.")
@@ -532,7 +537,7 @@ def save_and_optionally_publish(prefix: str, uploaded_file, mode: str, publish_n
 
     if publish_now:
         with st.spinner("Avvio workflow GitHub Actions..."):
-            dispatch_daily_publish(values["date"], force_republish=True)
+            dispatch_daily_publish(values["date"], dedication_id=values["id"], force_republish=True)
         st.success(
             "Workflow daily-publish avviato. Il sito verra' aggiornato appena GitHub Actions termina."
         )

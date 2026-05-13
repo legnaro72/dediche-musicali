@@ -1,9 +1,9 @@
 """
-validate_dedications.py — Valida le dediche prima del deploy.
+validate_dedications.py - Valida le dediche prima del deploy.
 
 Uso:
     python scripts/validate_dedications.py
-    python scripts/validate_dedications.py --strict   # blocca anche su warning
+    python scripts/validate_dedications.py --strict
 """
 import sys
 import os
@@ -20,12 +20,11 @@ from scripts.utils import (
 logger = setup_logging('validate')
 
 
-def validate_dedication(ded: dict, seen_ids: set, active_dates: dict) -> list:
+def validate_dedication(ded: dict, seen_ids: set, active_dates: dict = None) -> list:
     """Restituisce una lista di messaggi di errore per la dedica."""
     errors = []
     ded_id = ded.get('id', '').strip()
 
-    # id
     if not ded_id:
         errors.append("Campo 'id' mancante")
     elif ded_id in seen_ids:
@@ -33,66 +32,53 @@ def validate_dedication(ded: dict, seen_ids: set, active_dates: dict) -> list:
     elif not re.match(r'^[a-z0-9\-]+$', ded_id):
         errors.append(f"ID '{ded_id}' non valido (solo lettere minuscole, numeri, trattini)")
 
-    # date
     date = ded.get('date', '').strip()
     if not date:
         errors.append("Campo 'date' mancante")
     elif not parse_date(date):
         errors.append(f"Data '{date}' non nel formato YYYY-MM-DD")
 
-    # status
     status = ded.get('status', '').strip()
     if not status:
         errors.append("Campo 'status' mancante")
     elif status not in VALID_STATUSES:
         errors.append(f"Status '{status}' non valido. Ammessi: {sorted(VALID_STATUSES)}")
 
-    # controlla date duplicate per dediche attive
-    if date and status in ('scheduled', 'published'):
-        if date in active_dates:
-            errors.append(f"Data {date} già usata da '{active_dates[date]}'")
-        else:
-            active_dates[date] = ded_id
+    # Piu' dediche possono condividere la stessa data. L'unicita' resta sull'id.
 
-    # campi testo obbligatori
     for field in ['song_title', 'artist', 'dedication_title', 'dedication_text']:
         if not ded.get(field, '').strip():
             errors.append(f"Campo '{field}' mancante o vuoto")
 
-    # audio (struttura annidata: ded['audio']['url'] e ded['audio']['type'])
     audio = ded.get('audio', {})
     audio_url = audio.get('url', '').strip() if isinstance(audio, dict) else ''
     audio_type = audio.get('type', '').strip() if isinstance(audio, dict) else ''
     if not audio_url:
         errors.append("Campo 'audio.url' mancante")
     elif not is_valid_url(audio_url):
-        errors.append(f"audio.url non è un URL https valido: '{audio_url}'")
+        errors.append(f"audio.url non e' un URL https valido: '{audio_url}'")
     if audio_type and audio_type not in VALID_AUDIO_TYPES:
         errors.append(f"audio.type '{audio_type}' non valido. Ammessi: {sorted(VALID_AUDIO_TYPES)}")
 
-    # image_mode (struttura annidata: ded['image']['mode'])
     image = ded.get('image', {})
     image_mode = image.get('mode', 'auto').strip() if isinstance(image, dict) else 'auto'
     if image_mode and image_mode not in VALID_IMAGE_MODES:
         errors.append(f"image.mode '{image_mode}' non valido. Ammessi: {sorted(VALID_IMAGE_MODES)}")
 
-    # vote_url (struttura annidata: ded['vote']['url'])
     vote = ded.get('vote', {})
     vote_url = vote.get('url', '').strip() if isinstance(vote, dict) else ''
     default_vote_url = os.environ.get('DEFAULT_VOTE_URL', '').strip()
     if not vote_url and not default_vote_url:
         errors.append("vote.url vuoto e DEFAULT_VOTE_URL non configurato")
     elif vote_url and not is_valid_url(vote_url):
-        errors.append(f"vote.url non è un URL https valido: '{vote_url}'")
+        errors.append(f"vote.url non e' un URL https valido: '{vote_url}'")
 
     return errors
 
 
 def validate_all(dedications: list) -> bool:
     """Valida tutte le dediche. Restituisce True se tutte passano."""
-    # re già importato a livello modulo
     seen_ids = set()
-    active_dates = {}
     total_errors = 0
 
     for ded in dedications:
@@ -100,10 +86,10 @@ def validate_all(dedications: list) -> bool:
         status = ded.get('status', '')
 
         if status == 'draft':
-            logger.info(f"  ↳ SKIP (draft): {ded_id}")
+            logger.info(f"  SKIP (draft): {ded_id}")
             continue
 
-        errors = validate_dedication(ded, seen_ids, active_dates)
+        errors = validate_dedication(ded, seen_ids)
 
         if ded.get('id'):
             seen_ids.add(ded['id'])
@@ -112,15 +98,15 @@ def validate_all(dedications: list) -> bool:
             total_errors += len(errors)
             logger.error(f"ERRORI in '{ded_id}':")
             for e in errors:
-                logger.error(f"   ✗ {e}")
+                logger.error(f"   - {e}")
         else:
-            logger.info(f"  ✓ OK: {ded_id} [{status}]")
+            logger.info(f"  OK: {ded_id} [{status}]")
 
     if total_errors:
-        logger.error(f"\n❌ Validazione FALLITA: {total_errors} errori trovati")
+        logger.error(f"\nValidazione FALLITA: {total_errors} errori trovati")
         return False
 
-    logger.info(f"\n✅ Validazione OK: {len(dedications)} dediche valide")
+    logger.info(f"\nValidazione OK: {len(dedications)} dediche valide")
     return True
 
 
@@ -131,7 +117,6 @@ def main():
 
     logger.info("=== Validazione dediche DDGPilliSite ===")
 
-    from scripts.utils import load_all_dedications
     dedications = load_all_dedications()
     logger.info(f"Trovate {len(dedications)} dediche in data/dedications/")
 

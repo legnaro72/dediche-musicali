@@ -20,7 +20,13 @@ const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' }
 // La dedica più recente con date <= oggi e status published/scheduled
 const published = all
   .filter(d => d.status === 'published' && d.date <= today)
-  .sort((a, b) => b.date.localeCompare(a.date));
+  .sort((a, b) => {
+    const byDate = b.date.localeCompare(a.date);
+    if (byDate !== 0) return byDate;
+    const byOrder = String(a.daily_order ?? '').localeCompare(String(b.daily_order ?? ''));
+    if (byOrder !== 0) return byOrder;
+    return String(a.id ?? '').localeCompare(String(b.id ?? ''));
+  });
 
 const dedication = published[0] ?? null;
 

@@ -13,7 +13,14 @@ if (existsSync(dataDir)) {
   const files = readdirSync(dataDir).filter(f => f.endsWith('.json')).sort().reverse();
   all = files
     .map(f => JSON.parse(readFileSync(join(dataDir, f), 'utf-8')))
-    .filter(d => d.status === 'published' && d.date <= today);
+    .filter(d => d.status === 'published' && d.date <= today)
+    .sort((a, b) => {
+      const byDate = b.date.localeCompare(a.date);
+      if (byDate !== 0) return byDate;
+      const byOrder = String(a.daily_order ?? '').localeCompare(String(b.daily_order ?? ''));
+      if (byOrder !== 0) return byOrder;
+      return String(a.id ?? '').localeCompare(String(b.id ?? ''));
+    });
 }
 
 // Ricava liste per filtri

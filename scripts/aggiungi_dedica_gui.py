@@ -134,7 +134,7 @@ def get_github_token() -> str:
     return token
 
 
-def upload_image_to_github(local_path: str, date_value: str) -> str:
+def upload_image_to_github(local_path: str, asset_id: str) -> str:
     src = Path(local_path)
     if not src.exists():
         raise ValueError("Il file immagine selezionato non esiste.")
@@ -145,7 +145,7 @@ def upload_image_to_github(local_path: str, date_value: str) -> str:
             "Formato immagine non supportato. Usa JPG, JPEG, PNG oppure WEBP."
         )
 
-    upload_name = f"{date_value}{ext}"
+    upload_name = f"{asset_id}{ext}"
     repo_path = f"{UPLOAD_DIR}/{upload_name}"
     local_upload_dir = ROOT_DIR / UPLOAD_DIR
     local_upload_dir.mkdir(parents=True, exist_ok=True)
@@ -173,7 +173,7 @@ def upload_image_to_github(local_path: str, date_value: str) -> str:
 
     content_b64 = base64.b64encode(src.read_bytes()).decode("ascii")
     payload = {
-        "message": f"Upload immagine dedica {date_value}",
+        "message": f"Upload immagine dedica {asset_id}",
         "content": content_b64,
         "branch": GITHUB_BRANCH,
     }
@@ -233,10 +233,11 @@ def submit():
             raise ValueError("Inserisci o conferma la frase breve.")
 
         image_source = ""
+        dedication_id = f"{date_value}-{slugify(song_title)}-{slugify(artist)}"
         if image_mode in ("upload", "raw"):
             if not selected_image:
                 raise ValueError(f"Seleziona un'immagine per image_mode={image_mode}.")
-            image_source = upload_image_to_github(selected_image, date_value)
+            image_source = upload_image_to_github(selected_image, dedication_id)
 
         row = build_row(
             date_value,

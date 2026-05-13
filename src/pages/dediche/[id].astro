@@ -12,7 +12,15 @@ export async function getStaticPaths() {
 
   const files = readdirSync(dataDir).filter(f => f.endsWith('.json')).sort();
   const dedications = files.map(f => JSON.parse(readFileSync(join(dataDir, f), 'utf-8')));
-  const published = dedications.filter(d => d.status === 'published');
+  const published = dedications
+    .filter(d => d.status === 'published')
+    .sort((a, b) => {
+      const byDate = b.date.localeCompare(a.date);
+      if (byDate !== 0) return byDate;
+      const byOrder = String(a.daily_order ?? '').localeCompare(String(b.daily_order ?? ''));
+      if (byOrder !== 0) return byOrder;
+      return String(a.id ?? '').localeCompare(String(b.id ?? ''));
+    });
 
   return published.map((ded, idx) => ({
     params: { id: ded.id },

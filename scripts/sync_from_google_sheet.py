@@ -27,7 +27,7 @@ except Exception:
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scripts.utils import (
-    setup_logging, save_json, load_json, get_dedication_json_path,
+    setup_logging, save_json, load_json, get_dedication_storage_path,
     get_italian_day_name, auto_seo_title, auto_seo_description,
     auto_image_alt, get_rome_now,
 )
@@ -104,7 +104,7 @@ def sheet_row_to_dict(row: dict, default_vote_url: str) -> dict:
             'url': vote_url,
         },
         'image': {
-            'path': f'/images/dedications/{date_str}.webp',
+            'path': f'/images/dedications/{ded_id}.webp',
             'alt': image_alt or auto_image_alt({
                 'song_title': _cell(row, 'song_title'),
                 'artist': _cell(row, 'artist'),
@@ -141,7 +141,7 @@ def save_sheet_dedication(row: dict, default_vote_url: str, dry_run: bool = Fals
         logger.info(f"  FILE NON TOCCATO (disabled nel foglio): {date_str}.json [{ded_id}]")
         return 'skipped'
 
-    path = get_dedication_json_path(date_str)
+    path = get_dedication_storage_path({'id': ded_id, 'date': date_str})
     existing = load_json(path) if path.exists() else None
 
     if existing and existing.get('status') == 'published' and not force_republish:
@@ -172,7 +172,8 @@ def save_sheet_dedication(row: dict, default_vote_url: str, dry_run: bool = Fals
 
 
 def sync_rows(rows: list, default_vote_url: str, dry_run: bool = False,
-              target_date: str = None, force_republish: bool = False) -> bool:
+              target_date: str = None, target_id: str = None,
+              force_republish: bool = False) -> bool:
     """Sincronizza righe gia' lette dal Google Sheet senza cancellare file locali."""
     saved = 0
     skipped = 0
@@ -189,6 +190,11 @@ def sync_rows(rows: list, default_vote_url: str, dry_run: bool = False,
 
         if target_date and date_str != target_date:
             logger.info(f"  FILE NON TOCCATO (fuori data target {target_date}): {date_str}.json [{ded_id}]")
+            skipped += 1
+            continue
+
+        if target_id and ded_id != target_id:
+            logger.info(f"  FILE NON TOCCATO (fuori id target {target_id}): {date_str}.json [{ded_id}]")
             skipped += 1
             continue
 
@@ -214,7 +220,8 @@ def sync_rows(rows: list, default_vote_url: str, dry_run: bool = False,
     return errors == 0
 
 
-def sync(dry_run: bool = False, target_date: str = None, force_republish: bool = False):
+def sync(dry_run: bool = False, target_date: str = None, target_id: str = None,
+         force_republish: bool = False):
     """Sincronizza dal Google Sheet."""
     sheet_id = os.environ.get('GOOGLE_SHEET_ID', '')
     if not sheet_id:
@@ -232,12 +239,15 @@ def sync(dry_run: bool = False, target_date: str = None, force_republish: bool =
     logger.info(f"Trovate {len(rows)} righe nel Google Sheet")
     if target_date:
         logger.info(f"Data target sync: {target_date}")
+    if target_id:
+        logger.info(f"ID target sync: {target_id}")
 
     return sync_rows(
         rows,
         default_vote_url,
         dry_run=dry_run,
         target_date=target_date,
+        target_id=target_id,
         force_republish=force_republish,
     )
 
@@ -246,6 +256,7 @@ def main():
     parser = argparse.ArgumentParser(description='Sync da Google Sheet')
     parser.add_argument('--dry-run', action='store_true', help='Non scrivere file')
     parser.add_argument('--date', default=None, help='Sincronizza solo questa data (YYYY-MM-DD)')
+    parser.add_argument('--id', default=None, help='Sincronizza solo questa dedica')
     parser.add_argument('--force-republish', action='store_true',
                         help='Permette di sovrascrivere dediche gia published')
     args = parser.parse_args()
@@ -254,6 +265,7 @@ def main():
     ok = sync(
         dry_run=args.dry_run,
         target_date=args.date,
+        target_id=args.id,
         force_republish=args.force_republish,
     )
     sys.exit(0 if ok else 1)
