@@ -2,7 +2,7 @@
   "id": "2026-05-12-su-di-noi",
   "date": "2026-05-12",
   "day_name": "martedì",
-  "status": "scheduled",
+  "status": "published",
   "song_title": "Su di noi",
   "artist": "Pupo",
   "dedication_title": "La dedica del giorno",
@@ -31,5 +31,6 @@
     "description": "Dedica musicale del giorno con “Su di noi” di Pupo."
   },
   "created_at": "2026-05-13T03:57:18.702111+02:00",
-  "updated_at": "2026-05-13T03:57:18.702111+02:00"
+  "updated_at": "2026-05-13T10:34:17.423681+02:00",
+  "date_it": "12 maggio 2026"
 }
