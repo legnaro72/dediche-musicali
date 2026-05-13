@@ -117,20 +117,38 @@ const fullOgImage = ogImage
   </div>
 
   {enableBackgroundMusic && (
-    <div class="ambient-audio" data-background-music-control>
-      <button
-        class="ambient-audio-toggle"
-        type="button"
-        aria-pressed="true"
-        aria-label="Disattiva musica di sottofondo"
-      >
-        <span class="ambient-audio-icon" aria-hidden="true">♪</span>
-        <span class="ambient-audio-label">Audio</span>
-      </button>
-      <p class="ambient-audio-hint" data-background-music-hint hidden>
-        Tocca per attivare la musica
-      </p>
-    </div>
+    <>
+      <div class="app-intro" data-audio-intro hidden>
+        <div class="app-intro-panel">
+          <p class="app-intro-kicker">DDGPilli</p>
+          <h2>Dedica del giorno</h2>
+          <p class="app-intro-text">Tocca Entra per avviare l'esperienza con musica di sottofondo.</p>
+          <div class="app-intro-progress" aria-hidden="true">
+            <span data-audio-intro-progress></span>
+          </div>
+          <p class="app-intro-status" data-audio-intro-status>Audio pronto</p>
+          <div class="app-intro-actions">
+            <button class="app-intro-start" type="button" data-audio-intro-start>Entra</button>
+            <button class="app-intro-skip" type="button" data-audio-intro-skip>Continua senza audio</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ambient-audio" data-background-music-control>
+        <button
+          class="ambient-audio-toggle"
+          type="button"
+          aria-pressed="true"
+          aria-label="Disattiva musica di sottofondo"
+        >
+          <span class="ambient-audio-icon" aria-hidden="true">♪</span>
+          <span class="ambient-audio-label">Audio</span>
+        </button>
+        <p class="ambient-audio-hint" data-background-music-hint hidden>
+          Tocca per attivare la musica
+        </p>
+      </div>
+    </>
   )}
 
   <!-- Footer -->
@@ -150,7 +168,7 @@ const fullOgImage = ogImage
   <!-- Navbar scroll effect + reveal animation -->
   <script>
     const appBase = document.querySelector('link[rel="manifest"]')?.getAttribute('href')?.replace(/manifest\.json$/, '') ?? '/';
-    (window as any).__DDGPILLI_BASE = appBase;
+    window.__DDGPILLI_BASE = appBase;
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register(`${appBase}sw.js`, { scope: appBase }).catch((error) => {
@@ -234,9 +252,9 @@ const fullOgImage = ogImage
       const dismissedKey = 'ddgpilli-install-dismissed';
       const isStandalone =
         window.matchMedia('(display-mode: standalone)').matches ||
-        (window.navigator as any).standalone === true;
+        window.navigator.standalone === true;
       const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
-      let deferredPrompt: any = null;
+      let deferredPrompt = null;
 
       const show = () => {
         if (isStandalone || localStorage.getItem(dismissedKey) === 'true') return;
@@ -302,14 +320,21 @@ const fullOgImage = ogImage
   {enableBackgroundMusic && (
     <script>
       (() => {
-        const appBase = (window as any).__DDGPILLI_BASE || '/';
+        const appBase = window.__DDGPILLI_BASE || '/';
         const root = document.querySelector('[data-background-music-control]');
         const button = root?.querySelector('.ambient-audio-toggle');
         const hint = root?.querySelector('[data-background-music-hint]');
+        const intro = document.querySelector('[data-audio-intro]');
+        const introStart = document.querySelector('[data-audio-intro-start]');
+        const introSkip = document.querySelector('[data-audio-intro-skip]');
+        const introProgress = document.querySelector('[data-audio-intro-progress]');
+        const introStatus = document.querySelector('[data-audio-intro-status]');
         if (!(root instanceof HTMLElement) || !(button instanceof HTMLButtonElement)) return;
 
         const storageKey = 'ddgpilli-background-audio-enabled';
+        const introKey = 'ddgpilli-audio-intro-seen';
         let audio;
+        let progressTimer;
         let config = {
           backgroundMusic: `${appBase}background-music/main.mp3`,
           audioDefaultEnabled: true,
@@ -320,8 +345,8 @@ const fullOgImage = ogImage
         let unlockRegistered = false;
 
         const trackAudioEvent = (eventName) => {
-          if (typeof (window as any).gtag === 'function') (window as any).gtag('event', eventName, { event_category: 'pwa_audio' });
-          if (typeof (window as any).fbq === 'function') (window as any).fbq('trackCustom', eventName);
+          if (typeof window.gtag === 'function') window.gtag('event', eventName, { event_category: 'pwa_audio' });
+          if (typeof window.fbq === 'function') window.fbq('trackCustom', eventName);
         };
 
         const applyUi = (isWaiting = false) => {
@@ -333,12 +358,56 @@ const fullOgImage = ogImage
           if (hint) hint.hidden = !(isWaiting && enabled);
         };
 
+        const setIntroProgress = (value, label) => {
+          if (introProgress instanceof HTMLElement) introProgress.style.width = `${Math.max(0, Math.min(100, value))}%`;
+          if (introStatus && label) introStatus.textContent = label;
+        };
+
+        const hideIntro = () => {
+          if (intro instanceof HTMLElement) intro.hidden = true;
+          if (progressTimer) window.clearInterval(progressTimer);
+          sessionStorage.setItem(introKey, 'true');
+        };
+
+        const showIntro = () => {
+          if (intro instanceof HTMLElement) intro.hidden = false;
+          setIntroProgress(0, 'Audio pronto');
+        };
+
+        const updateBufferedProgress = () => {
+          const current = ensureAudio();
+          if (current.duration && Number.isFinite(current.duration) && current.buffered.length > 0) {
+            const bufferedEnd = current.buffered.end(current.buffered.length - 1);
+            setIntroProgress(Math.min(95, (bufferedEnd / current.duration) * 100), 'Caricamento musica...');
+          }
+        };
+
+        const startSoftProgress = () => {
+          if (progressTimer) window.clearInterval(progressTimer);
+          let value = 8;
+          setIntroProgress(value, 'Caricamento musica...');
+          progressTimer = window.setInterval(() => {
+            value = Math.min(82, value + 4);
+            setIntroProgress(value, 'Caricamento musica...');
+          }, 180);
+        };
+
         const ensureAudio = () => {
           if (audio) return audio;
           audio = new Audio(config.backgroundMusic);
           audio.loop = true;
-          audio.preload = 'none';
+          audio.preload = 'auto';
           audio.volume = Math.max(0, Math.min(1, Number(config.audioVolume) || 0.3));
+          audio.addEventListener('progress', updateBufferedProgress);
+          audio.addEventListener('canplay', () => setIntroProgress(92, 'Quasi pronto...'));
+          audio.addEventListener('playing', () => {
+            setIntroProgress(100, 'Musica avviata');
+            window.setTimeout(hideIntro, 250);
+          });
+          audio.addEventListener('error', () => {
+            setIntroProgress(0, 'Audio non disponibile: controlla il file MP3.');
+            applyUi(true);
+          });
           return audio;
         };
 
@@ -357,10 +426,13 @@ const fullOgImage = ogImage
         const playAudio = async (fromGesture = false) => {
           if (!enabled) return;
           try {
+            if (fromGesture) startSoftProgress();
             await ensureAudio().play();
             applyUi(false);
             trackAudioEvent(fromGesture ? 'background_audio_unlocked' : 'background_audio_started');
           } catch {
+            if (progressTimer) window.clearInterval(progressTimer);
+            setIntroProgress(0, 'Tocca Entra per autorizzare audio.');
             applyUi(true);
             registerUnlock();
           }
@@ -387,6 +459,10 @@ const fullOgImage = ogImage
 
           readPreference();
           applyUi(false);
+          if (enabled && sessionStorage.getItem(introKey) !== 'true') {
+            showIntro();
+            return;
+          }
           if (enabled) window.requestIdleCallback ? requestIdleCallback(() => playAudio(false)) : setTimeout(() => playAudio(false), 250);
         };
 
@@ -400,6 +476,20 @@ const fullOgImage = ogImage
           localStorage.setItem(storageKey, String(enabled));
           if (enabled) playAudio(true);
           else stopAudio();
+        });
+
+        introStart?.addEventListener('click', () => {
+          enabled = true;
+          localStorage.setItem(storageKey, 'true');
+          applyUi(false);
+          playAudio(true);
+        });
+
+        introSkip?.addEventListener('click', () => {
+          enabled = false;
+          localStorage.setItem(storageKey, 'false');
+          stopAudio();
+          hideIntro();
         });
 
         init();

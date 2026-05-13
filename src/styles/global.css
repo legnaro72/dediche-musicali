@@ -381,6 +381,94 @@ section { position:relative; z-index:1; }
   right:0.75rem;
 }
 
+/* App intro / audio unlock */
+.app-intro {
+  position:fixed;
+  inset:0;
+  z-index:210;
+  display:grid;
+  place-items:center;
+  padding:1.25rem;
+  background:
+    linear-gradient(135deg,rgba(8,7,15,0.96),rgba(30,27,75,0.92)),
+    var(--bg-base);
+}
+.app-intro[hidden] {
+  display:none;
+}
+.app-intro-panel {
+  width:min(100%,430px);
+  text-align:center;
+}
+.app-intro-kicker {
+  margin-bottom:0.7rem;
+  color:var(--accent);
+  font-size:0.82rem;
+  font-weight:800;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+}
+.app-intro h2 {
+  margin-bottom:0.85rem;
+  font-family:var(--font-serif);
+  font-size:clamp(2.1rem,8vw,3.4rem);
+  line-height:1;
+}
+.app-intro-text {
+  max-width:320px;
+  margin:0 auto 1.5rem;
+  color:var(--text-dim);
+  line-height:1.6;
+}
+.app-intro-progress {
+  height:6px;
+  width:100%;
+  overflow:hidden;
+  border-radius:var(--radius-full);
+  background:rgba(255,255,255,0.1);
+}
+.app-intro-progress span {
+  display:block;
+  width:0%;
+  height:100%;
+  border-radius:inherit;
+  background:var(--gradient-btn);
+  transition:width 0.2s ease;
+}
+.app-intro-status {
+  min-height:1.2rem;
+  margin:0.65rem 0 1.4rem;
+  color:var(--text-secondary);
+  font-size:0.78rem;
+}
+.app-intro-actions {
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:0.75rem;
+}
+.app-intro-start,
+.app-intro-skip {
+  min-height:44px;
+  border-radius:var(--radius-full);
+  cursor:pointer;
+  font:700 0.9rem var(--font-sans);
+}
+.app-intro-start {
+  min-width:128px;
+  border:0;
+  padding:0 1.5rem;
+  background:var(--gradient-btn);
+  color:#fff;
+  box-shadow:var(--shadow-btn);
+}
+.app-intro-skip {
+  border:1px solid var(--border);
+  padding:0 1.2rem;
+  background:rgba(255,255,255,0.05);
+  color:var(--text-dim);
+}
+
 /* PWA background music */
 .ambient-audio {
   position:fixed;

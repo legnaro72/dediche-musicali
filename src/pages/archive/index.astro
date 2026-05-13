@@ -104,10 +104,10 @@ const MONTH_NAMES: Record<string, string> = {
   // Dati lato client per il filtro live
   const grid = document.getElementById('archive-grid');
   const noResult = document.getElementById('no-result');
-  const cards = Array.from(grid?.querySelectorAll('.dedication-card') ?? []) as HTMLElement[];
-  const searchInput = document.getElementById('search-input') as HTMLInputElement;
-  const filterArtist = document.getElementById('filter-artist') as HTMLSelectElement;
-  const filterMonth = document.getElementById('filter-month') as HTMLSelectElement;
+  const cards = Array.from(grid?.querySelectorAll('.dedication-card') ?? []);
+  const searchInput = document.getElementById('search-input');
+  const filterArtist = document.getElementById('filter-artist');
+  const filterMonth = document.getElementById('filter-month');
 
   function normalizeSearch(value: string) {
     return value
@@ -119,9 +119,9 @@ const MONTH_NAMES: Record<string, string> = {
   }
 
   function applyFilters() {
-    const q = normalizeSearch(searchInput.value);
-    const artist = normalizeSearch(filterArtist.value);
-    const month = filterMonth.value; // YYYY-MM
+    const q = normalizeSearch(searchInput?.value ?? '');
+    const artist = normalizeSearch(filterArtist?.value ?? '');
+    const month = filterMonth?.value ?? ''; // YYYY-MM
 
     let visible = 0;
     cards.forEach(card => {
