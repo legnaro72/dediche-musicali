@@ -34,10 +34,11 @@ const fullOgImage = ogImage
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#08070f" />
   <meta name="color-scheme" content="dark" />
   <meta name="application-name" content="DDGPilliSite" />
+  <meta name="ddgpilli-base" content={base} />
 
   <!-- PWA / mobile app -->
   <link rel="manifest" href={`${base}manifest.json`} />
@@ -167,7 +168,7 @@ const fullOgImage = ogImage
 
   <!-- Navbar scroll effect + reveal animation -->
   <script>
-    const appBase = document.querySelector('link[rel="manifest"]')?.getAttribute('href')?.replace(/manifest\.json$/, '') ?? '/';
+    const appBase = document.querySelector('meta[name="ddgpilli-base"]')?.getAttribute('content') ?? '/';
     window.__DDGPILLI_BASE = appBase;
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -320,7 +321,7 @@ const fullOgImage = ogImage
   {enableBackgroundMusic && (
     <script>
       (() => {
-        const appBase = window.__DDGPILLI_BASE || '/';
+        const appBase = document.querySelector('meta[name="ddgpilli-base"]')?.getAttribute('content') ?? '/';
         const root = document.querySelector('[data-background-music-control]');
         const button = root?.querySelector('.ambient-audio-toggle');
         const hint = root?.querySelector('[data-background-music-hint]');
@@ -336,7 +337,7 @@ const fullOgImage = ogImage
         let audio;
         let progressTimer;
         let config = {
-          backgroundMusic: `${appBase}background-music/main.mp3`,
+          backgroundMusic: `${appBase}background-music/main-converted.mp3`,
           audioDefaultEnabled: true,
           audioVolume: 0.65,
         };
@@ -393,6 +394,15 @@ const fullOgImage = ogImage
           }, 180);
         };
 
+        const audioErrorLabel = (current) => {
+          const code = current?.error?.code;
+          if (code === 1) return 'Riproduzione audio interrotta.';
+          if (code === 2) return 'Errore di rete durante il caricamento audio.';
+          if (code === 3) return 'Il file audio non puo essere decodificato.';
+          if (code === 4) return 'Formato audio non supportato dal browser.';
+          return 'Audio non avviato. Tocca Audio per riprovare.';
+        };
+
         const ensureAudio = () => {
           if (audio) return audio;
           audio = new Audio(config.backgroundMusic);
@@ -415,7 +425,7 @@ const fullOgImage = ogImage
             applyUi(false);
           });
           audio.addEventListener('error', () => {
-            setIntroProgress(0, 'Audio non disponibile: controlla il file MP3.');
+            setIntroProgress(0, audioErrorLabel(audio));
             applyUi(true);
           });
           return audio;
@@ -473,7 +483,7 @@ const fullOgImage = ogImage
             if (playResult && typeof playResult.catch === 'function') {
               playResult.catch((error) => {
                 console.warn('Background audio play() rejected:', error);
-                setIntroProgress(0, 'Audio bloccato dal browser. Tocca Audio per riprovare.');
+                setIntroProgress(0, audioErrorLabel(current));
                 applyUi(true);
               });
             }
@@ -484,7 +494,7 @@ const fullOgImage = ogImage
           } catch (error) {
             if (progressTimer) window.clearInterval(progressTimer);
             console.warn('Background audio non avviato:', error);
-            setIntroProgress(0, fromGesture ? 'Audio non avviato. Tocca Audio per riprovare.' : 'Tocca Entra per autorizzare audio.');
+            setIntroProgress(0, fromGesture ? audioErrorLabel(current) : 'Tocca Entra per autorizzare audio.');
             applyUi(true);
             registerUnlock();
           }
@@ -506,7 +516,7 @@ const fullOgImage = ogImage
 
         const init = async () => {
           try {
-            const response = await fetch(`${appBase}pwa-config.json`, { cache: 'no-store' });
+            const response = await fetch(`${appBase}pwa-config.json?v=4`, { cache: 'no-store' });
             if (response.ok) config = { ...config, ...(await response.json()) };
           } catch {
             console.warn('Configurazione PWA non caricata, uso valori di default.');
