@@ -111,9 +111,9 @@ def get_secret_or_env(name: str, default: str = "") -> str:
 
 def get_github_token() -> str:
     token = (
-        get_secret_or_env("GITHUB_TOKEN")
+        get_secret_or_env("GITHUB_PAT")
         or get_secret_or_env("GH_TOKEN")
-        or get_secret_or_env("GITHUB_PAT")
+        or get_secret_or_env("GITHUB_TOKEN")
         or ""
     ).strip()
     if not token:
@@ -244,6 +244,14 @@ def dispatch_daily_publish(date_value: str, force_republish: bool = True) -> Non
     }
     response = requests.post(api_url, headers=headers, json=payload, timeout=20)
     if response.status_code != 204:
+        if response.status_code == 403:
+            raise ValueError(
+                "Avvio workflow GitHub Actions negato: il token GitHub non ha "
+                "permesso Actions: write sul repository. Crea/aggiorna un PAT "
+                "fine-grained con Repository access sul repo dediche-musicali e "
+                "permessi Contents: Read and write + Actions: Read and write, "
+                "poi salvalo nei secrets Streamlit come GITHUB_PAT."
+            )
         raise ValueError(f"Avvio workflow GitHub Actions fallito: {response.text}")
 
 
