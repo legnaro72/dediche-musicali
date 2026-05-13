@@ -54,7 +54,11 @@ jobs:
 
       - name: Sync da Google Sheet
         run: |
+          TARGET_DATE="${{ inputs.date }}"
+          [ -z "$TARGET_DATE" ] && TARGET_DATE="$(TZ=Europe/Rome date +%F)"
           ARGS=()
+          ARGS+=(--date "$TARGET_DATE")
+          [ "${{ inputs.force_republish }}" = "true" ] && ARGS+=(--force-republish)
           [ "${{ inputs.dry_run }}" = "true" ] && ARGS+=(--dry-run)
           python scripts/sync_from_google_sheet.py "${ARGS[@]}"
         env:
@@ -69,8 +73,10 @@ jobs:
 
       - name: Pubblica dedica del giorno
         run: |
+          TARGET_DATE="${{ inputs.date }}"
+          [ -z "$TARGET_DATE" ] && TARGET_DATE="$(TZ=Europe/Rome date +%F)"
           ARGS=()
-          [ -n "${{ inputs.date }}" ] && ARGS+=(--date "${{ inputs.date }}")
+          ARGS+=(--date "$TARGET_DATE")
           [ "${{ inputs.force_republish }}" = "true" ] && ARGS+=(--force-republish)
           [ "${{ inputs.dry_run }}" = "true" ] && ARGS+=(--dry-run)
           python scripts/publish_daily.py "${ARGS[@]}"

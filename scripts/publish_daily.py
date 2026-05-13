@@ -1,8 +1,8 @@
 """
-publish_daily.py — Pubblica la dedica del giorno.
+publish_daily.py - Pubblica la dedica del giorno.
 
-Legge il Google Sheet (o i JSON locali), trova la dedica del giorno,
-la valida, genera l'immagine, aggiorna lo stato e prepara il sito.
+Legge i JSON locali, trova la dedica del giorno, la valida, genera
+l'immagine, aggiorna solo il JSON della data target e prepara today.json.
 
 Uso:
     python scripts/publish_daily.py
@@ -13,13 +13,12 @@ Uso:
 import sys
 import os
 import argparse
-from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scripts.utils import (
-    setup_logging, get_rome_today, parse_date, load_json, save_json,
-    get_dedication_json_path, load_all_dedications, get_rome_now, ROME_TZ,
+    setup_logging, get_rome_today, load_json, save_json,
+    get_dedication_json_path, load_all_dedications, get_rome_now,
 )
 
 logger = setup_logging('publish')
@@ -32,7 +31,7 @@ def find_todays_dedication(date_str: str):
         ded = load_json(path)
         if ded and ded.get('status') in ('scheduled', 'published'):
             return ded
-    # fallback: cerca in tutti i JSON
+
     for ded in load_all_dedications():
         if ded.get('date') == date_str and ded.get('status') in ('scheduled', 'published'):
             return ded
@@ -51,17 +50,36 @@ def find_latest_published():
     return sorted(candidates, key=lambda d: d.get('date', ''))[-1]
 
 
+def log_untouched_archive(target_date: str) -> None:
+    """Logga esplicitamente che le altre dediche restano in archivio."""
+    untouched = [
+        d.get('date', '?')
+        for d in load_all_dedications()
+        if d.get('date') != target_date
+    ]
+    for date_str in sorted(untouched):
+        logger.info(f"  File non toccato: {date_str}.json")
+    logger.info("Nessun file eliminato: pubblicazione append-only.")
+
+
 def mark_as_published(ded: dict, dry_run: bool = False) -> bool:
-    """Aggiorna lo status a 'published' e updated_at."""
+    """Aggiorna lo status a 'published' e updated_at solo per la data target."""
     ded['status'] = 'published'
     ded['updated_at'] = get_rome_now().isoformat()
 
     if dry_run:
-        logger.info(f"  [DRY RUN] Aggiornerebbe status → published: {ded['id']}")
+        logger.info(f"  [DRY RUN] Aggiornerebbe status -> published: {ded['id']}")
         return True
 
     path = get_dedication_json_path(ded['date'])
-    return save_json(ded, path)
+    existed = path.exists()
+    ok = save_json(ded, path)
+    if ok:
+        if existed:
+            logger.info(f"  File aggiornato: {path.name}")
+        else:
+            logger.info(f"  File creato: {path.name}")
+    return ok
 
 
 def write_today_json(ded: dict, dry_run: bool = False) -> bool:
@@ -70,7 +88,7 @@ def write_today_json(ded: dict, dry_run: bool = False) -> bool:
     today_path = ROOT_DIR / 'data' / 'today.json'
 
     if dry_run:
-        logger.info(f"  [DRY RUN] Scriverebbe data/today.json")
+        logger.info("  [DRY RUN] Scriverebbe data/today.json")
         return True
 
     return save_json(ded, today_path)
@@ -79,50 +97,48 @@ def write_today_json(ded: dict, dry_run: bool = False) -> bool:
 def publish(date_str: str, force_republish: bool = False, dry_run: bool = False) -> bool:
     logger.info(f"Data target: {date_str} (Europe/Rome)")
 
-    # 1. Cerca la dedica
     ded = find_todays_dedication(date_str)
     if not ded:
-        logger.warning(f"⚠ Nessuna dedica trovata per {date_str}. Il sito resta invariato.")
-        return True  # non è un errore: il sito resta online
+        logger.warning(f"Nessuna dedica trovata per {date_str}. Il sito resta invariato.")
+        log_untouched_archive(date_str)
+        return True
 
     ded_id = ded.get('id', '?')
     logger.info(f"Trovata: {ded_id} [{ded.get('status')}]")
 
-    # 2. Controlla se già pubblicata
     if ded.get('status') == 'published' and not force_republish:
-        logger.info(f"✓ Dedica {ded_id} già pubblicata. Usa --force-republish per forzare.")
+        logger.info(f"Dedica {ded_id} gia' pubblicata. Usa --force-republish per forzare.")
+        logger.info(f"  File non toccato: {date_str}.json")
+        log_untouched_archive(date_str)
         write_today_json(ded, dry_run)
         return True
 
-    # 3. Valida
     from scripts.validate_dedications import validate_dedication
     errors = validate_dedication(ded, set(), {})
     if errors:
-        logger.error(f"❌ Validazione fallita per {ded_id}:")
+        logger.error(f"Validazione fallita per {ded_id}:")
         for e in errors:
-            logger.error(f"   ✗ {e}")
+            logger.error(f"   - {e}")
         return False
 
-    # 4. Genera immagine
     logger.info("Generazione immagine...")
     from scripts.generate_image import ensure_fonts, generate_for_dedication
     fonts = ensure_fonts()
     img_ok = generate_for_dedication(ded, fonts, dry_run=dry_run)
     if not img_ok:
-        logger.error("❌ Generazione immagine fallita")
+        logger.error("Generazione immagine fallita")
         return False
 
-    # 5. Aggiorna stato → published
     if not mark_as_published(ded, dry_run):
-        logger.error("❌ Impossibile aggiornare stato dedica")
+        logger.error("Impossibile aggiornare stato dedica")
         return False
 
-    # 6. Scrivi today.json
     if not write_today_json(ded, dry_run):
-        logger.error("❌ Impossibile scrivere today.json")
+        logger.error("Impossibile scrivere today.json")
         return False
 
-    logger.info(f"✅ Dedica '{ded_id}' pubblicata con successo per {date_str}")
+    log_untouched_archive(date_str)
+    logger.info(f"Dedica '{ded_id}' pubblicata con successo per {date_str}")
     return True
 
 
