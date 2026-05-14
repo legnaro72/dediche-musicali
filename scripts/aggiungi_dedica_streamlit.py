@@ -41,6 +41,7 @@ UPLOAD_IMAGE_MAX_SIDE = int(os.environ.get("UPLOAD_IMAGE_MAX_SIDE", "1400"))
 UPLOAD_IMAGE_WEBP_QUALITY = int(os.environ.get("UPLOAD_IMAGE_WEBP_QUALITY", "78"))
 UPLOAD_IMAGE_TARGET_BYTES = int(os.environ.get("UPLOAD_IMAGE_TARGET_BYTES", str(450 * 1024)))
 UPLOAD_IMAGE_HARD_MAX_BYTES = int(os.environ.get("UPLOAD_IMAGE_HARD_MAX_BYTES", str(700 * 1024)))
+STREAMLIT_ICON_PATH = Path(__file__).resolve().parents[1] / "static" / "pwa" / "icons" / "icon-192.png"
 
 SHEET_COLUMNS = [
     "id",
@@ -83,7 +84,10 @@ def inject_streamlit_pwa_tags() -> None:
           const doc = window.parent.document;
           const tags = [
             ['link', { rel: 'manifest', href: '/app/static/pwa/manifest.json' }],
+            ['link', { rel: 'icon', type: 'image/png', sizes: '192x192', href: '/app/static/pwa/icons/icon-192.png' }],
+            ['link', { rel: 'shortcut icon', type: 'image/png', href: '/app/static/pwa/icons/icon-192.png' }],
             ['link', { rel: 'apple-touch-icon', href: '/app/static/pwa/icons/apple-touch-icon.png' }],
+            ['link', { rel: 'apple-touch-startup-image', href: '/app/static/pwa/icons/apple-splash-2048.png' }],
             ['meta', { name: 'theme-color', content: '#08070f' }],
             ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
             ['meta', { name: 'apple-mobile-web-app-title', content: 'DDGPilli Admin' }],
@@ -900,7 +904,8 @@ def render_historical() -> None:
 
 
 def main() -> None:
-    st.set_page_config(page_title="Dediche musicali", page_icon="🎵", layout="centered")
+    page_icon = STREAMLIT_ICON_PATH.read_bytes() if STREAMLIT_ICON_PATH.exists() else "🎵"
+    st.set_page_config(page_title="DDGPilli Admin", page_icon=page_icon, layout="centered")
     inject_streamlit_pwa_tags()
     tab_new, tab_historical = st.tabs(["Nuova dedica", "Historical"])
     with tab_new:
