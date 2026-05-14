@@ -35,6 +35,7 @@ UPLOAD_DIR = "public/images/upload"
 VALID_IMAGE_MODES = ("raw", "auto", "upload", "none")
 VALID_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
 VALID_STATUSES = ("draft", "scheduled", "published", "disabled")
+VALID_VIDEO_TYPES = ("", "youtube", "mp4", "external")
 UPLOAD_IMAGE_MAX_SIDE = int(os.environ.get("UPLOAD_IMAGE_MAX_SIDE", "1400"))
 UPLOAD_IMAGE_WEBP_QUALITY = int(os.environ.get("UPLOAD_IMAGE_WEBP_QUALITY", "78"))
 UPLOAD_IMAGE_TARGET_BYTES = int(os.environ.get("UPLOAD_IMAGE_TARGET_BYTES", str(450 * 1024)))
@@ -58,6 +59,11 @@ SHEET_COLUMNS = [
     "seo_title",
     "seo_description",
     "image_alt",
+    "video_type",
+    "video_url",
+    "video_poster",
+    "video_title",
+    "video_description",
 ]
 
 QUICK_EMOJIS = ["🎵", "❤️", "✨", "🌙", "🌹", "😊", "🙏", "🎧"]
@@ -170,7 +176,32 @@ def get_sheet():
     if not sheet_id:
         raise ValueError("GOOGLE_SHEET_ID mancante nei secrets o nell'ambiente.")
     client = gspread.authorize(credentials)
-    return client.open_by_key(sheet_id).sheet1
+    sheet = client.open_by_key(sheet_id).sheet1
+    ensure_sheet_headers(sheet)
+    return sheet
+
+
+def column_letter(index: int) -> str:
+    result = ""
+    while index:
+        index, remainder = divmod(index - 1, 26)
+        result = chr(65 + remainder) + result
+    return result
+
+
+def ensure_sheet_headers(sheet) -> None:
+    headers = [str(value or "").strip() for value in sheet.row_values(1)]
+    if not headers:
+        sheet.update("A1", [SHEET_COLUMNS], value_input_option="USER_ENTERED")
+        return
+
+    missing = [col for col in SHEET_COLUMNS if col not in headers]
+    if not missing:
+        return
+
+    updated_headers = headers + missing
+    end_col = column_letter(len(updated_headers))
+    sheet.update(f"A1:{end_col}1", [updated_headers], value_input_option="USER_ENTERED")
 
 
 def load_sheet_records() -> list[dict]:
@@ -388,6 +419,11 @@ def default_form_values() -> dict:
         "seo_title": "",
         "seo_description": "",
         "image_alt": "",
+        "video_type": "",
+        "video_url": "",
+        "video_poster": "",
+        "video_title": "",
+        "video_description": "",
     }
 
 
@@ -413,6 +449,23 @@ def prepare_values(values: dict) -> dict:
         raise ValueError(f"Status non valido. Usa uno tra: {', '.join(VALID_STATUSES)}")
     if cleaned["image_mode"] not in VALID_IMAGE_MODES:
         raise ValueError(f"image_mode non valido. Usa uno tra: {', '.join(VALID_IMAGE_MODES)}")
+
+    cleaned["video_type"] = cleaned["video_type"].lower()
+    if cleaned["video_type"] not in VALID_VIDEO_TYPES:
+        raise ValueError("video_type non valido. Usa youtube, mp4 oppure external.")
+    if cleaned["video_type"] and not cleaned["video_url"]:
+        raise ValueError(f"video_url obbligatorio per video_type={cleaned['video_type']}.")
+    if cleaned["video_url"] and not cleaned["video_type"]:
+        raise ValueError("Compila video_type se inserisci video_url.")
+    if cleaned["video_url"] and not cleaned["video_url"].startswith("https://"):
+        raise ValueError("video_url deve essere un URL https valido.")
+    if cleaned["video_type"] == "youtube" and not re.search(
+        r"(youtube\.com/(watch\?v=|embed/|shorts/)|youtu\.be/)[A-Za-z0-9_-]{11}",
+        cleaned["video_url"],
+    ):
+        raise ValueError("Per video_type=youtube inserisci un URL YouTube valido.")
+    if cleaned["video_type"] == "mp4" and not cleaned["video_url"].split("?", 1)[0].lower().endswith(".mp4"):
+        raise ValueError("Per video_type=mp4 video_url deve puntare a un file .mp4.")
 
     if not cleaned["id"]:
         cleaned["id"] = make_default_id(cleaned["date"], cleaned["song_title"], cleaned["artist"])
@@ -444,7 +497,7 @@ def append_to_google_sheet(row: list[str]) -> None:
 
 def update_google_sheet_row(row_number: int, row: list[str]) -> None:
     sheet = get_sheet()
-    end_col = chr(ord("A") + len(SHEET_COLUMNS) - 1)
+    end_col = column_letter(len(SHEET_COLUMNS))
     sheet.update(f"A{row_number}:{end_col}{row_number}", [row], value_input_option="USER_ENTERED")
 
 
@@ -624,6 +677,24 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
         st.text_input("seo_title", key=f"{prefix}_seo_title")
         st.text_area("seo_description", key=f"{prefix}_seo_description", height=80)
         st.text_input("image_alt", key=f"{prefix}_image_alt")
+
+    with st.expander("Video opzionale"):
+        st.selectbox(
+            "video_type",
+            VALID_VIDEO_TYPES,
+            index=VALID_VIDEO_TYPES.index(st.session_state.get(f"{prefix}_video_type", ""))
+            if st.session_state.get(f"{prefix}_video_type", "") in VALID_VIDEO_TYPES else 0,
+            key=f"{prefix}_video_type",
+            help="Lascia vuoto se questa dedica non ha un video.",
+        )
+        st.text_input("video_url", key=f"{prefix}_video_url")
+        st.text_input(
+            "video_poster",
+            key=f"{prefix}_video_poster",
+            help="Immagine anteprima. Se vuota il sito usa il placeholder standard.",
+        )
+        st.text_input("video_title", key=f"{prefix}_video_title")
+        st.text_area("video_description", key=f"{prefix}_video_description", height=80)
 
     col_preview, col_clear = st.columns(2)
     col_preview.button(

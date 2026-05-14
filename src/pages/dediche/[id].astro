@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import AudioEmbed from '../../components/AudioEmbed.astro';
 import DedicationImage from '../../components/DedicationImage.astro';
+import VideoEmbed from '../../components/VideoEmbed.astro';
 
 export async function getStaticPaths() {
   const dataDir = join(process.cwd(), 'data', 'dedications');
@@ -94,6 +95,18 @@ const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
     <div class="anim-3" style="margin-bottom:2rem;">
       <AudioEmbed url={dedication.audio.url} type={dedication.audio.type} />
     </div>
+
+    {dedication.video && (
+      <div class="anim-3" style="margin-bottom:2rem;">
+        <VideoEmbed
+          type={dedication.video.type}
+          url={dedication.video.url}
+          poster={dedication.video.poster}
+          title={dedication.video.title || 'Video della dedica'}
+          description={dedication.video.description}
+        />
+      </div>
+    )}
 
     <!-- Dedication text -->
     <div class="card" style="padding:2rem;margin-bottom:2rem;" class="anim-3">

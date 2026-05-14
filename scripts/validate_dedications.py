@@ -15,9 +15,19 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from scripts.utils import (
     setup_logging, load_all_dedications, is_valid_url,
     parse_date, VALID_STATUSES, VALID_IMAGE_MODES, VALID_AUDIO_TYPES,
+    VALID_VIDEO_TYPES,
 )
 
 logger = setup_logging('validate')
+
+
+def is_youtube_url(url: str) -> bool:
+    return bool(re.search(r'(youtube\.com/(watch\?v=|embed/|shorts/)|youtu\.be/)[A-Za-z0-9_-]{11}', url))
+
+
+def is_mp4_url(url: str) -> bool:
+    clean_url = url.split('?', 1)[0].lower()
+    return clean_url.endswith('.mp4')
 
 
 def validate_dedication(ded: dict, seen_ids: set, active_dates: dict = None) -> list:
@@ -64,6 +74,23 @@ def validate_dedication(ded: dict, seen_ids: set, active_dates: dict = None) -> 
     image_mode = image.get('mode', 'auto').strip() if isinstance(image, dict) else 'auto'
     if image_mode and image_mode not in VALID_IMAGE_MODES:
         errors.append(f"image.mode '{image_mode}' non valido. Ammessi: {sorted(VALID_IMAGE_MODES)}")
+
+    video = ded.get('video', {})
+    if isinstance(video, dict) and (video.get('type') or video.get('url')):
+        video_type = str(video.get('type', '')).strip()
+        video_url = str(video.get('url', '')).strip()
+        if not video_type:
+            errors.append("video.type mancante")
+        elif video_type not in VALID_VIDEO_TYPES:
+            errors.append(f"video.type '{video_type}' non valido. Ammessi: {sorted(VALID_VIDEO_TYPES)}")
+        if not video_url:
+            errors.append("video.url mancante")
+        elif not is_valid_url(video_url):
+            errors.append(f"video.url non e' un URL https valido: '{video_url}'")
+        elif video_type == 'youtube' and not is_youtube_url(video_url):
+            errors.append(f"video.url non e' un link YouTube valido: '{video_url}'")
+        elif video_type == 'mp4' and not is_mp4_url(video_url):
+            errors.append(f"video.url deve puntare a un file .mp4: '{video_url}'")
 
     vote = ded.get('vote', {})
     vote_url = vote.get('url', '').strip() if isinstance(vote, dict) else ''

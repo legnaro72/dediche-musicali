@@ -21,6 +21,7 @@ FONTS_DIR       = ROOT_DIR / 'public' / 'fonts'
 VALID_STATUSES    = {'draft', 'scheduled', 'published', 'disabled'}
 VALID_IMAGE_MODES = {'auto', 'upload', 'raw', 'none'}
 VALID_AUDIO_TYPES = {'spotify', 'youtube', 'soundcloud', 'mp3', 'cloud', 'other'}
+VALID_VIDEO_TYPES = {'youtube', 'mp4', 'external'}
 
 ITALIAN_DAYS   = ['lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato', 'domenica']
 ITALIAN_MONTHS = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno',

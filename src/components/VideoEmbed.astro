@@ -1,0 +1,113 @@
+---
+export interface Props {
+  type?: 'youtube' | 'mp4' | 'external' | string;
+  url?: string;
+  poster?: string;
+  title?: string;
+  description?: string;
+  class?: string;
+}
+
+const {
+  type = '',
+  url = '',
+  poster = '/images/og-default.png',
+  title = 'Video',
+  description = '',
+  class: className = '',
+} = Astro.props;
+
+const base = (import.meta.env.BASE_URL ?? '/').replace(/([^/])$/, '$1/');
+
+function assetUrl(value: string) {
+  if (!value) return base + 'images/og-default.png';
+  if (/^https?:\/\//.test(value)) return value;
+  return base + value.replace(/^\//, '');
+}
+
+function getYoutubeId(value: string): string {
+  const match = value.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+  return match?.[1] ?? '';
+}
+
+const normalizedType = type.toLowerCase();
+const posterSrc = assetUrl(poster);
+const videoUrl = assetUrl(url);
+const youtubeId = normalizedType === 'youtube' ? getYoutubeId(url) : '';
+const canRender = Boolean(normalizedType && url);
+---
+
+{canRender && (
+  <section class={`video-card ${className}`} data-video-type={normalizedType}>
+    <div class="video-card-copy">
+      {title && <h2>{title}</h2>}
+      {description && <p>{description}</p>}
+    </div>
+
+    {normalizedType === 'external' ? (
+      <a
+        class="video-poster"
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Apri video esterno: ${title}`}
+      >
+        <img src={posterSrc} alt={title} loading="lazy" width="960" height="540" />
+        <span class="video-play" aria-hidden="true">Play</span>
+      </a>
+    ) : (
+      <button
+        class="video-poster"
+        type="button"
+        data-video-loader
+        data-video-type={normalizedType}
+        data-video-url={normalizedType === 'youtube' ? youtubeId : videoUrl}
+        data-video-title={title}
+        aria-label={`Carica video: ${title}`}
+      >
+        <img src={posterSrc} alt={title} loading="lazy" width="960" height="540" />
+        <span class="video-play" aria-hidden="true">Play</span>
+      </button>
+    )}
+  </section>
+)}
+
+<script>
+  function mountVideo(button) {
+    const type = button.dataset.videoType;
+    const url = button.dataset.videoUrl;
+    const title = button.dataset.videoTitle || 'Video';
+    if (!type || !url) return;
+
+    let node;
+    if (type === 'youtube') {
+      node = document.createElement('iframe');
+      node.src = `https://www.youtube.com/embed/${url}?rel=0&autoplay=0`;
+      node.title = title;
+      node.loading = 'lazy';
+      node.allow = 'accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      node.allowFullscreen = true;
+    } else if (type === 'mp4') {
+      node = document.createElement('video');
+      node.controls = true;
+      node.muted = true;
+      node.playsInline = true;
+      node.preload = 'metadata';
+      node.poster = button.querySelector('img')?.currentSrc || '';
+      const source = document.createElement('source');
+      source.src = url;
+      source.type = 'video/mp4';
+      node.append(source);
+    }
+
+    if (!node) return;
+    node.className = 'video-player';
+    button.replaceWith(node);
+  }
+
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-video-loader]');
+    if (!button) return;
+    mountVideo(button);
+  });
+</script>

@@ -39,6 +39,9 @@ REQUIRED_COLUMNS = [
     'dedication_title', 'dedication_text', 'audio_url', 'audio_type',
 ]
 
+VIDEO_POSTER_PLACEHOLDER = '/images/og-default.png'
+VALID_VIDEO_TYPES = {'youtube', 'mp4', 'external'}
+
 
 def get_gspread_client():
     """Crea client gspread da variabile d'ambiente o file."""
@@ -71,6 +74,27 @@ def _cell(row: dict, key: str, default: str = '') -> str:
     return str(row.get(key, default)).strip()
 
 
+def normalize_video(row: dict) -> dict | None:
+    video_type = _cell(row, 'video_type').lower()
+    video_url = _cell(row, 'video_url')
+    if not video_type and not video_url:
+        return None
+    if video_type not in VALID_VIDEO_TYPES:
+        raise ValueError(
+            f"video_type non valido: '{video_type}'. Ammessi: {sorted(VALID_VIDEO_TYPES)}"
+        )
+    if not video_url:
+        raise ValueError(f"video_url obbligatorio quando video_type={video_type}")
+
+    return {
+        'type': video_type,
+        'url': video_url,
+        'poster': _cell(row, 'video_poster') or VIDEO_POSTER_PLACEHOLDER,
+        'title': _cell(row, 'video_title'),
+        'description': _cell(row, 'video_description'),
+    }
+
+
 def sheet_row_to_dict(row: dict, default_vote_url: str) -> dict:
     """Converte una riga del Google Sheet in un dict dedica normalizzato."""
     date_str = _cell(row, 'date')
@@ -87,7 +111,7 @@ def sheet_row_to_dict(row: dict, default_vote_url: str) -> dict:
 
     now_str = get_rome_now().isoformat()
 
-    return {
+    dedication = {
         'id': ded_id,
         'date': date_str,
         'day_name': get_italian_day_name(date_str),
@@ -128,6 +152,10 @@ def sheet_row_to_dict(row: dict, default_vote_url: str) -> dict:
         'created_at': now_str,
         'updated_at': now_str,
     }
+    video = normalize_video(row)
+    if video:
+        dedication['video'] = video
+    return dedication
 
 
 def save_sheet_dedication(row: dict, default_vote_url: str, dry_run: bool = False,

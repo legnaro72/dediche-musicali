@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AudioEmbed from '../components/AudioEmbed.astro';
 import DedicationCard from '../components/DedicationCard.astro';
+import VideoEmbed from '../components/VideoEmbed.astro';
 
 const dataDir = join(process.cwd(), 'data', 'dedications');
 
@@ -155,6 +156,20 @@ function fmtDate(dateStr: string, dayName?: string) {
     <section style="padding:2rem 0;background:var(--bg-surface);">
       <div class="container-narrow reveal">
         <AudioEmbed url={dedication.audio.url} type={dedication.audio.type} />
+      </div>
+    </section>
+  )}
+
+  {dedication?.video && (
+    <section style="padding:2rem 0 3rem;background:var(--bg-surface);">
+      <div class="container-narrow reveal">
+        <VideoEmbed
+          type={dedication.video.type}
+          url={dedication.video.url}
+          poster={dedication.video.poster}
+          title={dedication.video.title || 'Video della dedica'}
+          description={dedication.video.description}
+        />
       </div>
     </section>
   )}

@@ -287,6 +287,87 @@ section { position:relative; z-index:1; }
 .audio-embed { border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border); }
 .audio-embed iframe { display:block; width:100%; border:none; }
 
+/* Video embed */
+.video-card {
+  display:grid;
+  gap:1rem;
+}
+.video-card-copy h2 {
+  margin-bottom:0.35rem;
+  font-family:var(--font-serif);
+  font-size:clamp(1.35rem,3vw,2rem);
+}
+.video-card-copy p {
+  color:var(--text-dim);
+  line-height:1.7;
+}
+.video-poster {
+  position:relative;
+  display:block;
+  width:100%;
+  overflow:hidden;
+  aspect-ratio:16/9;
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  background:var(--bg-card);
+  color:#fff;
+  cursor:pointer;
+  box-shadow:var(--shadow-card);
+}
+button.video-poster {
+  padding:0;
+  font:inherit;
+}
+.video-poster img,
+.video-player {
+  display:block;
+  width:100%;
+  height:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
+  border:0;
+}
+.video-poster::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to top,rgba(8,7,15,0.68),rgba(8,7,15,0.1));
+}
+.video-play {
+  position:absolute;
+  left:50%;
+  top:50%;
+  z-index:1;
+  display:grid;
+  place-items:center;
+  width:72px;
+  height:72px;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:var(--gradient-btn);
+  color:#fff;
+  box-shadow:var(--shadow-btn);
+  font-size:0;
+}
+.video-play::before {
+  content:'';
+  width:0;
+  height:0;
+  margin-left:5px;
+  border-top:14px solid transparent;
+  border-bottom:14px solid transparent;
+  border-left:22px solid currentColor;
+}
+.video-poster:hover {
+  border-color:var(--border-hover);
+  transform:translateY(-2px);
+}
+.video-player {
+  min-height:220px;
+  border-radius:var(--radius-md);
+  background:#000;
+}
+
 /* Install prompt */
 .app-install {
   position:fixed;
