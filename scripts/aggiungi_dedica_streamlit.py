@@ -83,11 +83,11 @@ def inject_streamlit_pwa_tags() -> None:
         (function () {
           const doc = window.parent.document;
           const tags = [
-            ['link', { rel: 'manifest', href: '/app/static/pwa/manifest.json' }],
-            ['link', { rel: 'icon', type: 'image/png', sizes: '192x192', href: '/app/static/pwa/icons/icon-192.png' }],
-            ['link', { rel: 'shortcut icon', type: 'image/png', href: '/app/static/pwa/icons/icon-192.png' }],
-            ['link', { rel: 'apple-touch-icon', href: '/app/static/pwa/icons/apple-touch-icon.png' }],
-            ['link', { rel: 'apple-touch-startup-image', href: '/app/static/pwa/icons/apple-splash-2048.png' }],
+            ['link', { rel: 'manifest', href: '/app/static/pwa/manifest.json?v=ddgpilli-admin-v2' }],
+            ['link', { rel: 'icon', type: 'image/png', sizes: '192x192', href: '/app/static/pwa/icons/icon-192.png?v=ddgpilli-admin-v2' }],
+            ['link', { rel: 'shortcut icon', type: 'image/png', href: '/app/static/pwa/icons/icon-192.png?v=ddgpilli-admin-v2' }],
+            ['link', { rel: 'apple-touch-icon', href: '/app/static/pwa/icons/apple-touch-icon.png?v=ddgpilli-admin-v2' }],
+            ['link', { rel: 'apple-touch-startup-image', href: '/app/static/pwa/icons/apple-splash-2048.png?v=ddgpilli-admin-v2' }],
             ['meta', { name: 'theme-color', content: '#08070f' }],
             ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
             ['meta', { name: 'apple-mobile-web-app-title', content: 'DDGPilli Admin' }],
