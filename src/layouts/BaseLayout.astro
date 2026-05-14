@@ -250,15 +250,23 @@ const fullOgImage = ogImage
       const modalClose = document.querySelector('[data-app-install-modal-close]');
       if (!(root instanceof HTMLElement) || !(installButton instanceof HTMLButtonElement)) return;
 
-      const dismissedKey = 'ddgpilli-install-dismissed';
-      const isStandalone =
+      const dismissedUntilKey = 'ddgpilli-install-dismissed-until';
+      const installedKey = 'ddgpilli-pwa-installed';
+      const isAppDisplayMode =
+        window.matchMedia('(display-mode: fullscreen)').matches ||
         window.matchMedia('(display-mode: standalone)').matches ||
         window.navigator.standalone === true;
       const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
       let deferredPrompt = null;
 
+      if (isAppDisplayMode) {
+        localStorage.setItem(installedKey, 'true');
+      }
+
       const show = () => {
-        if (isStandalone || localStorage.getItem(dismissedKey) === 'true') return;
+        const dismissedUntil = Number(localStorage.getItem(dismissedUntilKey) || 0);
+        const alreadyInstalled = localStorage.getItem(installedKey) === 'true';
+        if (isAppDisplayMode || alreadyInstalled || dismissedUntil > Date.now()) return;
         root.hidden = false;
       };
 
@@ -271,6 +279,13 @@ const fullOgImage = ogImage
         installButton.textContent = 'Come fare';
         if (installText) installText.textContent = 'Su iPhone si aggiunge dal pulsante Condividi di Safari.';
         setTimeout(show, 1200);
+      } else {
+        setTimeout(() => {
+          if (!deferredPrompt && installText) {
+            installText.textContent = 'Se il prompt non appare, usa il menu del browser per installarla.';
+          }
+          show();
+        }, 1800);
       }
 
       window.addEventListener('beforeinstallprompt', (event) => {
@@ -283,7 +298,8 @@ const fullOgImage = ogImage
 
       window.addEventListener('appinstalled', () => {
         root.hidden = true;
-        localStorage.setItem(dismissedKey, 'true');
+        localStorage.setItem(installedKey, 'true');
+        localStorage.removeItem(dismissedUntilKey);
       });
 
       installButton.addEventListener('click', async () => {
@@ -305,7 +321,7 @@ const fullOgImage = ogImage
 
       closeButton?.addEventListener('click', () => {
         root.hidden = true;
-        localStorage.setItem(dismissedKey, 'true');
+        localStorage.setItem(dismissedUntilKey, String(Date.now() + 6 * 60 * 60 * 1000));
       });
 
       modalClose?.addEventListener('click', () => {
@@ -339,7 +355,7 @@ const fullOgImage = ogImage
         let config = {
           backgroundMusic: `${appBase}background-music/main-converted.mp3`,
           audioDefaultEnabled: true,
-          audioVolume: 0.65,
+          audioVolume: 0.3,
         };
         let enabled = true;
         let waitingForGesture = false;

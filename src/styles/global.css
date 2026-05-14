@@ -30,12 +30,18 @@
 }
 
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-html { scroll-behavior:smooth; }
+html {
+  min-height:100%;
+  min-height:100dvh;
+  scroll-behavior:smooth;
+  background:var(--bg-base);
+}
 body {
   font-family: var(--font-sans);
   background: var(--bg-base);
   color: var(--text-primary);
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
@@ -144,7 +150,7 @@ section { position:relative; z-index:1; }
 
 /* Hero */
 .hero {
-  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  min-height:100vh; min-height:100dvh; display:flex; align-items:center; justify-content:center;
   padding:7rem 0 4rem; position:relative; overflow:hidden;
 }
 .hero-bg {
