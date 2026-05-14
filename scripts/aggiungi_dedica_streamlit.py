@@ -33,7 +33,7 @@ GITHUB_BRANCH = os.environ.get("GITHUB_BRANCH", "main")
 DAILY_WORKFLOW_FILE = os.environ.get("DAILY_WORKFLOW_FILE", "daily-publish.yml")
 UPLOAD_DIR = "public/images/upload"
 VALID_IMAGE_MODES = ("raw", "auto", "upload", "none")
-VALID_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
+VALID_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
 VALID_STATUSES = ("draft", "scheduled", "published", "disabled")
 UPLOAD_IMAGE_MAX_SIDE = int(os.environ.get("UPLOAD_IMAGE_MAX_SIDE", "1800"))
 UPLOAD_IMAGE_WEBP_QUALITY = int(os.environ.get("UPLOAD_IMAGE_WEBP_QUALITY", "84"))
@@ -194,11 +194,34 @@ def optimize_uploaded_image(uploaded_file) -> tuple[bytes, dict]:
     from PIL import Image, ImageOps
 
     original_bytes = uploaded_file.getvalue()
+    original_name = uploaded_file.name or "immagine"
+    original_ext = Path(original_name).suffix.lower()
+
+    if original_ext in {".heic", ".heif"}:
+        try:
+            import pillow_heif
+            pillow_heif.register_heif_opener()
+        except Exception as exc:
+            raise ValueError(
+                "Questa sembra una foto HEIC/Live Photo da telefono, ma manca il "
+                "supporto HEIC. Installa/aggiorna le dipendenze con pillow-heif "
+                "oppure esporta la foto come JPEG normale."
+            ) from exc
+
     try:
         img = Image.open(io.BytesIO(original_bytes))
+        img.load()
+        original_format = img.format or original_ext.replace(".", "").upper() or "UNKNOWN"
         img = ImageOps.exif_transpose(img)
     except Exception as exc:
-        raise ValueError(f"Immagine non leggibile: {exc}") from exc
+        file_type = getattr(uploaded_file, "type", "") or "tipo non dichiarato"
+        raise ValueError(
+            "Immagine non leggibile. Se e' una Live Photo/foto in movimento, "
+            "prova a esportarla come JPEG statico oppure disattiva Live Photo "
+            "prima dello scatto. "
+            f"Dettagli: file={original_name}, tipo={file_type}, "
+            f"peso={format_bytes(len(original_bytes))}, errore={exc}"
+        ) from exc
 
     original_size = img.size
     if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
@@ -225,6 +248,7 @@ def optimize_uploaded_image(uploaded_file) -> tuple[bytes, dict]:
         "optimized_bytes": len(optimized_bytes),
         "original_size": original_size,
         "optimized_size": img.size,
+        "original_format": original_format,
     }
 
 
@@ -232,7 +256,7 @@ def upload_image_to_github(uploaded_file, asset_id: str) -> str:
     original_name = uploaded_file.name or ""
     ext = Path(original_name).suffix.lower()
     if ext not in VALID_IMAGE_EXTS:
-        raise ValueError("Formato immagine non supportato. Usa JPG, JPEG, PNG oppure WEBP.")
+        raise ValueError("Formato immagine non supportato. Usa JPG, JPEG, PNG, WEBP, HEIC oppure HEIF.")
 
     optimized_bytes, image_info = optimize_uploaded_image(uploaded_file)
     upload_name = f"{asset_id}.webp"
@@ -534,7 +558,7 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
     )
     uploaded_file = st.file_uploader(
         "Nuova immagine per raw/upload",
-        type=["jpg", "jpeg", "png", "webp"],
+        type=["jpg", "jpeg", "png", "webp", "heic", "heif"],
         disabled=image_mode not in ("raw", "upload"),
         key=f"{prefix}_uploaded_file",
     )
@@ -542,6 +566,8 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
     if existing_image_source and not uploaded_file:
         st.caption(f"Immagine attuale: {existing_image_source}")
     if uploaded_file:
+        uploaded_size = len(uploaded_file.getvalue())
+        uploaded_type = getattr(uploaded_file, "type", "") or "tipo non dichiarato"
         date_text = st.session_state.get(f"{prefix}_date", "")
         song = st.session_state.get(f"{prefix}_song_title", "")
         artist = st.session_state.get(f"{prefix}_artist", "")
@@ -550,7 +576,8 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
             preview_id = make_default_id(normalize_date(date_text), song, artist)
         st.info(
             "Verra' ottimizzata e caricata come "
-            f"{preview_id or 'ID-DELLA-DEDICA'}.webp"
+            f"{preview_id or 'ID-DELLA-DEDICA'}.webp "
+            f"({format_bytes(uploaded_size)}, {uploaded_type})."
         )
 
     st.subheader("Testi")
