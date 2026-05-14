@@ -1,5 +1,6 @@
 import base64
 import datetime
+import io
 import json
 import os
 import re
@@ -34,6 +35,8 @@ UPLOAD_DIR = "public/images/upload"
 VALID_IMAGE_MODES = ("raw", "auto", "upload", "none")
 VALID_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 VALID_STATUSES = ("draft", "scheduled", "published", "disabled")
+UPLOAD_IMAGE_MAX_SIDE = int(os.environ.get("UPLOAD_IMAGE_MAX_SIDE", "1800"))
+UPLOAD_IMAGE_WEBP_QUALITY = int(os.environ.get("UPLOAD_IMAGE_WEBP_QUALITY", "84"))
 
 SHEET_COLUMNS = [
     "id",
@@ -179,13 +182,60 @@ def load_sheet_records() -> list[dict]:
     return records
 
 
+def format_bytes(size: int) -> str:
+    if size < 1024:
+        return f"{size} B"
+    if size < 1024 * 1024:
+        return f"{size / 1024:.1f} KB"
+    return f"{size / (1024 * 1024):.1f} MB"
+
+
+def optimize_uploaded_image(uploaded_file) -> tuple[bytes, dict]:
+    from PIL import Image, ImageOps
+
+    original_bytes = uploaded_file.getvalue()
+    try:
+        img = Image.open(io.BytesIO(original_bytes))
+        img = ImageOps.exif_transpose(img)
+    except Exception as exc:
+        raise ValueError(f"Immagine non leggibile: {exc}") from exc
+
+    original_size = img.size
+    if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+        background = Image.new("RGB", img.size, (255, 255, 255))
+        alpha = img.convert("RGBA").getchannel("A")
+        background.paste(img.convert("RGBA"), mask=alpha)
+        img = background
+    else:
+        img = img.convert("RGB")
+
+    img.thumbnail((UPLOAD_IMAGE_MAX_SIDE, UPLOAD_IMAGE_MAX_SIDE), Image.LANCZOS)
+
+    output = io.BytesIO()
+    img.save(
+        output,
+        format="WEBP",
+        quality=UPLOAD_IMAGE_WEBP_QUALITY,
+        method=6,
+    )
+    optimized_bytes = output.getvalue()
+
+    return optimized_bytes, {
+        "original_bytes": len(original_bytes),
+        "optimized_bytes": len(optimized_bytes),
+        "original_size": original_size,
+        "optimized_size": img.size,
+    }
+
+
 def upload_image_to_github(uploaded_file, asset_id: str) -> str:
     original_name = uploaded_file.name or ""
     ext = Path(original_name).suffix.lower()
     if ext not in VALID_IMAGE_EXTS:
         raise ValueError("Formato immagine non supportato. Usa JPG, JPEG, PNG oppure WEBP.")
 
-    upload_name = f"{asset_id}{ext}"
+    optimized_bytes, image_info = optimize_uploaded_image(uploaded_file)
+    upload_name = f"{asset_id}.webp"
     repo_path = f"{UPLOAD_DIR}/{upload_name}"
     token = get_github_token()
     api_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{repo_path}"
@@ -207,7 +257,7 @@ def upload_image_to_github(uploaded_file, asset_id: str) -> str:
     elif existing.status_code != 404:
         raise ValueError(f"Verifica file GitHub fallita: {existing.text}")
 
-    content_b64 = base64.b64encode(uploaded_file.getvalue()).decode("ascii")
+    content_b64 = base64.b64encode(optimized_bytes).decode("ascii")
     payload = {
         "message": f"Upload immagine dedica {asset_id}",
         "content": content_b64,
@@ -220,6 +270,13 @@ def upload_image_to_github(uploaded_file, asset_id: str) -> str:
     if response.status_code not in (200, 201):
         raise ValueError(f"Upload GitHub fallito: {response.text}")
 
+    st.caption(
+        "Immagine ottimizzata: "
+        f"{format_bytes(image_info['original_bytes'])} -> "
+        f"{format_bytes(image_info['optimized_bytes'])}, "
+        f"{image_info['original_size'][0]}x{image_info['original_size'][1]} -> "
+        f"{image_info['optimized_size'][0]}x{image_info['optimized_size'][1]}."
+    )
     return repo_path
 
 
@@ -468,7 +525,10 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
         preview_id = st.session_state.get(f"{prefix}_id", "").strip()
         if not preview_id and date_text and song and artist:
             preview_id = make_default_id(normalize_date(date_text), song, artist)
-        st.info(f"Verra' caricata come {preview_id or 'ID-DELLA-DEDICA'}{Path(uploaded_file.name).suffix.lower()}")
+        st.info(
+            "Verra' ottimizzata e caricata come "
+            f"{preview_id or 'ID-DELLA-DEDICA'}.webp"
+        )
 
     st.subheader("Testi")
     st.text_area(
