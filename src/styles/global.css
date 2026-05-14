@@ -78,7 +78,7 @@ section { position:relative; z-index:1; }
   background:var(--gradient-text);
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
 }
-.navbar-nav { display:flex; gap:2rem; list-style:none; }
+.navbar-nav { display:flex; gap:2rem; list-style:none; margin-right:8.5rem; }
 .navbar-nav a {
   color:var(--text-dim); font-size:0.85rem; font-weight:600;
   letter-spacing:0.07em; text-transform:uppercase;
@@ -479,8 +479,8 @@ section { position:relative; z-index:1; }
 .ambient-audio {
   position:fixed;
   right:clamp(1rem,4vw,1.5rem);
-  bottom:clamp(1rem,4vw,1.5rem);
-  z-index:120;
+  top:0.72rem;
+  z-index:140;
   display:flex;
   flex-direction:column;
   align-items:flex-end;
@@ -542,6 +542,70 @@ section { position:relative; z-index:1; }
   backdrop-filter:blur(14px);
 }
 
+/* Useful links */
+.useful-links-page {
+  min-height:100vh;
+  min-height:100dvh;
+  padding:8.5rem 0 5rem;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(124,58,237,0.22), transparent 34%),
+    radial-gradient(circle at 80% 20%, rgba(236,72,153,0.16), transparent 30%),
+    var(--bg-base);
+}
+.useful-links-header {
+  text-align:center;
+  margin-bottom:3rem;
+}
+.useful-links-home {
+  margin-top:0.5rem;
+}
+.useful-links-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:1rem;
+  max-width:920px;
+  margin:0 auto;
+}
+.useful-link-card {
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  min-height:104px;
+  padding:1rem;
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  background:var(--bg-card);
+  color:var(--text-primary);
+  box-shadow:0 10px 30px rgba(0,0,0,0.26);
+  backdrop-filter:blur(14px);
+}
+.useful-link-card:hover {
+  border-color:var(--border-hover);
+  background:var(--bg-card-hover);
+  color:var(--text-primary);
+  transform:translateY(-3px);
+}
+.useful-link-icon {
+  width:72px;
+  height:72px;
+  flex:0 0 auto;
+  border-radius:18px;
+  box-shadow:0 8px 22px rgba(0,0,0,0.28);
+}
+.useful-link-content {
+  display:flex;
+  min-width:0;
+  flex-direction:column;
+  gap:0.35rem;
+}
+.useful-link-content strong {
+  font-size:1rem;
+}
+.useful-link-content small {
+  color:var(--text-dim);
+  line-height:1.45;
+}
+
 /* Animations */
 @keyframes fadeInUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
 @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
@@ -567,7 +631,7 @@ section { position:relative; z-index:1; }
   .btn-lg { width:100%; justify-content:center; }
   .ambient-audio {
     right:1rem;
-    bottom:1rem;
+    top:0.55rem;
   }
   .app-install {
     bottom:4.8rem;

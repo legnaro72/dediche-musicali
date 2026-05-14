@@ -1,0 +1,101 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const base = (import.meta.env.BASE_URL ?? '/').replace(/([^/])$/, '$1/');
+
+const links = [
+  {
+    title: 'NotizieAColazione',
+    description: '10 minuti circa',
+    url: 'https://open.spotify.com/show/2GvJrEagmyNRZZqO9S6vpM?si=6b2bba2146a2438d',
+    icon: 'NotizieAColazione.jpg',
+  },
+  {
+    title: 'SkyTG24',
+    description: 'minore di 10 minuti',
+    url: 'https://open.spotify.com/show/3moc2FrasobmZe0UkuOCgp?si=4804c36a12574bbb',
+    icon: 'SkyTg24.jpg',
+  },
+  {
+    title: 'TgLa7',
+    description: '20 minuti circa',
+    url: 'https://open.spotify.com/show/5VgLr9YMZXRQKtLiYesklR?si=a618bfb254f3444b',
+    icon: 'TgLa7.jpg',
+  },
+  {
+    title: 'IlMeteo',
+    description: 'splende sempre il sole ☀️ dove c’è Pilli',
+    url: 'https://www.ilmeteo.it/meteo/genova',
+    icon: 'IlMeteo.jpg',
+    weather: true,
+  },
+];
+---
+
+<BaseLayout
+  title="Link utili | DDGPilliSite"
+  description="Collegamenti rapidi a notizie, meteo e risorse utili per DDGPilliSite."
+>
+  <section class="useful-links-page">
+    <div class="container">
+      <div class="useful-links-header anim-1">
+        <span class="section-label">Flash</span>
+        <h1 class="section-title">Link utili</h1>
+        <div class="divider"></div>
+        <a href={base} class="btn btn-secondary useful-links-home">← Torna alla Home</a>
+      </div>
+
+      <div class="useful-links-grid anim-2">
+        {links.map((item) => (
+          <a
+            class="useful-link-card"
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-weather-link={item.weather ? 'true' : undefined}
+            data-fallback-url={item.weather ? item.url : undefined}
+          >
+            <img
+              src={`${base}icons/LinkUtili/${item.icon}`}
+              alt=""
+              width="72"
+              height="72"
+              loading="lazy"
+              class="useful-link-icon"
+            />
+            <span class="useful-link-content">
+              <strong>{item.title}</strong>
+              <small>{item.description}</small>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.querySelectorAll('[data-weather-link="true"]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        const anchor = event.currentTarget;
+        if (!(anchor instanceof HTMLAnchorElement)) return;
+
+        const fallbackUrl = anchor.dataset.fallbackUrl || anchor.href;
+        const userAgent = window.navigator.userAgent.toLowerCase();
+
+        if (/android/.test(userAgent)) {
+          event.preventDefault();
+          window.location.href = `intent://www.ilmeteo.it/meteo/genova#Intent;scheme=https;package=it.ilmeteo.android.ilmeteo;S.browser_fallback_url=${encodeURIComponent(fallbackUrl)};end`;
+          return;
+        }
+
+        if (/iphone|ipad|ipod/.test(userAgent)) {
+          event.preventDefault();
+          window.location.href = 'ilmeteo://meteo/genova';
+          window.setTimeout(() => {
+            window.location.href = fallbackUrl;
+          }, 850);
+        }
+      });
+    });
+  </script>
+</BaseLayout>
