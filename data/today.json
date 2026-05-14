@@ -1,43 +1,36 @@
 {
-  "id": "2026-04-15-sds-dsds",
-  "date": "2026-04-15",
-  "day_name": "mercoledì",
+  "id": "2026-05-15-scarabocchi-olly",
+  "date": "2026-05-15",
+  "day_name": "venerdì",
   "status": "published",
-  "song_title": "sds",
-  "artist": "dsds",
+  "song_title": "Scarabocchi",
+  "artist": "Olly",
   "dedication_title": "La dedica del giorno",
-  "dedication_text": "ddad❤️",
+  "dedication_text": "Amore mio, questa canzone mi è piaciuta anche se non ho compreso affondo il testo ma era orecchiabile. E so che magari. Un ritmo un po' orecchiabile ti può strappare un sorriso.\nTi amo amore mio. Vorrei abbracciarti stringerti. E corre con te su una nuvola. Affondandosi nelle ginocchia, come se fossimo su un prato innevato dopo una nevicata copiosa❤️",
   "audio": {
-    "url": "https://open.spotify.com/intl-it/track/0h7djzQOTBHcNaKD8k449b?si=2c27d56f2b22437d",
+    "url": "https://open.spotify.com/track/6fil2G6hkjXZEXv6hnuhAF?si=-5XqKRc4Q1GyzWf5GQNlWQ",
     "type": "spotify"
   },
   "vote": {
     "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
   },
   "image": {
-    "path": "/images/dedications/2026-04-15-sds-dsds.webp",
-    "alt": "Dedica musicale sds di dsds",
+    "path": "/images/dedications/2026-05-15-scarabocchi-olly.webp",
+    "alt": "Dedica musicale Scarabocchi di Olly",
     "mode": "raw",
-    "source": "public/images/upload/2026-04-15-sds-dsds.webp"
+    "source": "public/images/upload/2026-05-15-scarabocchi-olly.webp"
   },
-  "short_phrase": "dwdwd",
+  "short_phrase": "Pocci pocci pucci pucci❤️🌹",
   "tags": [
     "musica",
     "emozioni",
     "dedica"
   ],
   "seo": {
-    "title": "sds - dsds | DDGPilliSite",
-    "description": "Dedica musicale del giorno con \"sds\" di dsds."
+    "title": "Scarabocchi - Olly | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"Scarabocchi\" di Olly."
   },
-  "created_at": "2026-05-14T16:42:48.298420+02:00",
-  "updated_at": "2026-05-14T19:37:38.307973+02:00",
-  "video": {
-    "type": "youtube",
-    "url": "https://www.youtube.com/shorts/qrww2Hg7QG8",
-    "poster": "/images/og-default.png",
-    "title": "Genoa",
-    "description": "genoa"
-  },
-  "date_it": "15 aprile 2026"
+  "created_at": "2026-05-14T19:01:03.326652+02:00",
+  "updated_at": "2026-05-15T00:57:08.581596+02:00",
+  "date_it": "15 maggio 2026"
 }
