@@ -27,7 +27,7 @@ const siteUrl = import.meta.env.SITE ?? 'https://example.github.io';
 const fullCanonical = canonicalUrl ?? (siteUrl + Astro.url.pathname);
 const fullOgImage = ogImage
   ? (ogImage.startsWith('http') ? ogImage : siteUrl + base + ogImage.replace(/^\//, ''))
-  : siteUrl + base + 'images/og-default.webp';
+  : siteUrl + base + 'images/og-default.png';
 ---
 
 <!DOCTYPE html>

@@ -45,11 +45,11 @@ function fmtDate(dateStr: string, dayName?: string) {
 ---
 
 <BaseLayout
-  title={dedication ? `${dedication.song_title} — ${dedication.artist} | DDGPilliSite` : 'DDGPilliSite — Dediche Musicali'}
-  description={dedication?.seo?.description ?? 'Una nuova dedica musicale ogni giorno.'}
-  ogTitle={dedication?.seo?.title}
-  ogDescription={dedication?.seo?.description}
-  ogImage={dedication?.image?.path?.replace('.webp', '-og.webp')}
+  title="DDGPilliSite — Dediche Musicali"
+  description="Una nuova dedica musicale ogni giorno. Ascolta, senti, condividi."
+  ogTitle="DDGPilliSite — Dediche Musicali"
+  ogDescription="Una nuova dedica musicale ogni giorno. Ascolta, senti, condividi."
+  ogImage="/images/og-default.png"
   enableBackgroundMusic={true}
 >
 
