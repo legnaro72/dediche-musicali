@@ -35,8 +35,10 @@ UPLOAD_DIR = "public/images/upload"
 VALID_IMAGE_MODES = ("raw", "auto", "upload", "none")
 VALID_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
 VALID_STATUSES = ("draft", "scheduled", "published", "disabled")
-UPLOAD_IMAGE_MAX_SIDE = int(os.environ.get("UPLOAD_IMAGE_MAX_SIDE", "1800"))
-UPLOAD_IMAGE_WEBP_QUALITY = int(os.environ.get("UPLOAD_IMAGE_WEBP_QUALITY", "84"))
+UPLOAD_IMAGE_MAX_SIDE = int(os.environ.get("UPLOAD_IMAGE_MAX_SIDE", "1400"))
+UPLOAD_IMAGE_WEBP_QUALITY = int(os.environ.get("UPLOAD_IMAGE_WEBP_QUALITY", "78"))
+UPLOAD_IMAGE_TARGET_BYTES = int(os.environ.get("UPLOAD_IMAGE_TARGET_BYTES", str(450 * 1024)))
+UPLOAD_IMAGE_HARD_MAX_BYTES = int(os.environ.get("UPLOAD_IMAGE_HARD_MAX_BYTES", str(700 * 1024)))
 
 SHEET_COLUMNS = [
     "id",
@@ -191,7 +193,7 @@ def format_bytes(size: int) -> str:
 
 
 def optimize_uploaded_image(uploaded_file) -> tuple[bytes, dict]:
-    from PIL import Image, ImageOps
+    from PIL import Image, ImageOps, ImageSequence
 
     original_bytes = uploaded_file.getvalue()
     original_name = uploaded_file.name or "immagine"
@@ -210,8 +212,14 @@ def optimize_uploaded_image(uploaded_file) -> tuple[bytes, dict]:
 
     try:
         img = Image.open(io.BytesIO(original_bytes))
-        img.load()
         original_format = img.format or original_ext.replace(".", "").upper() or "UNKNOWN"
+        frame_count = getattr(img, "n_frames", 1) or 1
+        is_animated = bool(getattr(img, "is_animated", False) or frame_count > 1)
+        if is_animated:
+            img.seek(0)
+            img = next(ImageSequence.Iterator(img)).copy()
+        else:
+            img.load()
         img = ImageOps.exif_transpose(img)
     except Exception as exc:
         file_type = getattr(uploaded_file, "type", "") or "tipo non dichiarato"
@@ -232,23 +240,41 @@ def optimize_uploaded_image(uploaded_file) -> tuple[bytes, dict]:
     else:
         img = img.convert("RGB")
 
-    img.thumbnail((UPLOAD_IMAGE_MAX_SIDE, UPLOAD_IMAGE_MAX_SIDE), Image.LANCZOS)
+    def encode_webp(source_img, max_side: int, quality: int) -> tuple[bytes, tuple[int, int], int, int]:
+        resized = source_img.copy()
+        resized.thumbnail((max_side, max_side), Image.LANCZOS)
+        output = io.BytesIO()
+        resized.save(output, format="WEBP", quality=quality, method=6)
+        return output.getvalue(), resized.size, max_side, quality
 
-    output = io.BytesIO()
-    img.save(
-        output,
-        format="WEBP",
-        quality=UPLOAD_IMAGE_WEBP_QUALITY,
-        method=6,
+    optimized_bytes, optimized_size, used_side, used_quality = encode_webp(
+        img,
+        UPLOAD_IMAGE_MAX_SIDE,
+        UPLOAD_IMAGE_WEBP_QUALITY,
     )
-    optimized_bytes = output.getvalue()
+
+    for side, quality in ((1280, 76), (1200, 74), (1080, 72), (960, 70), (840, 66), (720, 62)):
+        if len(optimized_bytes) <= UPLOAD_IMAGE_TARGET_BYTES:
+            break
+        optimized_bytes, optimized_size, used_side, used_quality = encode_webp(img, side, quality)
+
+    if len(optimized_bytes) > UPLOAD_IMAGE_HARD_MAX_BYTES:
+        raise ValueError(
+            "La foto in movimento resta troppo pesante anche dopo la conversione "
+            f"({format_bytes(len(optimized_bytes))}). Esportala come foto JPEG "
+            "statica dalla galleria e ricaricala."
+        )
 
     return optimized_bytes, {
         "original_bytes": len(original_bytes),
         "optimized_bytes": len(optimized_bytes),
         "original_size": original_size,
-        "optimized_size": img.size,
+        "optimized_size": optimized_size,
         "original_format": original_format,
+        "used_max_side": used_side,
+        "used_quality": used_quality,
+        "frame_count": frame_count,
+        "is_animated": is_animated,
     }
 
 
@@ -299,7 +325,9 @@ def upload_image_to_github(uploaded_file, asset_id: str) -> str:
         f"{format_bytes(image_info['original_bytes'])} -> "
         f"{format_bytes(image_info['optimized_bytes'])}, "
         f"{image_info['original_size'][0]}x{image_info['original_size'][1]} -> "
-        f"{image_info['optimized_size'][0]}x{image_info['optimized_size'][1]}."
+        f"{image_info['optimized_size'][0]}x{image_info['optimized_size'][1]} "
+        f"(max {image_info['used_max_side']}px, qualita' {image_info['used_quality']}, "
+        f"frame usati: 1/{image_info['frame_count']})."
     )
     return repo_path
 
