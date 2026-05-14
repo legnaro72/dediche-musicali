@@ -84,7 +84,7 @@ const links = [
 
         if (/android/.test(userAgent)) {
           event.preventDefault();
-          window.location.href = `intent://www.ilmeteo.it/meteo/genova#Intent;scheme=https;package=it.ilmeteo.android.ilmeteo;S.browser_fallback_url=${encodeURIComponent(fallbackUrl)};end`;
+          window.location.href = `intent://www.ilmeteo.it/meteo/genova#Intent;scheme=https;package=com.ilmeteo.android.ilmeteo;S.browser_fallback_url=${encodeURIComponent(fallbackUrl)};end`;
           return;
         }
 
