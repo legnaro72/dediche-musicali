@@ -396,6 +396,29 @@ def update_google_sheet_row(row_number: int, row: list[str]) -> None:
     sheet.update(f"A{row_number}:{end_col}{row_number}", [row], value_input_option="USER_ENTERED")
 
 
+def find_sheet_rows_by_id(dedication_id: str) -> list[int]:
+    if not dedication_id:
+        return []
+
+    sheet = get_sheet()
+    rows = sheet.get_all_records()
+    matches = []
+    for idx, row in enumerate(rows, start=2):
+        if str(row.get("id", "") or "").strip() == dedication_id:
+            matches.append(idx)
+    return matches
+
+
+def upsert_google_sheet_row(row: list[str], dedication_id: str) -> tuple[str, int | None, int]:
+    matching_rows = find_sheet_rows_by_id(dedication_id)
+    if matching_rows:
+        update_google_sheet_row(matching_rows[0], row)
+        return "updated", matching_rows[0], len(matching_rows)
+
+    append_to_google_sheet(row)
+    return "inserted", None, 0
+
+
 def add_to_active_text(value: str, prefix: str) -> None:
     target = st.session_state.get(f"{prefix}_active_text_target", "dedication_text")
     key = f"{prefix}_short_phrase" if target == "short_phrase" else f"{prefix}_dedication_text"
@@ -578,13 +601,22 @@ def save_dedication(prefix: str, uploaded_file, mode: str, row_number: int | Non
 
     row = build_row_from_values(values)
     if mode == "edit":
+        matching_rows = find_sheet_rows_by_id(values["id"])
         if row_number is None:
-            raise ValueError("Riga Google Sheet non trovata per la modifica.")
+            if not matching_rows:
+                raise ValueError("Riga Google Sheet non trovata per la modifica.")
+            row_number = matching_rows[0]
         with st.spinner("Aggiornamento riga nel Google Sheet..."):
             update_google_sheet_row(row_number, row)
+        values["_save_action"] = "updated"
+        values["_save_row_number"] = row_number
+        values["_duplicate_count"] = len(set(matching_rows + [row_number]))
     else:
-        with st.spinner("Inserimento nel Google Sheet..."):
-            append_to_google_sheet(row)
+        with st.spinner("Salvataggio nel Google Sheet..."):
+            action, saved_row_number, duplicate_count = upsert_google_sheet_row(row, values["id"])
+        values["_save_action"] = action
+        values["_save_row_number"] = saved_row_number
+        values["_duplicate_count"] = duplicate_count
 
     return values
 
@@ -592,8 +624,13 @@ def save_dedication(prefix: str, uploaded_file, mode: str, row_number: int | Non
 def save_and_optionally_publish(prefix: str, uploaded_file, mode: str, publish_now: bool,
                                 row_number: int | None = None) -> None:
     values = save_dedication(prefix, uploaded_file, mode, row_number=row_number)
-    action = "aggiornata" if mode == "edit" else "programmata"
+    action = "aggiornata" if values.get("_save_action") == "updated" else "programmata"
     st.success(f"Dedica {action} per il {values['date']}.")
+    if values.get("_duplicate_count", 0) > 1:
+        st.warning(
+            "Attenzione: nel Google Sheet esistono gia' piu' righe con questo ID. "
+            "Ho aggiornato la prima riga trovata; conviene eliminare manualmente le copie."
+        )
 
     if publish_now:
         with st.spinner("Avvio workflow GitHub Actions..."):
