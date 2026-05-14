@@ -381,6 +381,18 @@ const fullOgImage = ogImage
           if (introStatus && label) introStatus.textContent = label;
         };
 
+        const requestAppFullscreen = async () => {
+          if (document.fullscreenElement) return;
+          if (window.matchMedia('(display-mode: fullscreen)').matches) return;
+          if (window.navigator.standalone === true) return;
+
+          try {
+            await document.documentElement.requestFullscreen?.({ navigationUI: 'hide' });
+          } catch {
+            // Desktop browsers allow fullscreen only in some user-gesture contexts.
+          }
+        };
+
         const hideIntro = () => {
           if (intro instanceof HTMLElement) intro.hidden = true;
           if (progressTimer) window.clearInterval(progressTimer);
@@ -566,6 +578,7 @@ const fullOgImage = ogImage
           enabled = true;
           localStorage.setItem(storageKey, 'true');
           applyUi(false);
+          requestAppFullscreen();
           playAudio(true);
         });
 
