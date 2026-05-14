@@ -9,6 +9,7 @@ from pathlib import Path
 import gspread
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 from google.oauth2.service_account import Credentials
 
 try:
@@ -72,6 +73,43 @@ EXTENDED_EMOJIS = [
     "🔥", "😍", "🥹", "🕊️", "🎤", "💭", "🌈", "🍀",
     "⭐", "💌", "🤍", "🫶", "🌊", "🎹", "🎸", "🪩",
 ]
+
+
+def inject_streamlit_pwa_tags() -> None:
+    components.html(
+        """
+        <script>
+        (function () {
+          const doc = window.parent.document;
+          const tags = [
+            ['link', { rel: 'manifest', href: '/app/static/pwa/manifest.json' }],
+            ['link', { rel: 'apple-touch-icon', href: '/app/static/pwa/icons/apple-touch-icon.png' }],
+            ['meta', { name: 'theme-color', content: '#08070f' }],
+            ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
+            ['meta', { name: 'apple-mobile-web-app-title', content: 'DDGPilli Admin' }],
+            ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' }],
+            ['meta', { name: 'mobile-web-app-capable', content: 'yes' }]
+          ];
+
+          for (const [tagName, attrs] of tags) {
+            const selector = attrs.rel
+              ? `${tagName}[rel="${attrs.rel}"]`
+              : `${tagName}[name="${attrs.name}"]`;
+            let el = doc.querySelector(selector);
+            if (!el) {
+              el = doc.createElement(tagName);
+              doc.head.appendChild(el);
+            }
+            for (const [key, value] of Object.entries(attrs)) {
+              el.setAttribute(key, value);
+            }
+          }
+        })();
+        </script>
+        """,
+        height=0,
+        width=0,
+    )
 
 
 def slugify(text: str) -> str:
@@ -863,6 +901,7 @@ def render_historical() -> None:
 
 def main() -> None:
     st.set_page_config(page_title="Dediche musicali", page_icon="🎵", layout="centered")
+    inject_streamlit_pwa_tags()
     tab_new, tab_historical = st.tabs(["Nuova dedica", "Historical"])
     with tab_new:
         render_new_dedication()
