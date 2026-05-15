@@ -199,19 +199,44 @@ const fullOgImage = ogImage
       }, { once: true });
     }
 
-    const navbar = document.getElementById('navbar');
-    const navToggle = document.querySelector('[data-nav-toggle]');
-    const navMenu = document.getElementById('primary-navigation');
-    navToggle?.addEventListener('click', () => {
-      const isOpen = navMenu?.classList.toggle('is-open') ?? false;
-      navToggle.setAttribute('aria-expanded', String(isOpen));
-    });
-    navMenu?.querySelectorAll('a').forEach((link) => {
-      link.addEventListener('click', () => {
-        navMenu.classList.remove('is-open');
-        navToggle?.setAttribute('aria-expanded', 'false');
+    const setMobileMenuOpen = (isOpen) => {
+      const navToggle = document.querySelector('[data-nav-toggle]');
+      const navMenu = document.getElementById('primary-navigation');
+      navMenu?.classList.toggle('is-open', isOpen);
+      navToggle?.setAttribute('aria-expanded', String(isOpen));
+    };
+
+    if (!window.__DDGPILLI_NAV_READY) {
+      window.__DDGPILLI_NAV_READY = true;
+      document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const toggle = target.closest('[data-nav-toggle]');
+        if (toggle) {
+          event.preventDefault();
+          const navMenu = document.getElementById('primary-navigation');
+          setMobileMenuOpen(!navMenu?.classList.contains('is-open'));
+          return;
+        }
+
+        if (target.closest('#primary-navigation a')) {
+          setMobileMenuOpen(false);
+          return;
+        }
+
+        if (!target.closest('#primary-navigation') && !target.closest('[data-nav-toggle]')) {
+          setMobileMenuOpen(false);
+        }
       });
-    });
+
+      document.addEventListener('astro:before-swap', () => setMobileMenuOpen(false));
+      window.addEventListener('resize', () => {
+        if (window.matchMedia('(min-width: 769px)').matches) setMobileMenuOpen(false);
+      }, { passive: true });
+    }
+
+    const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
       if (window.scrollY > 40) navbar?.classList.add('scrolled');
       else navbar?.classList.remove('scrolled');

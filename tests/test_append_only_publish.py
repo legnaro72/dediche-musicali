@@ -193,6 +193,25 @@ class AppendOnlyPublishTest(unittest.TestCase):
         self.assertEqual(saved['pensieroPilly'], 'Pensiero salvato')
         self.assertEqual(saved['reactions'], {'down': 0, 'like': 0, 'heart': 0, 'sun': 0})
 
+    def test_update_reaction_can_switch_and_remove_browser_choice(self):
+        self.write_dedication('2026-05-18', 'published')
+        path = self.data_dir / '2026-05-18.json'
+        data = json.loads(path.read_text(encoding='utf-8'))
+        data['id'] = 'ded-2026-05-18'
+        path.write_text(json.dumps(data), encoding='utf-8')
+
+        first = dedication_feedback.update_reaction('ded-2026-05-18', 'heart')
+        self.assertEqual(first['reactions'], {'down': 0, 'like': 0, 'heart': 1, 'sun': 0})
+
+        removed = dedication_feedback.update_reaction('ded-2026-05-18', None, 'heart')
+        self.assertEqual(removed['reactions'], {'down': 0, 'like': 0, 'heart': 0, 'sun': 0})
+
+        sun = dedication_feedback.update_reaction('ded-2026-05-18', 'sun')
+        self.assertEqual(sun['reactions'], {'down': 0, 'like': 0, 'heart': 0, 'sun': 1})
+
+        switched = dedication_feedback.update_reaction('ded-2026-05-18', 'heart', 'sun')
+        self.assertEqual(switched['reactions'], {'down': 0, 'like': 0, 'heart': 1, 'sun': 0})
+
     def test_sync_preserves_existing_feedback_when_forced(self):
         self.write_dedication('2026-05-17', 'scheduled')
         path = self.data_dir / '2026-05-17.json'

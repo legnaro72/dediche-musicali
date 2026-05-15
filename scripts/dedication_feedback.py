@@ -267,20 +267,25 @@ def update_vote(dedication_id: str, voto_pilly: int, pensiero_pilly: str = "") -
 
 def update_reaction(
     dedication_id: str,
-    reaction: str,
+    reaction: str | None,
     previous_reaction: str | None = None,
 ) -> dict:
     """Aggiorna i conteggi reaction per una dedica."""
-    if reaction not in REACTION_KEYS:
+    reaction = str(reaction or "").strip()
+    previous_reaction = str(previous_reaction or "").strip()
+    if reaction and reaction not in REACTION_KEYS:
         raise ValueError(f"reaction non valida. Usa una tra: {', '.join(REACTION_KEYS)}")
     if previous_reaction and previous_reaction not in REACTION_KEYS:
         raise ValueError(f"previous_reaction non valida. Usa una tra: {', '.join(REACTION_KEYS)}")
+    if not reaction and not previous_reaction:
+        raise ValueError("reaction o previous_reaction obbligatoria.")
 
     dedication, target, sha = _load_feedback_target(dedication_id)
     reactions = normalize_reactions(dedication.get("reactions"))
-    if previous_reaction and previous_reaction != reaction:
+    if previous_reaction:
         reactions[previous_reaction] = max(0, reactions[previous_reaction] - 1)
-    reactions[reaction] += 1
+    if reaction:
+        reactions[reaction] += 1
     dedication["reactions"] = reactions
     dedication["updated_at"] = get_rome_now().isoformat()
 

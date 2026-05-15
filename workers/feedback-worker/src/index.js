@@ -208,21 +208,28 @@ async function saveVote(env, payload) {
 
 async function saveReaction(env, payload) {
   const dedicationId = String(payload.id || payload.dedicationId || '').trim();
-  const reaction = String(payload.reaction || '').trim();
+  const reaction = payload.reaction === null || payload.reaction === undefined
+    ? ''
+    : String(payload.reaction).trim();
   const previousReaction = String(payload.previousReaction || '').trim();
-  if (!REACTION_KEYS.includes(reaction)) {
+  if (reaction && !REACTION_KEYS.includes(reaction)) {
     throw new Error(`reaction non valida. Usa una tra: ${REACTION_KEYS.join(', ')}`);
   }
   if (previousReaction && !REACTION_KEYS.includes(previousReaction)) {
     throw new Error(`previousReaction non valida. Usa una tra: ${REACTION_KEYS.join(', ')}`);
   }
+  if (!reaction && !previousReaction) {
+    throw new Error('reaction o previousReaction obbligatoria.');
+  }
 
   const loaded = await loadDedicationById(env, dedicationId);
   const reactions = normalizeReactions(loaded.dedication.reactions);
-  if (previousReaction && previousReaction !== reaction) {
+  if (previousReaction) {
     reactions[previousReaction] = Math.max(0, reactions[previousReaction] - 1);
   }
-  reactions[reaction] += 1;
+  if (reaction) {
+    reactions[reaction] += 1;
+  }
   loaded.dedication.reactions = reactions;
   loaded.dedication.updated_at = nowIsoRomeApprox();
   await saveDedication(env, loaded, `Salva reazione Pilly ${dedicationId}`);
