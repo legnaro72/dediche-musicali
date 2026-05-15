@@ -282,12 +282,18 @@ const data = {
           const counts = normalizeCounts(previousCounts);
           const previous = choices[data.id];
 
-          if (previous === next && counts[next] > 0) return;
-          if (reactionKeys.includes(previous) && previous !== next) {
-            counts[previous] = Math.max(0, counts[previous] - 1);
+          const isToggleOff = previous === next;
+
+          if (isToggleOff) {
+            counts[next] = Math.max(0, counts[next] - 1);
+            delete choices[data.id];
+          } else {
+            if (reactionKeys.includes(previous)) {
+              counts[previous] = Math.max(0, counts[previous] - 1);
+            }
+            counts[next] += 1;
+            choices[data.id] = next;
           }
-          counts[next] += 1;
-          choices[data.id] = next;
 
           serverReactions = counts;
           countsStore[data.id] = counts;
@@ -299,8 +305,8 @@ const data = {
           try {
             const apiResult = await postFeedback('/save_reaction', {
               id: data.id,
-              reaction: next,
-              previousReaction: previous === next ? null : (previous || null),
+              reaction: isToggleOff ? null : next,
+              previousReaction: previous || null,
             });
             const savedReactions = feedbackReactions(apiResult);
             if (savedReactions) {

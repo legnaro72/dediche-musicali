@@ -88,6 +88,7 @@ const fullOgImage = ogImage
   <nav class="navbar" id="navbar">
     <div class="container navbar-inner">
       <a class="navbar-brand" href={base}>♪ DDGPilli</a>
+      
       <button
         class="navbar-menu-toggle"
         type="button"
@@ -97,6 +98,24 @@ const fullOgImage = ogImage
       >
         Menu
       </button>
+
+      {enableBackgroundMusic && (
+        <div class="ambient-audio" data-background-music-control transition:persist>
+          <button
+            class="ambient-audio-toggle"
+            type="button"
+            aria-pressed="true"
+            aria-label="Disattiva musica di sottofondo"
+          >
+            <span class="ambient-audio-icon" aria-hidden="true">♪</span>
+            <span class="ambient-audio-label">Audio</span>
+          </button>
+          <p class="ambient-audio-hint" data-background-music-hint hidden>
+            Tocca per attivare la musica
+          </p>
+        </div>
+      )}
+
       <ul class="navbar-nav" id="primary-navigation">
         <li><a href={base}>Home</a></li>
         <li><a href={`${base}archive/`}>Archivio</a></li>
@@ -148,21 +167,6 @@ const fullOgImage = ogImage
             <button class="app-intro-skip" type="button" data-audio-intro-skip>Continua senza audio</button>
           </div>
         </div>
-      </div>
-
-      <div class="ambient-audio" data-background-music-control transition:persist>
-        <button
-          class="ambient-audio-toggle"
-          type="button"
-          aria-pressed="true"
-          aria-label="Disattiva musica di sottofondo"
-        >
-          <span class="ambient-audio-icon" aria-hidden="true">♪</span>
-          <span class="ambient-audio-label">Audio</span>
-        </button>
-        <p class="ambient-audio-hint" data-background-music-hint hidden>
-          Tocca per attivare la musica
-        </p>
       </div>
     </>
   )}
