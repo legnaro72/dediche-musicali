@@ -129,6 +129,10 @@ const data = {
     }, {});
   }
 
+  function feedbackReactions(result) {
+    return result?.reactions || result?.feedback?.reactions || null;
+  }
+
   function initPlusVotes() {
     document.querySelectorAll('[data-plus-vote]').forEach((root) => {
       if (root.dataset.ready === 'true') return;
@@ -272,37 +276,56 @@ const data = {
 
           const countsStore = readObject(reactionCountKey);
           const choices = readObject(reactionChoiceKey);
-          const counts = normalizeCounts(feedbackApiUrl()
+          const previousCounts = normalizeCounts(feedbackApiUrl()
             ? (serverReactions || initialCounts)
             : (countsStore[data.id] || initialCounts));
+          const counts = normalizeCounts(previousCounts);
           const previous = choices[data.id];
 
-          if (previous === next) return;
-          if (reactionKeys.includes(previous)) counts[previous] = Math.max(0, counts[previous] - 1);
+          if (previous === next && counts[next] > 0) return;
+          if (reactionKeys.includes(previous) && previous !== next) {
+            counts[previous] = Math.max(0, counts[previous] - 1);
+          }
           counts[next] += 1;
           choices[data.id] = next;
+
+          serverReactions = counts;
+          countsStore[data.id] = counts;
+          writeObject(reactionCountKey, countsStore);
+          writeObject(reactionChoiceKey, choices);
+          render();
+          if (button instanceof HTMLButtonElement) button.disabled = true;
 
           try {
             const apiResult = await postFeedback('/save_reaction', {
               id: data.id,
               reaction: next,
-              previousReaction: previous || null,
+              previousReaction: previous === next ? null : (previous || null),
             });
-            if (apiResult.reactions) {
+            const savedReactions = feedbackReactions(apiResult);
+            if (savedReactions) {
               reactionKeys.forEach((key) => {
-                counts[key] = Math.max(0, Number(apiResult.reactions[key] || 0));
+                counts[key] = Math.max(0, Number(savedReactions[key] || 0));
               });
               serverReactions = counts;
             }
-          } catch {
-            console.warn('Salvataggio reaction fallito.');
+          } catch (error) {
+            console.warn('Salvataggio reaction fallito.', error);
+            serverReactions = previousCounts;
+            countsStore[data.id] = previousCounts;
+            if (previous) {
+              choices[data.id] = previous;
+            } else {
+              delete choices[data.id];
+            }
+          } finally {
+            if (button instanceof HTMLButtonElement) button.disabled = false;
+            countsStore[data.id] = serverReactions || counts;
+            writeObject(reactionCountKey, countsStore);
+            writeObject(reactionChoiceKey, choices);
+            render();
             return;
           }
-
-          countsStore[data.id] = counts;
-          writeObject(reactionCountKey, countsStore);
-          writeObject(reactionChoiceKey, choices);
-          render();
         });
       });
 
