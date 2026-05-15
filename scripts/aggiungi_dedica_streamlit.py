@@ -5,6 +5,12 @@ import json
 import os
 import re
 from pathlib import Path
+from urllib.parse import urlparse
+
+try:
+    from zoneinfo import ZoneInfo
+except Exception:
+    ZoneInfo = None
 
 import gspread
 import requests
@@ -151,6 +157,102 @@ def normalize_date(date_text: str) -> str:
         except ValueError:
             pass
     raise ValueError("Formato data non valido. Usa YYYY-MM-DD oppure DD/MM/YYYY.")
+
+
+def tomorrow_rome_date() -> datetime.date:
+    if ZoneInfo is not None:
+        now = datetime.datetime.now(ZoneInfo("Europe/Rome"))
+    else:
+        now = datetime.datetime.now()
+    return now.date() + datetime.timedelta(days=1)
+
+
+def parse_date_value(value) -> datetime.date:
+    if isinstance(value, datetime.datetime):
+        return value.date()
+    if isinstance(value, datetime.date):
+        return value
+    value = str(value or "").strip()
+    if value:
+        try:
+            return datetime.datetime.strptime(normalize_date(value), "%Y-%m-%d").date()
+        except ValueError:
+            pass
+    return tomorrow_rome_date()
+
+
+def sync_date_picker(prefix: str) -> None:
+    selected = st.session_state.get(f"{prefix}_date_picker")
+    st.session_state[f"{prefix}_date"] = parse_date_value(selected).isoformat()
+
+
+def is_spotify_track_url(url: str) -> bool:
+    parsed = urlparse((url or "").strip())
+    return parsed.scheme == "https" and parsed.netloc == "open.spotify.com" and parsed.path.startswith("/track/")
+
+
+def split_spotify_title(raw_title: str, raw_artist: str) -> tuple[str, str]:
+    title = (raw_title or "").strip()
+    artist = (raw_artist or "").strip()
+    title = re.sub(r"\s*\|\s*Spotify\s*$", "", title, flags=re.IGNORECASE).strip()
+
+    match = re.match(r"(.+?)\s+-\s+song and lyrics by\s+(.+)$", title, flags=re.IGNORECASE)
+    if match:
+        title = match.group(1).strip()
+        artist = artist or match.group(2).strip()
+    elif artist and title.lower().endswith(f" - {artist}".lower()):
+        title = title[:-(len(artist) + 3)].strip()
+
+    return title, artist
+
+
+def fetch_spotify_track_metadata(url: str) -> dict:
+    url = (url or "").strip()
+    if not is_spotify_track_url(url):
+        raise ValueError("URL Spotify non valido o non riconosciuto.")
+
+    response = requests.get(
+        "https://open.spotify.com/oembed",
+        params={"url": url},
+        timeout=12,
+    )
+    if response.status_code >= 400:
+        raise ValueError("Spotify non ha restituito metadati per questo URL.")
+
+    payload = response.json()
+    title, artist = split_spotify_title(payload.get("title", ""), payload.get("author_name", ""))
+    if not title or not artist:
+        raise ValueError("Metadati Spotify incompleti.")
+    return {"song_title": title, "artist": artist}
+
+
+def autofill_spotify_metadata(prefix: str) -> None:
+    url = str(st.session_state.get(f"{prefix}_audio_url", "") or "").strip()
+    status_key = f"{prefix}_spotify_status"
+    last_key = f"{prefix}_spotify_last_url"
+
+    if not url:
+        st.session_state[status_key] = ""
+        return
+    if st.session_state.get(last_key) == url:
+        return
+
+    try:
+        metadata = fetch_spotify_track_metadata(url)
+    except Exception:
+        st.session_state[status_key] = (
+            "Non e' stato possibile recuperare automaticamente i dati da Spotify. "
+            "Inserisci manualmente artista e titolo della canzone."
+        )
+        st.session_state[last_key] = url
+        return
+
+    st.session_state[f"{prefix}_song_title"] = metadata["song_title"]
+    st.session_state[f"{prefix}_artist"] = metadata["artist"]
+    st.session_state[status_key] = (
+        f"Dati recuperati da Spotify: {metadata['song_title']} - {metadata['artist']}."
+    )
+    st.session_state[last_key] = url
 
 
 def default_dedication_text(song_title: str, artist: str) -> str:
@@ -476,7 +578,7 @@ def make_default_id(date_value: str, song_title: str, artist: str) -> str:
 def default_form_values() -> dict:
     return {
         "id": "",
-        "date": "",
+        "date": tomorrow_rome_date().isoformat(),
         "status": "scheduled",
         "song_title": "",
         "artist": "",
@@ -630,6 +732,9 @@ def set_form_state(prefix: str, values: dict) -> None:
     defaults.update({col: values.get(col, "") for col in SHEET_COLUMNS})
     for col in SHEET_COLUMNS:
         st.session_state[f"{prefix}_{col}"] = defaults[col]
+    st.session_state[f"{prefix}_date_picker"] = parse_date_value(defaults["date"])
+    st.session_state[f"{prefix}_spotify_status"] = ""
+    st.session_state[f"{prefix}_spotify_last_url"] = str(defaults.get("audio_url", "") or "").strip()
 
 
 def init_form_state(prefix: str, values: dict | None = None) -> None:
@@ -638,6 +743,9 @@ def init_form_state(prefix: str, values: dict | None = None) -> None:
         defaults.update({col: values.get(col, "") for col in SHEET_COLUMNS})
     for col, value in defaults.items():
         st.session_state.setdefault(f"{prefix}_{col}", value)
+    st.session_state.setdefault(f"{prefix}_date_picker", parse_date_value(defaults["date"]))
+    st.session_state.setdefault(f"{prefix}_spotify_status", "")
+    st.session_state.setdefault(f"{prefix}_spotify_last_url", "")
     st.session_state.setdefault(f"{prefix}_active_text_target", "dedication_text")
 
 
@@ -689,7 +797,15 @@ def render_emoji_picker(prefix: str) -> None:
 def render_dedication_form(prefix: str, existing_image_source: str = ""):
     st.subheader("Dati principali")
     st.text_input("ID", key=f"{prefix}_id", help="Lascia vuoto per generarne uno automaticamente.")
-    st.text_input("Data", placeholder="2026-05-14 oppure 14/05/2026", key=f"{prefix}_date")
+    selected_date = st.date_input(
+        "Data",
+        value=parse_date_value(st.session_state.get(f"{prefix}_date")),
+        format="DD/MM/YYYY",
+        key=f"{prefix}_date_picker",
+        on_change=sync_date_picker,
+        args=(prefix,),
+    )
+    st.session_state[f"{prefix}_date"] = parse_date_value(selected_date).isoformat()
     st.selectbox(
         "status",
         VALID_STATUSES,
@@ -697,9 +813,24 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
         if st.session_state.get(f"{prefix}_status", "scheduled") in VALID_STATUSES else 1,
         key=f"{prefix}_status",
     )
+    st.text_input(
+        "URL Spotify",
+        key=f"{prefix}_audio_url",
+        on_change=autofill_spotify_metadata,
+        args=(prefix,),
+        placeholder="https://open.spotify.com/track/...",
+    )
+    spotify_status = st.session_state.get(f"{prefix}_spotify_status", "")
+    if spotify_status:
+        if spotify_status.startswith("Dati recuperati"):
+            st.success(spotify_status)
+        else:
+            st.warning(spotify_status)
+    if st.button("Recupera dati da Spotify", use_container_width=True, key=f"{prefix}_fetch_spotify"):
+        st.session_state[f"{prefix}_spotify_last_url"] = ""
+        autofill_spotify_metadata(prefix)
     st.text_input("Titolo canzone", key=f"{prefix}_song_title")
     st.text_input("Artista", key=f"{prefix}_artist")
-    st.text_input("URL Spotify", key=f"{prefix}_audio_url")
     st.text_input("Titolo dedica", key=f"{prefix}_dedication_title")
 
     st.subheader("Immagine")
