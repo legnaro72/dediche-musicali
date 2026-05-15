@@ -33,12 +33,12 @@
   "created_at": "2026-05-13T12:50:31.384645+02:00",
   "updated_at": "2026-05-15T16:48:34.884Z",
   "date_it": "9 aprile 2026",
-  "votoPilly": 10,
-  "pensieroPilly": "BIU",
+  "votoPilly": null,
+  "pensieroPilly": "",
   "reactions": {
-    "down": 2,
+    "down": 0,
     "like": 0,
     "heart": 0,
-    "sun": 2
+    "sun": 0
   }
 }
