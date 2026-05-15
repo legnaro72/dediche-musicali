@@ -88,7 +88,16 @@ const fullOgImage = ogImage
   <nav class="navbar" id="navbar">
     <div class="container navbar-inner">
       <a class="navbar-brand" href={base}>♪ DDGPilli</a>
-      <ul class="navbar-nav">
+      <button
+        class="navbar-menu-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="primary-navigation"
+        data-nav-toggle
+      >
+        Menu
+      </button>
+      <ul class="navbar-nav" id="primary-navigation">
         <li><a href={base}>Home</a></li>
         <li><a href={`${base}archive/`}>Archivio</a></li>
         <li><a href={`${base}statistiche/`}>Statistiche</a></li>
@@ -187,6 +196,18 @@ const fullOgImage = ogImage
     }
 
     const navbar = document.getElementById('navbar');
+    const navToggle = document.querySelector('[data-nav-toggle]');
+    const navMenu = document.getElementById('primary-navigation');
+    navToggle?.addEventListener('click', () => {
+      const isOpen = navMenu?.classList.toggle('is-open') ?? false;
+      navToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+    navMenu?.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        navMenu.classList.remove('is-open');
+        navToggle?.setAttribute('aria-expanded', 'false');
+      });
+    });
     window.addEventListener('scroll', () => {
       if (window.scrollY > 40) navbar?.classList.add('scrolled');
       else navbar?.classList.remove('scrolled');

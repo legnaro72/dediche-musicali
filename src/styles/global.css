@@ -78,6 +78,19 @@ section { position:relative; z-index:1; }
   background:var(--gradient-text);
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
 }
+.navbar-menu-toggle {
+  display:none;
+  min-height:38px;
+  padding:0 0.9rem;
+  border:1px solid var(--border);
+  border-radius:var(--radius-full);
+  background:rgba(255,255,255,0.06);
+  color:var(--text-primary);
+  cursor:pointer;
+  font:700 0.78rem var(--font-sans);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
 .navbar-nav { display:flex; gap:2rem; list-style:none; margin-right:8.5rem; }
 .navbar-nav a {
   color:var(--text-dim); font-size:0.85rem; font-weight:600;
@@ -292,7 +305,7 @@ section { position:relative; z-index:1; }
   padding:0.8rem 1rem;
 }
 .plus-vote-form textarea {
-  min-height:120px;
+  min-height:220px;
   resize:vertical;
   padding:0.9rem 1rem;
 }
@@ -310,6 +323,7 @@ section { position:relative; z-index:1; }
   min-height:1.2rem;
   color:var(--text-dim);
   font-size:0.82rem;
+  line-height:1.45;
 }
 .quick-reactions {
   display:flex;
@@ -972,6 +986,55 @@ button.video-poster {
   .plus-vote .btn-lg {
     width:100%;
   }
+  .navbar-inner {
+    position:relative;
+  }
+  .navbar-menu-toggle {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    margin-right:4.7rem;
+  }
+  .navbar-nav {
+    position:absolute;
+    top:calc(100% + 0.75rem);
+    left:clamp(1rem,5vw,2rem);
+    right:clamp(1rem,5vw,2rem);
+    display:none;
+    flex-direction:column;
+    gap:0;
+    margin-right:0;
+    padding:0.55rem;
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    background:rgba(8,7,15,0.96);
+    box-shadow:var(--shadow-card);
+    backdrop-filter:blur(18px);
+  }
+  .navbar-nav.is-open {
+    display:flex;
+  }
+  .navbar-nav li {
+    width:100%;
+  }
+  .navbar-nav a {
+    display:flex;
+    width:100%;
+    min-height:44px;
+    align-items:center;
+    padding:0 0.85rem;
+    border-radius:12px;
+  }
+  .navbar-nav a:hover {
+    background:rgba(255,255,255,0.06);
+  }
+  .plus-vote-dialog {
+    max-height:calc(100dvh - 2rem);
+    overflow:auto;
+  }
+  .plus-vote-form textarea {
+    min-height:240px;
+  }
   .ambient-audio {
     right:1rem;
     top:0.55rem;
@@ -995,7 +1058,6 @@ button.video-poster {
   }
 }
 @media(max-width:640px) {
-  .navbar-nav { display:none; }
   .ded-nav { grid-template-columns:1fr; }
   .archive-grid { grid-template-columns:1fr 1fr; }
 }

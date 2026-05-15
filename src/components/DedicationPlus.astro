@@ -33,7 +33,7 @@ const data = {
     <div class="plus-vote-modal" data-plus-vote-modal hidden>
       <div class="plus-vote-dialog" role="dialog" aria-modal="true" aria-labelledby={`plus-vote-title-${dedication.id}`}>
         <button class="plus-vote-close" type="button" aria-label="Chiudi" data-plus-vote-close>×</button>
-        <p class="plus-vote-kicker">Voto interno</p>
+        <p class="plus-vote-kicker">Pensiero di Pilly</p>
         <h2 id={`plus-vote-title-${dedication.id}`}>{dedication.song_title}</h2>
         <p class="plus-vote-artist">{dedication.artist}</p>
         <form class="plus-vote-form" data-plus-vote-form>
@@ -43,13 +43,13 @@ const data = {
           </label>
           <label>
             <span>Pensiero di Pilly</span>
-            <textarea data-plus-vote-thought rows="5" placeholder="Scrivi un pensiero, anche breve..."></textarea>
+            <textarea data-plus-vote-thought rows="8" placeholder="Scrivi un pensiero, anche breve..."></textarea>
           </label>
           <div class="plus-vote-actions">
-            <button class="btn btn-primary" type="submit">Salva voto</button>
+            <button class="btn btn-primary" type="submit" data-plus-vote-submit>Salva voto</button>
             <button class="btn btn-secondary" type="button" data-plus-vote-cancel>Annulla</button>
           </div>
-          <p class="plus-vote-status" data-plus-vote-status></p>
+          <p class="plus-vote-status" data-plus-vote-status aria-live="polite"></p>
         </form>
       </div>
     </div>
@@ -143,16 +143,27 @@ const data = {
       const score = root.querySelector('[data-plus-vote-score]');
       const thought = root.querySelector('[data-plus-vote-thought]');
       const status = root.querySelector('[data-plus-vote-status]');
+      const submit = root.querySelector('[data-plus-vote-submit]');
       let serverFeedback = null;
 
       const fillForm = async () => {
         if (feedbackApiUrl()) {
-          serverFeedback = await fetchFeedback(data.id);
+          try {
+            serverFeedback = await fetchFeedback(data.id);
+          } catch (error) {
+            console.warn('Feedback non recuperato:', error);
+            serverFeedback = null;
+            if (status instanceof HTMLElement) {
+              status.textContent = 'Voto salvato non recuperabile: controlla che la feedback API sia attiva.';
+            }
+          }
+        } else if (status instanceof HTMLElement) {
+          status.textContent = 'API feedback non configurata: il voto non puo essere salvato.';
         }
         const saved = serverFeedback || (data.votoPilly ? data : null);
         if (score instanceof HTMLInputElement) score.value = saved?.votoPilly ? String(saved.votoPilly) : '';
         if (thought instanceof HTMLTextAreaElement) thought.value = saved?.pensieroPilly || '';
-        if (status instanceof HTMLElement) {
+        if (status instanceof HTMLElement && saved?.votoPilly) {
           status.textContent = saved?.votoPilly ? 'Puoi modificare il voto gia salvato.' : '';
         }
       };
@@ -192,14 +203,17 @@ const data = {
         };
 
         if (status instanceof HTMLElement) status.textContent = 'Salvataggio in corso...';
+        if (submit instanceof HTMLButtonElement) submit.disabled = true;
 
         try {
           const apiResult = await postFeedback('/save_vote', votePayload);
           votePayload.updatedAt = apiResult.updated_at || votePayload.updatedAt;
         } catch (error) {
+          console.error('Salvataggio voto fallito:', error);
           if (status instanceof HTMLElement) {
             status.textContent = error instanceof Error ? error.message : 'Salvataggio persistente non riuscito.';
           }
+          if (submit instanceof HTMLButtonElement) submit.disabled = false;
           return;
         }
 
@@ -207,6 +221,7 @@ const data = {
         if (status instanceof HTMLElement) {
           status.textContent = 'Voto salvato nel dataset.';
         }
+        if (submit instanceof HTMLButtonElement) submit.disabled = false;
         window.setTimeout(hide, 500);
       });
     });
@@ -274,6 +289,7 @@ const data = {
               serverReactions = counts;
             }
           } catch {
+            console.warn('Salvataggio reaction fallito.');
             return;
           }
 
