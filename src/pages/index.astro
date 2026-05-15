@@ -94,6 +94,9 @@ function fmtDate(dateStr: string, dayName?: string) {
             <h1 class="hero-song anim-2">{dedication.song_title}</h1>
             <p class="hero-artist anim-2">{dedication.artist}</p>
             <p class="hero-ded-label anim-3">{dedication.dedication_title}</p>
+            {dedication.short_phrase && (
+              <p class="hero-short-phrase anim-3">{dedication.short_phrase}</p>
+            )}
             <p class="hero-text anim-3">{dedication.dedication_text}</p>
 
             <div class="hero-actions anim-4">
@@ -198,6 +201,8 @@ function fmtDate(dateStr: string, dayName?: string) {
               artist={d.artist}
               image={d.image}
               tags={d.tags}
+              dedication_text={d.dedication_text}
+              short_phrase={d.short_phrase}
             />
           ))}
         </div>

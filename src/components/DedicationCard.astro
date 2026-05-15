@@ -75,6 +75,9 @@ const monthValue = date.substring(0, 7);
     </div>
     <div class="dedication-card-song">{song_title}</div>
     <div class="dedication-card-artist">{artist}</div>
+    {short_phrase && (
+      <p class="dedication-card-phrase">{short_phrase}</p>
+    )}
     {tags && tags.length > 0 && (
       <div style="margin-top:0.75rem; display:flex; flex-wrap:wrap; gap:0.4rem;">
         {tags.slice(0, 3).map(tag => (

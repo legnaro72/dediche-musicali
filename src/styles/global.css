@@ -359,6 +359,15 @@ section {
   margin-bottom: 0.5rem;
 }
 
+.hero-short-phrase {
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-family: var(--font-serif);
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
 .hero-text {
   color: var(--text-dim);
   font-size: 1.05rem;
@@ -682,6 +691,18 @@ body.plus-vote-is-open .app-install {
   font-size: 0.85rem;
   color: var(--magenta-soft);
   font-weight: 500;
+}
+
+.dedication-card-phrase {
+  margin-top: 0.8rem;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* Search/Filter */
