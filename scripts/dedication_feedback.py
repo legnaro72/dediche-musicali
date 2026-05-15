@@ -6,10 +6,16 @@ script CLI, micro API o in futuro da un backend Atlas.
 """
 from __future__ import annotations
 
+import base64
+import json
+import os
 from copy import deepcopy
 from typing import Any
 
+import requests
+
 from scripts.utils import (
+    DATA_DIR,
     find_existing_dedication_path,
     get_rome_now,
     load_all_dedications,
@@ -18,6 +24,7 @@ from scripts.utils import (
 )
 
 REACTION_KEYS = ("down", "like", "heart", "sun")
+GITHUB_API = "https://api.github.com"
 
 
 def default_reactions() -> dict[str, int]:
@@ -72,6 +79,128 @@ def _load_existing_dedication(dedication_id: str) -> tuple[dict, Any]:
     return ensure_feedback_fields(dedication), path
 
 
+def _github_token() -> str:
+    return (
+        os.environ.get("DDGPILLI_GITHUB_TOKEN")
+        or os.environ.get("GITHUB_PAT")
+        or os.environ.get("GH_TOKEN")
+        or os.environ.get("GITHUB_TOKEN")
+        or ""
+    ).strip()
+
+
+def use_github_backend() -> bool:
+    return os.environ.get("DDGPILLI_FEEDBACK_BACKEND", "").strip().lower() == "github"
+
+
+def _github_repo() -> str:
+    repo = os.environ.get("DDGPILLI_GITHUB_REPO") or os.environ.get("GITHUB_REPO") or ""
+    repo = repo.strip()
+    if not repo:
+        raise ValueError("DDGPILLI_GITHUB_REPO mancante, esempio: legnaro72/dediche-musicali.")
+    return repo
+
+
+def _github_branch() -> str:
+    return (os.environ.get("DDGPILLI_GITHUB_BRANCH") or os.environ.get("GITHUB_BRANCH") or "main").strip()
+
+
+def _github_headers() -> dict[str, str]:
+    token = _github_token()
+    if not token:
+        raise ValueError("Token GitHub mancante. Configura DDGPILLI_GITHUB_TOKEN come secret del backend.")
+    return {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {token}",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+
+
+def _github_request(method: str, path: str, **kwargs):
+    response = requests.request(
+        method,
+        f"{GITHUB_API}/repos/{_github_repo()}/{path.lstrip('/')}",
+        headers=_github_headers(),
+        timeout=25,
+        **kwargs,
+    )
+    if response.status_code >= 400:
+        raise ValueError(f"GitHub API error {response.status_code}: {response.text}")
+    return response
+
+
+def _dedication_file_name(dedication: dict) -> str:
+    current_path = find_existing_dedication_path(str(dedication.get("id", "")), str(dedication.get("date", "")))
+    if current_path:
+        return current_path.name
+    return f"{dedication.get('id')}.json"
+
+
+def _github_load_path(repo_path: str) -> tuple[dict, str]:
+    response = _github_request("GET", f"contents/{repo_path}", params={"ref": _github_branch()})
+    payload = response.json()
+    content = base64.b64decode(payload["content"]).decode("utf-8-sig")
+    data = json.loads(content)
+    if not isinstance(data, dict):
+        raise ValueError(f"JSON GitHub non valido: {repo_path}")
+    return ensure_feedback_fields(data), payload["sha"]
+
+
+def _github_load_dedication(dedication_id: str) -> tuple[dict, str, str]:
+    dedication_id = (dedication_id or "").strip()
+    if not dedication_id:
+        raise ValueError("dedication_id obbligatorio.")
+
+    direct_path = f"data/dedications/{dedication_id}.json"
+    try:
+        dedication, sha = _github_load_path(direct_path)
+        return dedication, direct_path, sha
+    except Exception:
+        pass
+
+    response = _github_request("GET", "contents/data/dedications", params={"ref": _github_branch()})
+    for item in response.json():
+        if not str(item.get("name", "")).endswith(".json"):
+            continue
+        dedication, sha = _github_load_path(item["path"])
+        if dedication.get("id") == dedication_id:
+            return dedication, item["path"], sha
+
+    raise FileNotFoundError(f"Dedica non trovata su GitHub: {dedication_id}")
+
+
+def _github_save_dedication(dedication: dict, repo_path: str, sha: str, message: str) -> dict:
+    encoded = base64.b64encode(
+        json.dumps(dedication, ensure_ascii=False, indent=2).encode("utf-8")
+    ).decode("ascii")
+    payload = {
+        "message": message,
+        "content": encoded,
+        "sha": sha,
+        "branch": _github_branch(),
+    }
+    _github_request("PUT", f"contents/{repo_path}", json=payload)
+    return dedication
+
+
+def _load_feedback_target(dedication_id: str) -> tuple[dict, Any, str | None]:
+    if use_github_backend():
+        dedication, repo_path, sha = _github_load_dedication(dedication_id)
+        return dedication, repo_path, sha
+    dedication, path = _load_existing_dedication(dedication_id)
+    return dedication, path, None
+
+
+def _save_feedback_target(dedication: dict, target: Any, sha: str | None, message: str) -> dict:
+    if use_github_backend():
+        if not sha:
+            raise ValueError("SHA GitHub mancante per il salvataggio.")
+        return _github_save_dedication(dedication, str(target), sha, message)
+    if not save_json(dedication, target):
+        raise OSError(f"Impossibile salvare {target}")
+    return dedication
+
+
 def feedback_payload(dedication: dict) -> dict:
     dedication = ensure_feedback_fields(dedication)
     return {
@@ -87,11 +216,23 @@ def feedback_payload(dedication: dict) -> dict:
 
 
 def load_feedback(dedication_id: str) -> dict:
-    dedication, _path = _load_existing_dedication(dedication_id)
+    dedication, _target, _sha = _load_feedback_target(dedication_id)
     return feedback_payload(dedication)
 
 
 def load_all_feedback() -> dict[str, dict]:
+    if use_github_backend():
+        response = _github_request("GET", "contents/data/dedications", params={"ref": _github_branch()})
+        feedback = {}
+        for item in response.json():
+            if not str(item.get("name", "")).endswith(".json"):
+                continue
+            dedication, _sha = _github_load_path(item["path"])
+            payload = feedback_payload(dedication)
+            if payload["id"]:
+                feedback[payload["id"]] = payload
+        return feedback
+
     feedback = {}
     for dedication in load_all_dedications():
         if not isinstance(dedication, dict):
@@ -111,14 +252,17 @@ def update_vote(dedication_id: str, voto_pilly: int, pensiero_pilly: str = "") -
     if vote < 1 or vote > 10:
         raise ValueError("votoPilly deve essere compreso tra 1 e 10.")
 
-    dedication, path = _load_existing_dedication(dedication_id)
+    dedication, target, sha = _load_feedback_target(dedication_id)
     dedication["votoPilly"] = vote
     dedication["pensieroPilly"] = str(pensiero_pilly or "").strip()
     dedication["updated_at"] = get_rome_now().isoformat()
 
-    if not save_json(dedication, path):
-        raise OSError(f"Impossibile salvare {path}")
-    return dedication
+    return _save_feedback_target(
+        dedication,
+        target,
+        sha,
+        f"Salva voto Pilly {dedication_id}",
+    )
 
 
 def update_reaction(
@@ -132,7 +276,7 @@ def update_reaction(
     if previous_reaction and previous_reaction not in REACTION_KEYS:
         raise ValueError(f"previous_reaction non valida. Usa una tra: {', '.join(REACTION_KEYS)}")
 
-    dedication, path = _load_existing_dedication(dedication_id)
+    dedication, target, sha = _load_feedback_target(dedication_id)
     reactions = normalize_reactions(dedication.get("reactions"))
     if previous_reaction and previous_reaction != reaction:
         reactions[previous_reaction] = max(0, reactions[previous_reaction] - 1)
@@ -140,6 +284,9 @@ def update_reaction(
     dedication["reactions"] = reactions
     dedication["updated_at"] = get_rome_now().isoformat()
 
-    if not save_json(dedication, path):
-        raise OSError(f"Impossibile salvare {path}")
-    return dedication
+    return _save_feedback_target(
+        dedication,
+        target,
+        sha,
+        f"Salva reazione Pilly {dedication_id}",
+    )

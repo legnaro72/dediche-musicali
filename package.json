@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "astro dev",
     "feedback-api": "python scripts/feedback_api.py",
+    "worker:login": "npx wrangler login",
+    "worker:deploy": "npx wrangler deploy --config workers/feedback-worker/wrangler.toml",
+    "worker:dev": "npx wrangler dev --config workers/feedback-worker/wrangler.toml",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"

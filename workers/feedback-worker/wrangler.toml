@@ -1,0 +1,8 @@
+name = "ddgpilli-feedback"
+main = "src/index.js"
+compatibility_date = "2026-05-15"
+
+[vars]
+GITHUB_REPO = "legnaro72/dediche-musicali"
+GITHUB_BRANCH = "main"
+ALLOWED_ORIGINS = "https://legnaro72.github.io,http://localhost:4321,http://127.0.0.1:4321,http://127.0.0.1:8787"

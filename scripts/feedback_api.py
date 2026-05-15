@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from scripts.dedication_feedback import load_all_feedback, load_feedback, update_reaction, update_vote
 
 HOST = os.environ.get("DDGPILLI_FEEDBACK_HOST", "127.0.0.1")
-PORT = int(os.environ.get("DDGPILLI_FEEDBACK_PORT", "8787"))
+PORT = int(os.environ.get("DDGPILLI_FEEDBACK_PORT") or os.environ.get("PORT") or "8787")
 TOKEN = os.environ.get("DDGPILLI_FEEDBACK_TOKEN", "").strip()
 ALLOWED_ORIGIN = os.environ.get("DDGPILLI_FEEDBACK_ORIGIN", "*")
 
