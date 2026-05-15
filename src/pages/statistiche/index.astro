@@ -1,0 +1,217 @@
+---
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const dataDir = join(process.cwd(), 'data', 'dedications');
+const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
+
+let dedications: any[] = [];
+if (existsSync(dataDir)) {
+  dedications = readdirSync(dataDir)
+    .filter(f => f.endsWith('.json'))
+    .map(f => JSON.parse(readFileSync(join(dataDir, f), 'utf-8')))
+    .filter(d => d.status === 'published' && d.date <= today)
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+const statsData = dedications.map(d => ({
+  id: d.id,
+  date: d.date,
+  title: d.song_title,
+  artist: d.artist,
+  votoPilly: d.votoPilly ?? null,
+  pensieroPilly: d.pensieroPilly ?? '',
+  reactions: d.reactions ?? {},
+}));
+const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
+---
+
+<BaseLayout
+  title="Statistiche | DDGPilliSite"
+  description="Panoramica dei voti Plus e delle reazioni raccolte sulle dediche musicali."
+>
+  <section class="stats-page">
+    <div class="container">
+      <div class="stats-header anim-1">
+        <span class="section-label">Panoramica</span>
+        <h1 class="section-title" style="font-family:var(--font-serif)">Statistiche</h1>
+        <div class="divider"></div>
+      </div>
+
+      <div class="stats-grid anim-2" data-stats-summary>
+        <div class="stat-box"><span>Totale voti</span><strong data-stat="totalVotes">0</strong></div>
+        <div class="stat-box"><span>Voto medio</span><strong data-stat="averageVote">-</strong></div>
+        <div class="stat-box"><span>Voto piu alto</span><strong data-stat="highestVote">-</strong></div>
+        <div class="stat-box"><span>Voto piu basso</span><strong data-stat="lowestVote">-</strong></div>
+        <div class="stat-box"><span>Totale reazioni</span><strong data-stat="totalReactions">0</strong></div>
+        <div class="stat-box"><span>Reazione piu usata</span><strong data-stat="topReaction">-</strong></div>
+      </div>
+
+      <div class="stats-reactions anim-2">
+        <div class="reaction-total">👍 <strong data-reaction-total="like">0</strong></div>
+        <div class="reaction-total">👎 <strong data-reaction-total="down">0</strong></div>
+        <div class="reaction-total">❤️ <strong data-reaction-total="heart">0</strong></div>
+        <div class="reaction-total">☀️ <strong data-reaction-total="sun">0</strong></div>
+      </div>
+
+      <div class="stats-rankings anim-3">
+        <section>
+          <h2>Top 5 voti</h2>
+          <ol data-ranking="votes"></ol>
+        </section>
+        <section>
+          <h2>Top 5 romantiche</h2>
+          <ol data-ranking="heart"></ol>
+        </section>
+        <section>
+          <h2>Top 5 allegre</h2>
+          <ol data-ranking="sun"></ol>
+        </section>
+      </div>
+
+      <div class="stats-extremes anim-3">
+        <p>Canzone con voto piu alto: <strong data-stat="highestSong">-</strong></p>
+        <p>Canzone con voto piu basso: <strong data-stat="lowestSong">-</strong></p>
+        <p>Canzone con piu cuori: <strong data-stat="heartSong">-</strong></p>
+        <p>Canzone con piu like: <strong data-stat="likeSong">-</strong></p>
+      </div>
+
+      <div class="stats-table-wrap anim-4">
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Titolo</th>
+              <th>Artista</th>
+              <th>Voto di Pilly</th>
+              <th>Pensiero di Pilly</th>
+            </tr>
+          </thead>
+          <tbody data-voted-table>
+            <tr><td colspan="5">Nessun voto Plus salvato in questo browser.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <script type="application/json" id="stats-dedications" set:html={statsJson}></script>
+  <script>
+    const dedications = JSON.parse(document.getElementById('stats-dedications')?.textContent || '[]');
+    const reactionKeys = ['down', 'like', 'heart', 'sun'];
+    const reactionLabels = { down: '👎', like: '👍', heart: '❤️', sun: '☀️' };
+
+    function readObject(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || '{}');
+        return value && typeof value === 'object' ? value : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function setText(selector, value) {
+      const node = document.querySelector(selector);
+      if (node) node.textContent = String(value);
+    }
+
+    function countsFor(item, store) {
+      const source = store[item.id] || item.reactions || {};
+      return reactionKeys.reduce((acc, key) => {
+        acc[key] = Math.max(0, Number(source[key] || 0));
+        return acc;
+      }, {});
+    }
+
+    function songLabel(item) {
+      return item ? `${item.title} - ${item.artist}` : '-';
+    }
+
+    function renderRanking(selector, items, formatter) {
+      const list = document.querySelector(selector);
+      if (!list) return;
+      list.innerHTML = '';
+      if (items.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'Nessun dato disponibile';
+        list.append(li);
+        return;
+      }
+      items.slice(0, 5).forEach((item) => {
+        const li = document.createElement('li');
+        li.textContent = formatter(item);
+        list.append(li);
+      });
+    }
+
+    function renderStats() {
+      const voteStore = readObject('ddgpilli-plus-votes');
+      const reactionStore = readObject('ddgpilli-reaction-counts');
+      const voteMap = new Map();
+
+      dedications.forEach((item) => {
+        if (item.votoPilly) voteMap.set(item.id, item);
+      });
+      Object.values(voteStore).forEach((vote) => voteMap.set(vote.id, vote));
+
+      const votes = [...voteMap.values()]
+        .filter(v => Number.isInteger(Number(v.votoPilly)) && Number(v.votoPilly) >= 1 && Number(v.votoPilly) <= 10)
+        .map(v => ({ ...v, votoPilly: Number(v.votoPilly) }));
+
+      const sum = votes.reduce((acc, item) => acc + item.votoPilly, 0);
+      const sortedVotes = [...votes].sort((a, b) => b.votoPilly - a.votoPilly || a.title.localeCompare(b.title));
+      const lowVotes = [...votes].sort((a, b) => a.votoPilly - b.votoPilly || a.title.localeCompare(b.title));
+
+      const reactionTotals = { down: 0, like: 0, heart: 0, sun: 0 };
+      const withReactions = dedications.map((item) => {
+        const counts = countsFor(item, reactionStore);
+        reactionKeys.forEach((key) => reactionTotals[key] += counts[key]);
+        return { ...item, counts };
+      });
+      const totalReactions = Object.values(reactionTotals).reduce((acc, value) => acc + value, 0);
+      const topReaction = reactionKeys.sort((a, b) => reactionTotals[b] - reactionTotals[a])[0];
+      const heartSong = [...withReactions].sort((a, b) => b.counts.heart - a.counts.heart)[0];
+      const likeSong = [...withReactions].sort((a, b) => b.counts.like - a.counts.like)[0];
+
+      setText('[data-stat="totalVotes"]', votes.length);
+      setText('[data-stat="averageVote"]', votes.length ? (sum / votes.length).toFixed(1) : '-');
+      setText('[data-stat="highestVote"]', sortedVotes[0]?.votoPilly ?? '-');
+      setText('[data-stat="lowestVote"]', lowVotes[0]?.votoPilly ?? '-');
+      setText('[data-stat="totalReactions"]', totalReactions);
+      setText('[data-stat="topReaction"]', totalReactions ? reactionLabels[topReaction] : '-');
+      setText('[data-stat="highestSong"]', songLabel(sortedVotes[0]));
+      setText('[data-stat="lowestSong"]', songLabel(lowVotes[0]));
+      setText('[data-stat="heartSong"]', heartSong?.counts.heart ? songLabel(heartSong) : '-');
+      setText('[data-stat="likeSong"]', likeSong?.counts.like ? songLabel(likeSong) : '-');
+      reactionKeys.forEach((key) => setText(`[data-reaction-total="${key}"]`, reactionTotals[key]));
+
+      renderRanking('[data-ranking="votes"]', sortedVotes, item => `${item.votoPilly}/10 - ${songLabel(item)}`);
+      renderRanking('[data-ranking="heart"]', withReactions.filter(i => i.counts.heart > 0).sort((a, b) => b.counts.heart - a.counts.heart), item => `${item.counts.heart} ❤️ - ${songLabel(item)}`);
+      renderRanking('[data-ranking="sun"]', withReactions.filter(i => i.counts.sun > 0).sort((a, b) => b.counts.sun - a.counts.sun), item => `${item.counts.sun} ☀️ - ${songLabel(item)}`);
+
+      const body = document.querySelector('[data-voted-table]');
+      if (!body) return;
+      body.innerHTML = '';
+      if (votes.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="5">Nessun voto Plus salvato in questo browser.</td>';
+        body.append(row);
+        return;
+      }
+      votes.sort((a, b) => b.date.localeCompare(a.date)).forEach((item) => {
+        const row = document.createElement('tr');
+        [item.date, item.title, item.artist, `${item.votoPilly}/10`, item.pensieroPilly || '-'].forEach((value) => {
+          const cell = document.createElement('td');
+          cell.textContent = value;
+          row.append(cell);
+        });
+        body.append(row);
+      });
+    }
+
+    renderStats();
+    window.addEventListener('ddgpilli:stats-updated', renderStats);
+    window.addEventListener('storage', renderStats);
+  </script>
+</BaseLayout>

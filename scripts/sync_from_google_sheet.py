@@ -31,6 +31,7 @@ from scripts.utils import (
     get_italian_day_name, auto_seo_title, auto_seo_description,
     auto_image_alt, get_rome_now,
 )
+from scripts.dedication_feedback import merge_existing_feedback
 
 logger = setup_logging('sync')
 
@@ -181,6 +182,7 @@ def save_sheet_dedication(row: dict, default_vote_url: str, dry_run: bool = Fals
     ded = sheet_row_to_dict(row, default_vote_url)
     if existing and existing.get('created_at'):
         ded['created_at'] = existing['created_at']
+    ded = merge_existing_feedback(ded, existing)
 
     action = 'updated' if path.exists() else 'created'
     if dry_run:

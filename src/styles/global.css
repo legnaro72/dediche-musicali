@@ -207,6 +207,144 @@ section { position:relative; z-index:1; }
 .hero-actions { display:flex; gap:1rem; flex-wrap:wrap; }
 .hero-contact { margin-top:1rem; display:flex; }
 
+/* Plus vote / reactions */
+.plus-vote {
+  display:inline-flex;
+}
+.plus-vote-modal {
+  position:fixed;
+  inset:0;
+  z-index:220;
+  display:grid;
+  place-items:center;
+  padding:1.25rem;
+  background:rgba(0,0,0,0.62);
+  backdrop-filter:blur(10px);
+}
+.plus-vote-modal[hidden] {
+  display:none;
+}
+.plus-vote-dialog {
+  position:relative;
+  width:min(100%,430px);
+  padding:1.6rem;
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  background:#0f0d1a;
+  box-shadow:var(--shadow-card);
+}
+.plus-vote-close {
+  position:absolute;
+  top:0.8rem;
+  right:0.8rem;
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:50%;
+  background:rgba(255,255,255,0.06);
+  color:var(--text-dim);
+  cursor:pointer;
+  font:700 1.1rem/1 var(--font-sans);
+}
+.plus-vote-kicker {
+  margin-bottom:0.5rem;
+  color:var(--accent);
+  font-size:0.76rem;
+  font-weight:800;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+}
+.plus-vote-dialog h2 {
+  padding-right:2.2rem;
+  margin-bottom:0.25rem;
+  font-family:var(--font-serif);
+  font-size:1.65rem;
+}
+.plus-vote-artist {
+  margin-bottom:1.25rem;
+  color:var(--magenta-soft);
+}
+.plus-vote-form {
+  display:grid;
+  gap:1rem;
+}
+.plus-vote-form label {
+  display:grid;
+  gap:0.45rem;
+  color:var(--text-secondary);
+  font-size:0.82rem;
+  font-weight:700;
+}
+.plus-vote-form input,
+.plus-vote-form textarea {
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  background:rgba(255,255,255,0.05);
+  color:var(--text-primary);
+  font:500 1rem var(--font-sans);
+  outline:none;
+}
+.plus-vote-form input {
+  max-width:130px;
+  padding:0.8rem 1rem;
+}
+.plus-vote-form textarea {
+  min-height:120px;
+  resize:vertical;
+  padding:0.9rem 1rem;
+}
+.plus-vote-form input:focus,
+.plus-vote-form textarea:focus {
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(167,139,250,0.14);
+}
+.plus-vote-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.75rem;
+}
+.plus-vote-status {
+  min-height:1.2rem;
+  color:var(--text-dim);
+  font-size:0.82rem;
+}
+.quick-reactions {
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:0.5rem;
+  width:100%;
+  max-width:480px;
+  margin:0.9rem auto 0;
+}
+.quick-reactions button {
+  display:inline-flex;
+  align-items:center;
+  gap:0.35rem;
+  min-width:66px;
+  min-height:40px;
+  justify-content:center;
+  border:1px solid var(--border);
+  border-radius:var(--radius-full);
+  background:rgba(255,255,255,0.055);
+  color:var(--text-primary);
+  cursor:pointer;
+  transition:var(--transition);
+}
+.quick-reactions button:hover,
+.quick-reactions button.is-active {
+  border-color:var(--border-hover);
+  background:rgba(167,139,250,0.16);
+  transform:translateY(-2px);
+}
+.quick-reactions strong {
+  min-width:1.2ch;
+  font-size:0.85rem;
+}
+
 /* Archive grid */
 .archive-grid {
   display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:1.5rem;
@@ -687,6 +825,126 @@ button.video-poster {
   line-height:1.45;
 }
 
+/* Statistics */
+.stats-page {
+  min-height:100vh;
+  min-height:100dvh;
+  padding:8.5rem 0 5rem;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(124,58,237,0.2), transparent 34%),
+    radial-gradient(circle at 82% 16%, rgba(236,72,153,0.14), transparent 30%),
+    var(--bg-base);
+}
+.stats-header {
+  text-align:center;
+  margin-bottom:2.5rem;
+}
+.stats-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:1rem;
+  margin-bottom:1rem;
+}
+.stat-box,
+.stats-rankings section,
+.stats-extremes,
+.stats-table-wrap {
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  background:var(--bg-card);
+  backdrop-filter:blur(12px);
+}
+.stat-box {
+  min-height:110px;
+  padding:1rem;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.stat-box span {
+  color:var(--text-dim);
+  font-size:0.78rem;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+.stat-box strong {
+  font-size:clamp(1.75rem,4vw,2.4rem);
+  line-height:1;
+}
+.stats-reactions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.75rem;
+  margin:1rem 0 1.5rem;
+}
+.reaction-total {
+  min-width:95px;
+  padding:0.75rem 1rem;
+  border:1px solid var(--border);
+  border-radius:var(--radius-full);
+  background:rgba(255,255,255,0.055);
+  text-align:center;
+}
+.stats-rankings {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:1rem;
+  margin-bottom:1rem;
+}
+.stats-rankings section {
+  padding:1.25rem;
+}
+.stats-rankings h2 {
+  margin-bottom:0.85rem;
+  font-size:1rem;
+}
+.stats-rankings ol {
+  display:grid;
+  gap:0.55rem;
+  padding-left:1.3rem;
+  color:var(--text-dim);
+  line-height:1.5;
+}
+.stats-extremes {
+  display:grid;
+  gap:0.65rem;
+  margin-bottom:1rem;
+  padding:1.25rem;
+  color:var(--text-dim);
+}
+.stats-extremes strong {
+  color:var(--text-primary);
+}
+.stats-table-wrap {
+  overflow:auto;
+}
+.stats-table {
+  width:100%;
+  min-width:720px;
+  border-collapse:collapse;
+}
+.stats-table th,
+.stats-table td {
+  padding:0.9rem 1rem;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+  vertical-align:top;
+}
+.stats-table th {
+  color:var(--accent);
+  font-size:0.76rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+.stats-table td {
+  color:var(--text-dim);
+  line-height:1.5;
+}
+.stats-table tr:last-child td {
+  border-bottom:0;
+}
+
 /* Animations */
 @keyframes fadeInUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
 @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
@@ -710,6 +968,10 @@ button.video-poster {
   .hero { padding:6rem 0 3rem; }
   .hero-actions { flex-direction:column; }
   .btn-lg { width:100%; justify-content:center; }
+  .plus-vote,
+  .plus-vote .btn-lg {
+    width:100%;
+  }
   .ambient-audio {
     right:1rem;
     top:0.55rem;

@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AudioEmbed from '../components/AudioEmbed.astro';
 import DedicationCard from '../components/DedicationCard.astro';
+import DedicationPlus from '../components/DedicationPlus.astro';
 import VideoEmbed from '../components/VideoEmbed.astro';
 
 const dataDir = join(process.cwd(), 'data', 'dedications');
@@ -63,8 +64,9 @@ function fmtDate(dateStr: string, dayName?: string) {
 
     <div class="container hero-content">
       <!-- Immagine -->
-      <div style="display:flex;justify-content:center;" class="anim-1">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;" class="anim-1">
         {dedication?.image?.path ? (
+          <>
           <div class="hero-image-frame" id="hero-image-frame">
             <img
               src={base + (dedication.image.path).replace(/^\//, '')}
@@ -75,6 +77,8 @@ function fmtDate(dateStr: string, dayName?: string) {
               loading="eager"
             />
           </div>
+          <DedicationPlus dedication={dedication} mode="reactions" />
+          </>
         ) : (
           <div class="img-placeholder">♪</div>
         )}
@@ -109,6 +113,7 @@ function fmtDate(dateStr: string, dayName?: string) {
               >
                 ⭐ Votami
               </a>
+              <DedicationPlus dedication={dedication} mode="button" />
               <a href={`${base}dediche/${dedication.id}/`} class="btn btn-secondary btn-lg">
                 Leggi tutto →
               </a>

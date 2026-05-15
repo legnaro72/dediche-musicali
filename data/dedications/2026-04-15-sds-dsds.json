@@ -39,5 +39,13 @@
     "title": "Genoa",
     "description": "genoa"
   },
-  "date_it": "15 aprile 2026"
+  "date_it": "15 aprile 2026",
+  "votoPilly": null,
+  "pensieroPilly": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 0,
+    "sun": 0
+  }
 }

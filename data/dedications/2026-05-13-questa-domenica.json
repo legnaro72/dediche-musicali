@@ -32,5 +32,13 @@
   },
   "created_at": "2026-05-13T17:31:48.327004+02:00",
   "updated_at": "2026-05-13T17:39:57.735616+02:00",
-  "date_it": "13 maggio 2026"
+  "date_it": "13 maggio 2026",
+  "votoPilly": null,
+  "pensieroPilly": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 0,
+    "sun": 0
+  }
 }

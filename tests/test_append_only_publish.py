@@ -6,7 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from scripts import publish_daily, sync_from_google_sheet, utils
+from scripts import dedication_feedback, publish_daily, sync_from_google_sheet, utils
 
 
 def make_dedication(date_str, status):
@@ -172,6 +172,50 @@ class AppendOnlyPublishTest(unittest.TestCase):
         second_after = json.loads((self.data_dir / f"{second['id']}.json").read_text(encoding='utf-8'))
         self.assertEqual(first_after['status'], 'published')
         self.assertEqual(second_after['status'], 'scheduled')
+
+    def test_update_vote_persists_feedback_fields(self):
+        self.write_dedication('2026-05-16', 'published')
+        path = self.data_dir / '2026-05-16.json'
+        data = json.loads(path.read_text(encoding='utf-8'))
+        data['id'] = 'ded-2026-05-16'
+        path.write_text(json.dumps(data), encoding='utf-8')
+
+        updated = dedication_feedback.update_vote(
+            'ded-2026-05-16',
+            8,
+            'Pensiero salvato',
+        )
+
+        self.assertEqual(updated['votoPilly'], 8)
+        self.assertEqual(updated['pensieroPilly'], 'Pensiero salvato')
+        saved = json.loads(path.read_text(encoding='utf-8'))
+        self.assertEqual(saved['votoPilly'], 8)
+        self.assertEqual(saved['pensieroPilly'], 'Pensiero salvato')
+        self.assertEqual(saved['reactions'], {'down': 0, 'like': 0, 'heart': 0, 'sun': 0})
+
+    def test_sync_preserves_existing_feedback_when_forced(self):
+        self.write_dedication('2026-05-17', 'scheduled')
+        path = self.data_dir / '2026-05-17.json'
+        before = json.loads(path.read_text(encoding='utf-8'))
+        before['votoPilly'] = 9
+        before['pensieroPilly'] = 'Da non perdere'
+        before['reactions'] = {'down': 0, 'like': 2, 'heart': 4, 'sun': 1}
+        path.write_text(json.dumps(before), encoding='utf-8')
+
+        row = make_row('2026-05-17', 'scheduled')
+        row['song_title'] = 'Changed in sheet'
+        sync_ok = sync_from_google_sheet.sync_rows(
+            [row],
+            default_vote_url='https://example.com/vote',
+            force_republish=True,
+        )
+
+        self.assertTrue(sync_ok)
+        after = json.loads(path.read_text(encoding='utf-8'))
+        self.assertEqual(after['song_title'], 'Changed in sheet')
+        self.assertEqual(after['votoPilly'], 9)
+        self.assertEqual(after['pensieroPilly'], 'Da non perdere')
+        self.assertEqual(after['reactions'], {'down': 0, 'like': 2, 'heart': 4, 'sun': 1})
 
 
 if __name__ == '__main__':

@@ -1,0 +1,270 @@
+---
+export interface Props {
+  dedication: {
+    id: string;
+    date: string;
+    song_title: string;
+    artist: string;
+    votoPilly?: number;
+    pensieroPilly?: string;
+    reactions?: Record<string, number>;
+  };
+  mode: 'button' | 'reactions';
+}
+
+const { dedication, mode } = Astro.props;
+const data = {
+  id: dedication.id,
+  date: dedication.date,
+  title: dedication.song_title,
+  artist: dedication.artist,
+  votoPilly: dedication.votoPilly ?? null,
+  pensieroPilly: dedication.pensieroPilly ?? '',
+  reactions: dedication.reactions ?? {},
+};
+---
+
+{mode === 'button' ? (
+  <div class="plus-vote" data-plus-vote={JSON.stringify(data)}>
+    <button class="btn btn-secondary btn-lg plus-vote-open" type="button" data-plus-vote-open>
+      Votami Plus
+    </button>
+
+    <div class="plus-vote-modal" data-plus-vote-modal hidden>
+      <div class="plus-vote-dialog" role="dialog" aria-modal="true" aria-labelledby={`plus-vote-title-${dedication.id}`}>
+        <button class="plus-vote-close" type="button" aria-label="Chiudi" data-plus-vote-close>×</button>
+        <p class="plus-vote-kicker">Voto interno</p>
+        <h2 id={`plus-vote-title-${dedication.id}`}>{dedication.song_title}</h2>
+        <p class="plus-vote-artist">{dedication.artist}</p>
+        <form class="plus-vote-form" data-plus-vote-form>
+          <label>
+            <span>Voto da 1 a 10</span>
+            <input data-plus-vote-score type="text" inputmode="numeric" pattern="[1-9]|10" autocomplete="off" required />
+          </label>
+          <label>
+            <span>Pensiero di Pilly</span>
+            <textarea data-plus-vote-thought rows="5" placeholder="Scrivi un pensiero, anche breve..."></textarea>
+          </label>
+          <div class="plus-vote-actions">
+            <button class="btn btn-primary" type="submit">Salva voto</button>
+            <button class="btn btn-secondary" type="button" data-plus-vote-cancel>Annulla</button>
+          </div>
+          <p class="plus-vote-status" data-plus-vote-status></p>
+        </form>
+      </div>
+    </div>
+  </div>
+) : (
+  <div class="quick-reactions" data-quick-reactions={JSON.stringify(data)} aria-label="Reazioni rapide">
+    <button type="button" data-reaction="down" aria-label="Non mi piace"><span>👎</span><strong data-count="down">0</strong></button>
+    <button type="button" data-reaction="like" aria-label="Mi piace"><span>👍</span><strong data-count="like">0</strong></button>
+    <button type="button" data-reaction="heart" aria-label="Molto romantica"><span>❤️</span><strong data-count="heart">0</strong></button>
+    <button type="button" data-reaction="sun" aria-label="Mi porta allegria"><span>☀️</span><strong data-count="sun">0</strong></button>
+  </div>
+)}
+
+<script>
+  const voteStoreKey = 'ddgpilli-plus-votes';
+  const reactionCountKey = 'ddgpilli-reaction-counts';
+  const reactionChoiceKey = 'ddgpilli-reaction-choice';
+  const reactionKeys = ['down', 'like', 'heart', 'sun'];
+
+  function readObject(key) {
+    try {
+      const value = JSON.parse(localStorage.getItem(key) || '{}');
+      return value && typeof value === 'object' ? value : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function writeObject(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+    window.dispatchEvent(new CustomEvent('ddgpilli:stats-updated'));
+  }
+
+  function feedbackApiUrl() {
+    return document.querySelector('meta[name="ddgpilli-feedback-api"]')?.getAttribute('content')?.trim() || '';
+  }
+
+  async function postFeedback(path, payload) {
+    const baseUrl = feedbackApiUrl();
+    if (!baseUrl) return { ok: false, localOnly: true };
+    const response = await fetch(`${baseUrl.replace(/\/$/, '')}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || result.ok === false) {
+      throw new Error(result.error || 'Salvataggio persistente non riuscito.');
+    }
+    return result;
+  }
+
+  function parseData(node) {
+    const raw = node.getAttribute('data-plus-vote') || node.getAttribute('data-quick-reactions') || '{}';
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return {};
+    }
+  }
+
+  function normalizeCounts(counts) {
+    return reactionKeys.reduce((acc, key) => {
+      acc[key] = Math.max(0, Number(counts?.[key] || 0));
+      return acc;
+    }, {});
+  }
+
+  function initPlusVotes() {
+    document.querySelectorAll('[data-plus-vote]').forEach((root) => {
+      if (root.dataset.ready === 'true') return;
+      root.dataset.ready = 'true';
+
+      const data = parseData(root);
+      const modal = root.querySelector('[data-plus-vote-modal]');
+      const open = root.querySelector('[data-plus-vote-open]');
+      const close = root.querySelector('[data-plus-vote-close]');
+      const cancel = root.querySelector('[data-plus-vote-cancel]');
+      const form = root.querySelector('[data-plus-vote-form]');
+      const score = root.querySelector('[data-plus-vote-score]');
+      const thought = root.querySelector('[data-plus-vote-thought]');
+      const status = root.querySelector('[data-plus-vote-status]');
+
+      const fillForm = () => {
+        const votes = readObject(voteStoreKey);
+        const saved = votes[data.id] || (data.votoPilly ? data : null);
+        if (score instanceof HTMLInputElement) score.value = saved?.votoPilly ? String(saved.votoPilly) : '';
+        if (thought instanceof HTMLTextAreaElement) thought.value = saved?.pensieroPilly || '';
+        if (status instanceof HTMLElement) status.textContent = saved ? 'Puoi modificare il voto gia salvato.' : '';
+      };
+
+      const hide = () => {
+        if (modal instanceof HTMLElement) modal.hidden = true;
+      };
+
+      open?.addEventListener('click', () => {
+        fillForm();
+        if (modal instanceof HTMLElement) modal.hidden = false;
+        if (score instanceof HTMLInputElement) score.focus();
+      });
+      close?.addEventListener('click', hide);
+      cancel?.addEventListener('click', hide);
+      modal?.addEventListener('click', (event) => {
+        if (event.target === modal) hide();
+      });
+
+      form?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const value = Number(score?.value || 0);
+        if (!Number.isInteger(value) || value < 1 || value > 10) {
+          if (status instanceof HTMLElement) status.textContent = 'Inserisci un voto intero da 1 a 10.';
+          return;
+        }
+
+        const votePayload = {
+          id: data.id,
+          date: data.date,
+          title: data.title,
+          artist: data.artist,
+          votoPilly: value,
+          pensieroPilly: thought instanceof HTMLTextAreaElement ? thought.value.trim() : '',
+          updatedAt: new Date().toISOString(),
+        };
+
+        if (status instanceof HTMLElement) status.textContent = 'Salvataggio in corso...';
+
+        try {
+          const apiResult = await postFeedback('/save_vote', votePayload);
+          if (!apiResult.localOnly) votePayload.updatedAt = apiResult.updated_at || votePayload.updatedAt;
+        } catch (error) {
+          if (status instanceof HTMLElement) {
+            status.textContent = error instanceof Error ? error.message : 'Salvataggio persistente non riuscito.';
+          }
+          return;
+        }
+
+        const votes = readObject(voteStoreKey);
+        votes[data.id] = votePayload;
+        writeObject(voteStoreKey, votes);
+        if (status instanceof HTMLElement) {
+          status.textContent = feedbackApiUrl()
+            ? 'Voto salvato nel dataset.'
+            : 'Endpoint non configurato: bozza salvata nel browser.';
+        }
+        window.setTimeout(hide, 500);
+      });
+    });
+  }
+
+  function initReactions() {
+    document.querySelectorAll('[data-quick-reactions]').forEach((root) => {
+      if (root.dataset.ready === 'true') return;
+      root.dataset.ready = 'true';
+
+      const data = parseData(root);
+      const initialCounts = normalizeCounts(data.reactions);
+
+      const render = () => {
+        const countsStore = readObject(reactionCountKey);
+        const choices = readObject(reactionChoiceKey);
+        const counts = normalizeCounts(countsStore[data.id] || initialCounts);
+        reactionKeys.forEach((key) => {
+          const count = root.querySelector(`[data-count="${key}"]`);
+          const button = root.querySelector(`[data-reaction="${key}"]`);
+          if (count instanceof HTMLElement) count.textContent = String(counts[key]);
+          if (button instanceof HTMLElement) button.classList.toggle('is-active', choices[data.id] === key);
+        });
+      };
+
+      root.querySelectorAll('[data-reaction]').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const next = button.getAttribute('data-reaction');
+          if (!reactionKeys.includes(next)) return;
+
+          const countsStore = readObject(reactionCountKey);
+          const choices = readObject(reactionChoiceKey);
+          const counts = normalizeCounts(countsStore[data.id] || initialCounts);
+          const previous = choices[data.id];
+
+          if (previous === next) return;
+          if (reactionKeys.includes(previous)) counts[previous] = Math.max(0, counts[previous] - 1);
+          counts[next] += 1;
+          choices[data.id] = next;
+
+          try {
+            const apiResult = await postFeedback('/save_reaction', {
+              id: data.id,
+              reaction: next,
+              previousReaction: previous || null,
+            });
+            if (apiResult.reactions) {
+              reactionKeys.forEach((key) => {
+                counts[key] = Math.max(0, Number(apiResult.reactions[key] || 0));
+              });
+            }
+          } catch {
+            return;
+          }
+
+          countsStore[data.id] = counts;
+          writeObject(reactionCountKey, countsStore);
+          writeObject(reactionChoiceKey, choices);
+          render();
+        });
+      });
+
+      render();
+    });
+  }
+
+  function initDedicationPlus() {
+    initPlusVotes();
+    initReactions();
+  }
+
+  initDedicationPlus();
+  document.addEventListener('astro:page-load', initDedicationPlus);
+</script>

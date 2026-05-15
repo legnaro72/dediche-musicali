@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import AudioEmbed from '../../components/AudioEmbed.astro';
 import DedicationImage from '../../components/DedicationImage.astro';
+import DedicationPlus from '../../components/DedicationPlus.astro';
 import VideoEmbed from '../../components/VideoEmbed.astro';
 
 export async function getStaticPaths() {
@@ -88,6 +89,7 @@ const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
           style="border-radius:var(--radius-lg);"
           loading="eager"
         />
+        <DedicationPlus dedication={dedication} mode="reactions" />
       </div>
     )}
 
@@ -126,6 +128,7 @@ const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
       <a href={dedication.vote.url} target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg">
         ⭐ Votami
       </a>
+      <DedicationPlus dedication={dedication} mode="button" />
     </div>
 
     <!-- Tags -->
