@@ -12,6 +12,7 @@ from typing import Any
 from scripts.utils import (
     find_existing_dedication_path,
     get_rome_now,
+    load_all_dedications,
     load_json,
     save_json,
 )
@@ -69,6 +70,36 @@ def _load_existing_dedication(dedication_id: str) -> tuple[dict, Any]:
     if not isinstance(dedication, dict):
         raise ValueError(f"JSON dedica non valido: {path}")
     return ensure_feedback_fields(dedication), path
+
+
+def feedback_payload(dedication: dict) -> dict:
+    dedication = ensure_feedback_fields(dedication)
+    return {
+        "id": dedication.get("id", ""),
+        "date": dedication.get("date", ""),
+        "title": dedication.get("song_title", ""),
+        "artist": dedication.get("artist", ""),
+        "votoPilly": dedication.get("votoPilly"),
+        "pensieroPilly": dedication.get("pensieroPilly", ""),
+        "reactions": normalize_reactions(dedication.get("reactions")),
+        "updated_at": dedication.get("updated_at", ""),
+    }
+
+
+def load_feedback(dedication_id: str) -> dict:
+    dedication, _path = _load_existing_dedication(dedication_id)
+    return feedback_payload(dedication)
+
+
+def load_all_feedback() -> dict[str, dict]:
+    feedback = {}
+    for dedication in load_all_dedications():
+        if not isinstance(dedication, dict):
+            continue
+        payload = feedback_payload(dedication)
+        if payload["id"]:
+            feedback[payload["id"]] = payload
+    return feedback
 
 
 def update_vote(dedication_id: str, voto_pilly: int, pensiero_pilly: str = "") -> dict:

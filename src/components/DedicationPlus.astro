@@ -89,7 +89,7 @@ const data = {
 
   async function postFeedback(path, payload) {
     const baseUrl = feedbackApiUrl();
-    if (!baseUrl) return { ok: false, localOnly: true };
+    if (!baseUrl) throw new Error('API feedback non configurata: impossibile salvare in modo persistente.');
     const response = await fetch(`${baseUrl.replace(/\/$/, '')}${path}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -100,6 +100,17 @@ const data = {
       throw new Error(result.error || 'Salvataggio persistente non riuscito.');
     }
     return result;
+  }
+
+  async function fetchFeedback(dedicationId) {
+    const baseUrl = feedbackApiUrl();
+    if (!baseUrl || !dedicationId) return null;
+    const response = await fetch(`${baseUrl.replace(/\/$/, '')}/feedback?id=${encodeURIComponent(dedicationId)}`, {
+      cache: 'no-store',
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || result.ok === false) return null;
+    return result.feedback || null;
   }
 
   function parseData(node) {
@@ -132,21 +143,27 @@ const data = {
       const score = root.querySelector('[data-plus-vote-score]');
       const thought = root.querySelector('[data-plus-vote-thought]');
       const status = root.querySelector('[data-plus-vote-status]');
+      let serverFeedback = null;
 
-      const fillForm = () => {
-        const votes = readObject(voteStoreKey);
-        const saved = votes[data.id] || (data.votoPilly ? data : null);
+      const fillForm = async () => {
+        if (feedbackApiUrl()) {
+          serverFeedback = await fetchFeedback(data.id);
+        }
+        const saved = serverFeedback || (data.votoPilly ? data : null);
         if (score instanceof HTMLInputElement) score.value = saved?.votoPilly ? String(saved.votoPilly) : '';
         if (thought instanceof HTMLTextAreaElement) thought.value = saved?.pensieroPilly || '';
-        if (status instanceof HTMLElement) status.textContent = saved ? 'Puoi modificare il voto gia salvato.' : '';
+        if (status instanceof HTMLElement) {
+          status.textContent = saved?.votoPilly ? 'Puoi modificare il voto gia salvato.' : '';
+        }
       };
 
       const hide = () => {
         if (modal instanceof HTMLElement) modal.hidden = true;
       };
 
-      open?.addEventListener('click', () => {
-        fillForm();
+      open?.addEventListener('click', async () => {
+        if (status instanceof HTMLElement) status.textContent = feedbackApiUrl() ? 'Caricamento voto salvato...' : '';
+        await fillForm();
         if (modal instanceof HTMLElement) modal.hidden = false;
         if (score instanceof HTMLInputElement) score.focus();
       });
@@ -178,7 +195,7 @@ const data = {
 
         try {
           const apiResult = await postFeedback('/save_vote', votePayload);
-          if (!apiResult.localOnly) votePayload.updatedAt = apiResult.updated_at || votePayload.updatedAt;
+          votePayload.updatedAt = apiResult.updated_at || votePayload.updatedAt;
         } catch (error) {
           if (status instanceof HTMLElement) {
             status.textContent = error instanceof Error ? error.message : 'Salvataggio persistente non riuscito.';
@@ -186,13 +203,9 @@ const data = {
           return;
         }
 
-        const votes = readObject(voteStoreKey);
-        votes[data.id] = votePayload;
-        writeObject(voteStoreKey, votes);
+        writeObject(voteStoreKey, { [data.id]: votePayload });
         if (status instanceof HTMLElement) {
-          status.textContent = feedbackApiUrl()
-            ? 'Voto salvato nel dataset.'
-            : 'Endpoint non configurato: bozza salvata nel browser.';
+          status.textContent = 'Voto salvato nel dataset.';
         }
         window.setTimeout(hide, 500);
       });
@@ -205,18 +218,30 @@ const data = {
       root.dataset.ready = 'true';
 
       const data = parseData(root);
+      let serverReactions = null;
       const initialCounts = normalizeCounts(data.reactions);
 
       const render = () => {
         const countsStore = readObject(reactionCountKey);
         const choices = readObject(reactionChoiceKey);
-        const counts = normalizeCounts(countsStore[data.id] || initialCounts);
+        const source = feedbackApiUrl()
+          ? (serverReactions || initialCounts)
+          : (countsStore[data.id] || initialCounts);
+        const counts = normalizeCounts(source);
         reactionKeys.forEach((key) => {
           const count = root.querySelector(`[data-count="${key}"]`);
           const button = root.querySelector(`[data-reaction="${key}"]`);
           if (count instanceof HTMLElement) count.textContent = String(counts[key]);
           if (button instanceof HTMLElement) button.classList.toggle('is-active', choices[data.id] === key);
         });
+      };
+
+      const refreshServerReactions = async () => {
+        const feedback = await fetchFeedback(data.id);
+        if (feedback?.reactions) {
+          serverReactions = feedback.reactions;
+          render();
+        }
       };
 
       root.querySelectorAll('[data-reaction]').forEach((button) => {
@@ -226,7 +251,9 @@ const data = {
 
           const countsStore = readObject(reactionCountKey);
           const choices = readObject(reactionChoiceKey);
-          const counts = normalizeCounts(countsStore[data.id] || initialCounts);
+          const counts = normalizeCounts(feedbackApiUrl()
+            ? (serverReactions || initialCounts)
+            : (countsStore[data.id] || initialCounts));
           const previous = choices[data.id];
 
           if (previous === next) return;
@@ -244,6 +271,7 @@ const data = {
               reactionKeys.forEach((key) => {
                 counts[key] = Math.max(0, Number(apiResult.reactions[key] || 0));
               });
+              serverReactions = counts;
             }
           } catch {
             return;
@@ -256,6 +284,7 @@ const data = {
         });
       });
 
+      refreshServerReactions();
       render();
     });
   }

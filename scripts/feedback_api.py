@@ -14,10 +14,11 @@ import json
 import os
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from scripts.dedication_feedback import update_reaction, update_vote
+from scripts.dedication_feedback import load_all_feedback, load_feedback, update_reaction, update_vote
 
 HOST = os.environ.get("DDGPILLI_FEEDBACK_HOST", "127.0.0.1")
 PORT = int(os.environ.get("DDGPILLI_FEEDBACK_PORT", "8787"))
@@ -32,13 +33,38 @@ class FeedbackHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Access-Control-Allow-Origin", ALLOWED_ORIGIN)
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
 
     def do_OPTIONS(self) -> None:
         self._send_json(200, {"ok": True})
+
+    def do_GET(self) -> None:
+        parsed = urlparse(self.path)
+        try:
+            if parsed.path in ("", "/"):
+                self._send_json(200, {
+                    "ok": True,
+                    "service": "DDGPilli feedback API",
+                    "endpoints": ["/feedback/all", "/feedback?id=<dedication_id>", "/save_vote", "/save_reaction"],
+                })
+                return
+
+            if parsed.path == "/feedback/all":
+                self._send_json(200, {"ok": True, "feedback": load_all_feedback()})
+                return
+
+            if parsed.path == "/feedback":
+                params = parse_qs(parsed.query)
+                dedication_id = (params.get("id") or params.get("dedicationId") or [""])[0]
+                self._send_json(200, {"ok": True, "feedback": load_feedback(dedication_id)})
+                return
+
+            self._send_json(404, {"ok": False, "error": "Endpoint non trovato."})
+        except Exception as exc:
+            self._send_json(400, {"ok": False, "error": str(exc)})
 
     def do_POST(self) -> None:
         if TOKEN and self.headers.get("Authorization") != f"Bearer {TOKEN}":

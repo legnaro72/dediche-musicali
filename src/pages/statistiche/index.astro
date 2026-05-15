@@ -100,6 +100,11 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
   <script>
     const dedications = JSON.parse(document.getElementById('stats-dedications')?.textContent || '[]');
     const reactionKeys = ['down', 'like', 'heart', 'sun'];
+    let apiFeedback = {};
+
+    function feedbackApiUrl() {
+      return document.querySelector('meta[name="ddgpilli-feedback-api"]')?.getAttribute('content')?.trim() || '';
+    }
     const reactionLabels = { down: '👎', like: '👍', heart: '❤️', sun: '☀️' };
 
     function readObject(key) {
@@ -146,14 +151,21 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
     }
 
     function renderStats() {
-      const voteStore = readObject('ddgpilli-plus-votes');
-      const reactionStore = readObject('ddgpilli-reaction-counts');
+      const voteStore = {};
+      const reactionStore = {};
+      const runtimeDedications = dedications.map(item => ({
+        ...item,
+        ...(apiFeedback[item.id] || {}),
+        id: item.id,
+        date: item.date,
+        title: item.title,
+        artist: item.artist,
+      }));
       const voteMap = new Map();
 
-      dedications.forEach((item) => {
+      runtimeDedications.forEach((item) => {
         if (item.votoPilly) voteMap.set(item.id, item);
       });
-      Object.values(voteStore).forEach((vote) => voteMap.set(vote.id, vote));
 
       const votes = [...voteMap.values()]
         .filter(v => Number.isInteger(Number(v.votoPilly)) && Number(v.votoPilly) >= 1 && Number(v.votoPilly) <= 10)
@@ -164,7 +176,7 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
       const lowVotes = [...votes].sort((a, b) => a.votoPilly - b.votoPilly || a.title.localeCompare(b.title));
 
       const reactionTotals = { down: 0, like: 0, heart: 0, sun: 0 };
-      const withReactions = dedications.map((item) => {
+      const withReactions = runtimeDedications.map((item) => {
         const counts = countsFor(item, reactionStore);
         reactionKeys.forEach((key) => reactionTotals[key] += counts[key]);
         return { ...item, counts };
@@ -210,8 +222,24 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
       });
     }
 
+    async function loadApiFeedback() {
+      const baseUrl = feedbackApiUrl();
+      if (!baseUrl) return;
+      try {
+        const response = await fetch(`${baseUrl.replace(/\/$/, '')}/feedback/all`, { cache: 'no-store' });
+        const result = await response.json();
+        if (response.ok && result.ok !== false && result.feedback) {
+          apiFeedback = result.feedback;
+        }
+      } catch {
+        apiFeedback = {};
+      }
+      renderStats();
+    }
+
     renderStats();
-    window.addEventListener('ddgpilli:stats-updated', renderStats);
+    loadApiFeedback();
+    window.addEventListener('ddgpilli:stats-updated', loadApiFeedback);
     window.addEventListener('storage', renderStats);
   </script>
 </BaseLayout>
