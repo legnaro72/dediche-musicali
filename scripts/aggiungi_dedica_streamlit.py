@@ -43,6 +43,18 @@ UPLOAD_IMAGE_TARGET_BYTES = int(os.environ.get("UPLOAD_IMAGE_TARGET_BYTES", str(
 UPLOAD_IMAGE_HARD_MAX_BYTES = int(os.environ.get("UPLOAD_IMAGE_HARD_MAX_BYTES", str(700 * 1024)))
 STREAMLIT_ICON_PATH = Path(__file__).resolve().parents[1] / "static" / "pwa" / "icons" / "icon-192.png"
 
+
+class UploadedImageSnapshot:
+    """Copia stabile di un file caricato, utile quando il browser mobile perde il widget."""
+
+    def __init__(self, name: str, file_type: str, data: bytes):
+        self.name = name
+        self.type = file_type
+        self._data = data
+
+    def getvalue(self) -> bytes:
+        return self._data
+
 SHEET_COLUMNS = [
     "id",
     "date",
@@ -265,6 +277,25 @@ def format_bytes(size: int) -> str:
     return f"{size / (1024 * 1024):.1f} MB"
 
 
+def remember_uploaded_image(prefix: str, uploaded_file):
+    snapshot_key = f"{prefix}_uploaded_image_snapshot"
+    if uploaded_file is None:
+        return st.session_state.get(snapshot_key)
+
+    data = uploaded_file.getvalue()
+    if not data:
+        st.warning("Il browser ha inviato un file vuoto. Riprova selezionando la foto dalla galleria.")
+        return st.session_state.get(snapshot_key)
+
+    snapshot = UploadedImageSnapshot(
+        uploaded_file.name or f"{prefix}-immagine.jpg",
+        getattr(uploaded_file, "type", "") or "application/octet-stream",
+        data,
+    )
+    st.session_state[snapshot_key] = snapshot
+    return snapshot
+
+
 def optimize_uploaded_image(uploaded_file) -> tuple[bytes, dict]:
     from PIL import Image, ImageOps, ImageSequence
 
@@ -389,7 +420,7 @@ def upload_image_to_github(uploaded_file, asset_id: str) -> str:
     if sha:
         payload["sha"] = sha
 
-    response = requests.put(api_url, headers=headers, json=payload, timeout=30)
+    response = requests.put(api_url, headers=headers, json=payload, timeout=60)
     if response.status_code not in (200, 201):
         raise ValueError(f"Upload GitHub fallito: {response.text}")
 
@@ -685,23 +716,28 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
         disabled=image_mode not in ("raw", "upload"),
         key=f"{prefix}_uploaded_file",
     )
+    uploaded_snapshot = remember_uploaded_image(prefix, uploaded_file)
     st.text_input("image_source", key=f"{prefix}_image_source")
-    if existing_image_source and not uploaded_file:
+    if existing_image_source and not uploaded_snapshot:
         st.caption(f"Immagine attuale: {existing_image_source}")
-    if uploaded_file:
-        uploaded_size = len(uploaded_file.getvalue())
-        uploaded_type = getattr(uploaded_file, "type", "") or "tipo non dichiarato"
+    if uploaded_snapshot:
+        uploaded_bytes = uploaded_snapshot.getvalue()
+        uploaded_size = len(uploaded_bytes)
+        uploaded_type = getattr(uploaded_snapshot, "type", "") or "tipo non dichiarato"
         date_text = st.session_state.get(f"{prefix}_date", "")
         song = st.session_state.get(f"{prefix}_song_title", "")
         artist = st.session_state.get(f"{prefix}_artist", "")
         preview_id = st.session_state.get(f"{prefix}_id", "").strip()
         if not preview_id and date_text and song and artist:
             preview_id = make_default_id(normalize_date(date_text), song, artist)
-        st.info(
-            "Verra' ottimizzata e caricata come "
-            f"{preview_id or 'ID-DELLA-DEDICA'}.webp "
-            f"({format_bytes(uploaded_size)}, {uploaded_type})."
-        )
+        with st.expander("Anteprima immagine caricata", expanded=True):
+            st.image(uploaded_bytes, use_container_width=True)
+            st.caption(
+                "Pronta per il salvataggio: "
+                f"{preview_id or 'ID-DELLA-DEDICA'}.webp "
+                f"({format_bytes(uploaded_size)}, {uploaded_type}). "
+                "Se su mobile il selettore si chiude, questa copia resta in memoria fino al salvataggio."
+            )
 
     st.subheader("Testi")
     st.text_area(
@@ -755,7 +791,7 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
     )
 
     render_emoji_picker(prefix)
-    return uploaded_file
+    return uploaded_snapshot
 
 
 def save_dedication(prefix: str, uploaded_file, mode: str, row_number: int | None = None) -> dict:
