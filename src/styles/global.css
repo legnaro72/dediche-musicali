@@ -227,24 +227,78 @@ section { position:relative; z-index:1; }
 .plus-vote-modal {
   position:fixed;
   inset:0;
-  z-index:220;
-  display:grid;
-  place-items:center;
+  z-index:2000;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  overflow:auto;
   padding:1.25rem;
-  background:rgba(0,0,0,0.62);
+  background:rgba(0,0,0,0.84);
   backdrop-filter:blur(10px);
 }
 .plus-vote-modal[hidden] {
   display:none;
 }
+body.plus-vote-is-open {
+  overflow:hidden;
+}
+body.plus-vote-is-open .app-install {
+  display:none;
+}
 .plus-vote-dialog {
   position:relative;
   width:min(100%,430px);
+  max-height:calc(100dvh - 2.5rem);
+  overflow:auto;
   padding:1.6rem;
   border:1px solid var(--border);
   border-radius:var(--radius-md);
   background:#0f0d1a;
   box-shadow:var(--shadow-card);
+}
+@media(min-height:760px) {
+  .plus-vote-modal {
+    align-items:center;
+  }
+}
+@media(max-height:620px) {
+  .plus-vote-modal {
+    padding:0.75rem;
+  }
+  .plus-vote-dialog {
+    max-height:calc(100dvh - 1.5rem);
+    padding:1rem;
+  }
+  .plus-vote-kicker {
+    margin-bottom:0.25rem;
+    font-size:0.68rem;
+  }
+  .plus-vote-dialog h2 {
+    margin-bottom:0.1rem;
+    font-size:1.35rem;
+  }
+  .plus-vote-artist {
+    margin-bottom:0.65rem;
+  }
+  .plus-vote-form {
+    gap:0.55rem;
+  }
+  .plus-vote-form label {
+    gap:0.3rem;
+  }
+  .plus-vote-form input {
+    padding:0.55rem 0.85rem;
+  }
+  .plus-vote-form textarea {
+    min-height:86px;
+    max-height:22dvh;
+  }
+  .plus-vote-actions {
+    gap:0.55rem;
+  }
+  .plus-vote-status {
+    min-height:0;
+  }
 }
 .plus-vote-close {
   position:absolute;
@@ -305,7 +359,8 @@ section { position:relative; z-index:1; }
   padding:0.8rem 1rem;
 }
 .plus-vote-form textarea {
-  min-height:220px;
+  min-height:160px;
+  max-height:34dvh;
   resize:vertical;
   padding:0.9rem 1rem;
 }
@@ -318,6 +373,7 @@ section { position:relative; z-index:1; }
   display:flex;
   flex-wrap:wrap;
   gap:0.75rem;
+  align-items:center;
 }
 .plus-vote-status {
   min-height:1.2rem;
@@ -1029,11 +1085,21 @@ button.video-poster {
     background:rgba(255,255,255,0.06);
   }
   .plus-vote-dialog {
-    max-height:calc(100dvh - 2rem);
-    overflow:auto;
+    width:100%;
+    max-height:calc(100dvh - 1rem);
+    padding:1.25rem;
   }
   .plus-vote-form textarea {
-    min-height:240px;
+    min-height:150px;
+    max-height:28dvh;
+  }
+  .plus-vote-actions {
+    position:sticky;
+    bottom:-1.25rem;
+    margin:0 -1.25rem;
+    padding:0.85rem 1.25rem 1rem;
+    background:#0f0d1a;
+    border-top:1px solid var(--border);
   }
   .ambient-audio {
     right:1rem;

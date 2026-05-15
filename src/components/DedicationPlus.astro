@@ -146,6 +146,10 @@ const data = {
       const submit = root.querySelector('[data-plus-vote-submit]');
       let serverFeedback = null;
 
+      if (modal instanceof HTMLElement && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+      }
+
       const fillForm = async () => {
         if (feedbackApiUrl()) {
           try {
@@ -170,12 +174,14 @@ const data = {
 
       const hide = () => {
         if (modal instanceof HTMLElement) modal.hidden = true;
+        document.body.classList.remove('plus-vote-is-open');
       };
 
       open?.addEventListener('click', async () => {
         if (status instanceof HTMLElement) status.textContent = feedbackApiUrl() ? 'Caricamento voto salvato...' : '';
         await fillForm();
         if (modal instanceof HTMLElement) modal.hidden = false;
+        document.body.classList.add('plus-vote-is-open');
         if (score instanceof HTMLInputElement) score.focus();
       });
       close?.addEventListener('click', hide);
