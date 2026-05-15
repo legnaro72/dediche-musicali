@@ -1,11 +1,12 @@
 import base64
 import datetime
+import html
 import io
 import json
 import os
 import re
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 try:
     from zoneinfo import ZoneInfo
@@ -188,7 +189,33 @@ def sync_date_picker(prefix: str) -> None:
 
 def is_spotify_track_url(url: str) -> bool:
     parsed = urlparse((url or "").strip())
-    return parsed.scheme == "https" and parsed.netloc == "open.spotify.com" and parsed.path.startswith("/track/")
+    return spotify_track_url(url) is not None
+
+
+def spotify_track_url(url: str) -> str | None:
+    parsed = urlparse((url or "").strip())
+    if parsed.scheme not in ("http", "https"):
+        return None
+    if parsed.netloc not in ("open.spotify.com", "play.spotify.com"):
+        return None
+
+    parts = [part for part in parsed.path.split("/") if part]
+    if not parts:
+        return None
+
+    track_index = None
+    for idx, part in enumerate(parts):
+        if part == "track":
+            track_index = idx
+            break
+    if track_index is None or track_index + 1 >= len(parts):
+        return None
+
+    track_id = parts[track_index + 1]
+    if not re.fullmatch(r"[A-Za-z0-9]{10,}", track_id):
+        return None
+
+    return urlunparse(("https", "open.spotify.com", f"/track/{track_id}", "", "", ""))
 
 
 def split_spotify_title(raw_title: str, raw_artist: str) -> tuple[str, str]:
@@ -206,24 +233,85 @@ def split_spotify_title(raw_title: str, raw_artist: str) -> tuple[str, str]:
     return title, artist
 
 
-def fetch_spotify_track_metadata(url: str) -> dict:
-    url = (url or "").strip()
-    if not is_spotify_track_url(url):
-        raise ValueError("URL Spotify non valido o non riconosciuto.")
-
+def fetch_spotify_oembed(url: str) -> tuple[str, str]:
     response = requests.get(
         "https://open.spotify.com/oembed",
         params={"url": url},
         timeout=12,
+        headers={"User-Agent": "DDGPilliAdmin/1.0"},
     )
     if response.status_code >= 400:
-        raise ValueError("Spotify non ha restituito metadati per questo URL.")
-
+        raise ValueError("Spotify oEmbed non ha restituito metadati.")
     payload = response.json()
-    title, artist = split_spotify_title(payload.get("title", ""), payload.get("author_name", ""))
-    if not title or not artist:
-        raise ValueError("Metadati Spotify incompleti.")
-    return {"song_title": title, "artist": artist}
+    return split_spotify_title(payload.get("title", ""), payload.get("author_name", ""))
+
+
+def fetch_spotify_open_graph(url: str) -> tuple[str, str]:
+    response = requests.get(
+        url,
+        timeout=12,
+        headers={
+            "Accept": "text/html,application/xhtml+xml",
+            "Accept-Language": "it-IT,it;q=0.9,en;q=0.8",
+            "User-Agent": (
+                "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) "
+                "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+            ),
+        },
+    )
+    if response.status_code >= 400:
+        raise ValueError("Pagina Spotify non recuperabile.")
+    page_html = response.text
+
+    title_match = re.search(
+        r'<meta\s+(?:property|name)=["\']og:title["\']\s+content=["\']([^"\']+)["\']',
+        page_html,
+        flags=re.IGNORECASE,
+    )
+    description_match = re.search(
+        r'<meta\s+(?:property|name)=["\']og:description["\']\s+content=["\']([^"\']+)["\']',
+        page_html,
+        flags=re.IGNORECASE,
+    )
+
+    title = html.unescape(title_match.group(1).strip()) if title_match else ""
+    description = html.unescape(description_match.group(1).strip()) if description_match else ""
+    artist = ""
+
+    description_parts = [part.strip() for part in description.split("·") if part.strip()]
+    if len(description_parts) >= 3 and description_parts[-2].lower() in {"brano", "song"}:
+        artist = description_parts[0]
+    else:
+        patterns = [
+            r"Listen to .+? on Spotify\.\s*Song\s*·\s*(.+?)\s*·\s*\d{4}",
+            r"Song\s*·\s*(.+?)\s*·\s*\d{4}",
+            r"Brano\s*·\s*(.+?)\s*·\s*\d{4}",
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, description, flags=re.IGNORECASE)
+            if match:
+                artist = match.group(1).strip()
+                break
+
+    return split_spotify_title(title, artist)
+
+
+def fetch_spotify_track_metadata(url: str) -> dict:
+    normalized_url = spotify_track_url(url)
+    if not normalized_url:
+        raise ValueError("URL Spotify non valido o non riconosciuto.")
+
+    errors = []
+    for fetcher in (fetch_spotify_oembed, fetch_spotify_open_graph):
+        try:
+            title, artist = fetcher(normalized_url)
+        except Exception as exc:
+            errors.append(str(exc))
+            continue
+        if title and artist:
+            return {"song_title": title, "artist": artist}
+
+    raise ValueError("Metadati Spotify incompleti. " + " ".join(errors))
 
 
 def autofill_spotify_metadata(prefix: str) -> None:
@@ -239,10 +327,11 @@ def autofill_spotify_metadata(prefix: str) -> None:
 
     try:
         metadata = fetch_spotify_track_metadata(url)
-    except Exception:
+    except Exception as exc:
         st.session_state[status_key] = (
             "Non e' stato possibile recuperare automaticamente i dati da Spotify. "
-            "Inserisci manualmente artista e titolo della canzone."
+            "Inserisci manualmente artista e titolo della canzone. "
+            f"Dettaglio: {exc}"
         )
         st.session_state[last_key] = url
         return
@@ -732,7 +821,8 @@ def set_form_state(prefix: str, values: dict) -> None:
     defaults.update({col: values.get(col, "") for col in SHEET_COLUMNS})
     for col in SHEET_COLUMNS:
         st.session_state[f"{prefix}_{col}"] = defaults[col]
-    st.session_state[f"{prefix}_date_picker"] = parse_date_value(defaults["date"])
+    st.session_state[f"{prefix}_date_picker_value"] = parse_date_value(defaults["date"])
+    st.session_state.pop(f"{prefix}_date_picker", None)
     st.session_state[f"{prefix}_spotify_status"] = ""
     st.session_state[f"{prefix}_spotify_last_url"] = str(defaults.get("audio_url", "") or "").strip()
 
@@ -743,7 +833,7 @@ def init_form_state(prefix: str, values: dict | None = None) -> None:
         defaults.update({col: values.get(col, "") for col in SHEET_COLUMNS})
     for col, value in defaults.items():
         st.session_state.setdefault(f"{prefix}_{col}", value)
-    st.session_state.setdefault(f"{prefix}_date_picker", parse_date_value(defaults["date"]))
+    st.session_state.setdefault(f"{prefix}_date_picker_value", parse_date_value(defaults["date"]))
     st.session_state.setdefault(f"{prefix}_spotify_status", "")
     st.session_state.setdefault(f"{prefix}_spotify_last_url", "")
     st.session_state.setdefault(f"{prefix}_active_text_target", "dedication_text")
@@ -797,14 +887,17 @@ def render_emoji_picker(prefix: str) -> None:
 def render_dedication_form(prefix: str, existing_image_source: str = ""):
     st.subheader("Dati principali")
     st.text_input("ID", key=f"{prefix}_id", help="Lascia vuoto per generarne uno automaticamente.")
-    selected_date = st.date_input(
-        "Data",
-        value=parse_date_value(st.session_state.get(f"{prefix}_date")),
-        format="DD/MM/YYYY",
-        key=f"{prefix}_date_picker",
-        on_change=sync_date_picker,
-        args=(prefix,),
-    )
+    date_key = f"{prefix}_date_picker"
+    date_kwargs = {
+        "label": "Data",
+        "format": "DD/MM/YYYY",
+        "key": date_key,
+        "on_change": sync_date_picker,
+        "args": (prefix,),
+    }
+    if date_key not in st.session_state:
+        date_kwargs["value"] = parse_date_value(st.session_state.get(f"{prefix}_date_picker_value") or st.session_state.get(f"{prefix}_date"))
+    selected_date = st.date_input(**date_kwargs)
     st.session_state[f"{prefix}_date"] = parse_date_value(selected_date).isoformat()
     st.selectbox(
         "status",
