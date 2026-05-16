@@ -4,13 +4,13 @@
     "plusVote": true
   },
   "fakeError": {
-    "enabled": true,
+    "enabled": false,
     "title": "ERROR 404",
-    "message": "Il server non e' al momento raggiungibile. Sei stata poco gentile con MassiTuo!",
+    "message": "Il server non e' al momento raggiungibile.",
     "buttonText": "Ritenta",
-    "imagePath": "public/images/site-lock/20260516125519-20240823-164901.jpg",
+    "imagePath": "public/images/site-lock/20260516125756-20240823-164901.jpg",
     "imageMessage": "Sistema momentaneamente offline. Sei stata cattiva con MassiTuo e ChatGpt lo protegge!!",
     "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
   },
-  "updated_at": "2026-05-16T12:55:19.498438+00:00"
+  "updated_at": "2026-05-16T12:57:56.546191+00:00"
 }
