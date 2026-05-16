@@ -3,5 +3,14 @@
     "googleVote": false,
     "plusVote": true
   },
-  "updated_at": "2026-05-16T09:10:39.425955+00:00"
+  "fakeError": {
+    "enabled": true,
+    "title": "ERROR 404",
+    "message": "Il server non e' al momento raggiungibile. Sei stata poco gentile con MassiTuo!",
+    "buttonText": "Ritenta",
+    "imagePath": "public/images/site-lock/20260516125519-20240823-164901.jpg",
+    "imageMessage": "Sistema momentaneamente offline. Sei stata cattiva con MassiTuo e ChatGpt lo protegge!!",
+    "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
+  },
+  "updated_at": "2026-05-16T12:55:19.498438+00:00"
 }
