@@ -40,11 +40,21 @@ GITHUB_REPO = os.environ.get("GITHUB_REPO", "legnaro72/dediche-musicali")
 GITHUB_BRANCH = os.environ.get("GITHUB_BRANCH", "main")
 DAILY_WORKFLOW_FILE = os.environ.get("DAILY_WORKFLOW_FILE", "daily-publish.yml")
 UPLOAD_DIR = "public/images/upload"
+SITE_LOCK_IMAGE_DIR = "public/images/site-lock"
 SITE_SETTINGS_PATH = "public/config/site-settings.json"
 DEFAULT_SITE_SETTINGS = {
     "buttons": {
         "googleVote": True,
         "plusVote": True,
+    },
+    "fakeError": {
+        "enabled": False,
+        "title": "ERROR 404",
+        "message": "Il server non e' al momento raggiungibile.",
+        "buttonText": "Verifica stato sistema",
+        "imagePath": "",
+        "imageMessage": "Sistema momentaneamente offline.",
+        "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito.",
     },
     "updated_at": "",
 }
@@ -433,14 +443,52 @@ def write_github_json(repo_path: str, data: dict, sha: str | None, message: str)
         raise ValueError(f"Salvataggio configurazione GitHub fallito: {response.text}")
 
 
+def upload_site_lock_image(uploaded_file) -> str:
+    original_name = uploaded_file.name or "site-lock-image"
+    ext = Path(original_name).suffix.lower()
+    if ext not in {".png", ".jpg", ".jpeg", ".webp"}:
+        raise ValueError("Formato immagine non supportato. Usa PNG, JPG, JPEG oppure WEBP.")
+
+    data = uploaded_file.getvalue()
+    if not data:
+        raise ValueError("File immagine vuoto. Riprova selezionando l'immagine.")
+
+    safe_name = slugify(Path(original_name).stem) or "site-lock-image"
+    stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d%H%M%S")
+    repo_path = f"{SITE_LOCK_IMAGE_DIR}/{stamp}-{safe_name}{ext}"
+    api_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{repo_path}"
+    payload = {
+        "message": "Aggiorna immagine fake error sito",
+        "content": base64.b64encode(data).decode("ascii"),
+        "branch": GITHUB_BRANCH,
+    }
+    response = requests.put(api_url, headers=github_headers(), json=payload, timeout=40)
+    if response.status_code not in (200, 201):
+        raise ValueError(f"Upload immagine fake error fallito: {response.text}")
+    return repo_path
+
+
 def normalize_site_settings(settings: dict) -> dict:
     buttons = settings.get("buttons") if isinstance(settings, dict) else {}
     if not isinstance(buttons, dict):
         buttons = {}
+    fake_error = settings.get("fakeError") if isinstance(settings, dict) else {}
+    if not isinstance(fake_error, dict):
+        fake_error = {}
+    default_fake = DEFAULT_SITE_SETTINGS["fakeError"]
     return {
         "buttons": {
             "googleVote": buttons.get("googleVote", True) is not False,
             "plusVote": buttons.get("plusVote", True) is not False,
+        },
+        "fakeError": {
+            "enabled": fake_error.get("enabled", False) is True,
+            "title": str(fake_error.get("title") or default_fake["title"]),
+            "message": str(fake_error.get("message") or default_fake["message"]),
+            "buttonText": str(fake_error.get("buttonText") or default_fake["buttonText"]),
+            "imagePath": str(fake_error.get("imagePath") or ""),
+            "imageMessage": str(fake_error.get("imageMessage") or default_fake["imageMessage"]),
+            "adminMessage": str(fake_error.get("adminMessage") or default_fake["adminMessage"]),
         },
         "updated_at": str(settings.get("updated_at", "") if isinstance(settings, dict) else ""),
     }
@@ -1232,7 +1280,7 @@ def render_historical() -> None:
 def render_site_configuration() -> None:
     st.title("Configurazione sito")
     st.caption(
-        "Gestisce la visibilita' dei pulsanti nella home e nelle pagine dedica. "
+        "Gestisce la visibilita' dei pulsanti e la modalita' Fake Error / Site Locked. "
         "Il sito legge questa configurazione da GitHub e si aggiorna entro pochi secondi."
     )
 
@@ -1244,6 +1292,9 @@ def render_site_configuration() -> None:
         return
 
     buttons = settings["buttons"]
+    fake_error = settings["fakeError"]
+
+    st.subheader("Pulsanti")
     google_vote_visible = st.checkbox(
         "Mostra pulsante Votami (Google Form)",
         value=buttons["googleVote"],
@@ -1255,25 +1306,88 @@ def render_site_configuration() -> None:
         key="config_plus_vote_visible",
     )
 
+    st.divider()
+    st.subheader("Fake Error / Site Locked Mode")
+    fake_error_enabled = st.toggle(
+        "Abilita Fake Error Mode",
+        value=fake_error["enabled"],
+        key="config_fake_error_enabled",
+    )
+    fake_error_title = st.text_input(
+        "Titolo errore principale",
+        value=fake_error["title"],
+        key="config_fake_error_title",
+    )
+    fake_error_message = st.text_area(
+        "Messaggio personalizzato iniziale",
+        value=fake_error["message"],
+        height=120,
+        key="config_fake_error_message",
+    )
+    fake_error_button = st.text_input(
+        "Testo pulsante/interazione",
+        value=fake_error["buttonText"],
+        key="config_fake_error_button",
+    )
+
+    current_image_path = fake_error["imagePath"]
+    if current_image_path:
+        st.caption("Immagine attualmente configurata")
+        st.image(
+            f"https://raw.githubusercontent.com/{GITHUB_REPO}/{GITHUB_BRANCH}/{current_image_path}",
+            use_container_width=True,
+        )
+
+    lock_image = st.file_uploader(
+        "Sostituisci immagine seconda schermata",
+        type=["png", "jpg", "jpeg", "webp"],
+        key="config_fake_error_image",
+    )
+    fake_error_image_message = st.text_area(
+        "Messaggio associato all'immagine",
+        value=fake_error["imageMessage"],
+        height=140,
+        key="config_fake_error_image_message",
+    )
+    fake_error_admin_message = st.text_area(
+        "Messaggio amministrativo finale",
+        value=fake_error["adminMessage"],
+        height=120,
+        key="config_fake_error_admin_message",
+    )
+
     st.caption(
         "File configurazione: "
         f"https://raw.githubusercontent.com/{GITHUB_REPO}/{GITHUB_BRANCH}/{SITE_SETTINGS_PATH}"
     )
 
     if st.button("Salva configurazione sito", type="primary", use_container_width=True):
+        image_path = current_image_path
         updated = {
             "buttons": {
                 "googleVote": bool(google_vote_visible),
                 "plusVote": bool(plus_vote_visible),
             },
+            "fakeError": {
+                "enabled": bool(fake_error_enabled),
+                "title": fake_error_title.strip() or DEFAULT_SITE_SETTINGS["fakeError"]["title"],
+                "message": fake_error_message.strip() or DEFAULT_SITE_SETTINGS["fakeError"]["message"],
+                "buttonText": fake_error_button.strip() or DEFAULT_SITE_SETTINGS["fakeError"]["buttonText"],
+                "imagePath": image_path,
+                "imageMessage": fake_error_image_message.strip() or DEFAULT_SITE_SETTINGS["fakeError"]["imageMessage"],
+                "adminMessage": fake_error_admin_message.strip() or DEFAULT_SITE_SETTINGS["fakeError"]["adminMessage"],
+            },
             "updated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         }
         try:
+            if lock_image is not None:
+                image_path = upload_site_lock_image(lock_image)
+                updated["fakeError"]["imagePath"] = image_path
             write_github_json(
                 SITE_SETTINGS_PATH,
                 updated,
                 sha,
-                "Aggiorna configurazione visibilita pulsanti sito",
+                "Aggiorna configurazione sito",
             )
             st.success(
                 "Configurazione salvata. Le pagine gia' aperte la rileggono automaticamente "

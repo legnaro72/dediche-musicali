@@ -89,6 +89,30 @@ const fullOgImage = ogImage
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 </head>
 <body>
+  <section class="site-lock" data-site-lock hidden aria-live="polite">
+    <div class="site-lock-shell" data-site-lock-phase="initial">
+      <div class="site-lock-panel">
+        <p class="site-lock-kicker">DDGPilli System</p>
+        <h1 data-site-lock-title>ERROR 404</h1>
+        <p class="site-lock-message" data-site-lock-message>Il server non e' al momento raggiungibile.</p>
+        <button class="site-lock-button" type="button" data-site-lock-action>Verifica stato sistema</button>
+        <div class="site-lock-terminal" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+
+      <div class="site-lock-panel site-lock-second" hidden data-site-lock-second>
+        <img data-site-lock-image src="" alt="" hidden />
+        <p class="site-lock-message" data-site-lock-image-message>Sistema momentaneamente offline.</p>
+        <p class="site-lock-admin" data-site-lock-admin-message>
+          Per il ripristino del servizio contattare l'amministratore del sito.
+        </p>
+      </div>
+    </div>
+  </section>
+
   <!-- Navbar -->
   <nav class="navbar" id="navbar">
     <div class="container navbar-inner">
@@ -198,6 +222,43 @@ const fullOgImage = ogImage
     window.__DDGPILLI_BASE = appBase;
 
     const siteConfigUrl = document.querySelector('meta[name="ddgpilli-site-config-url"]')?.getAttribute('content')?.trim() || '';
+    const resolveSiteAsset = (path) => {
+      if (!path) return '';
+      if (/^https?:\/\//i.test(path)) return path;
+      return `${appBase}${String(path).replace(/^\//, '')}`;
+    };
+
+    const setText = (selector, value) => {
+      const element = document.querySelector(selector);
+      if (element) element.textContent = value || '';
+    };
+
+    const applyFakeErrorMode = (fakeError) => {
+      const lock = document.querySelector('[data-site-lock]');
+      if (!(lock instanceof HTMLElement)) return;
+
+      const enabled = fakeError?.enabled === true;
+      lock.hidden = !enabled;
+      document.body.classList.toggle('site-is-locked', enabled);
+      if (!enabled) return;
+
+      setText('[data-site-lock-title]', fakeError.title || 'ERROR 404');
+      setText('[data-site-lock-message]', fakeError.message || "Il server non e' al momento raggiungibile.");
+      setText('[data-site-lock-action]', fakeError.buttonText || 'Verifica stato sistema');
+      setText('[data-site-lock-image-message]', fakeError.imageMessage || 'Sistema momentaneamente offline.');
+      setText('[data-site-lock-admin-message]', fakeError.adminMessage || "Per il ripristino del servizio contattare l'amministratore del sito.");
+
+      const image = document.querySelector('[data-site-lock-image]');
+      const imageUrl = resolveSiteAsset(fakeError.imagePath || '');
+      if (image instanceof HTMLImageElement && imageUrl) {
+        image.src = imageUrl;
+        image.hidden = false;
+      } else if (image instanceof HTMLImageElement) {
+        image.removeAttribute('src');
+        image.hidden = true;
+      }
+    };
+
     const applySiteSettings = (settings) => {
       const buttons = settings?.buttons || {};
       const visibility = {
@@ -210,6 +271,8 @@ const fullOgImage = ogImage
           if (element instanceof HTMLElement) element.hidden = !isVisible;
         });
       }
+
+      applyFakeErrorMode(settings?.fakeError || {});
     };
 
     const loadSiteSettings = async () => {
@@ -234,6 +297,16 @@ const fullOgImage = ogImage
       });
       document.addEventListener('astro:page-load', loadSiteSettings);
     }
+
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (!target.closest('[data-site-lock-action]')) return;
+      const second = document.querySelector('[data-site-lock-second]');
+      if (second instanceof HTMLElement) second.hidden = false;
+      const panel = target.closest('[data-site-lock-phase]');
+      if (panel instanceof HTMLElement) panel.setAttribute('data-site-lock-phase', 'second');
+    });
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
