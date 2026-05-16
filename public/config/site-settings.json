@@ -7,10 +7,10 @@
     "enabled": false,
     "title": "ERROR 404",
     "message": "Il server non e' al momento raggiungibile.",
-    "buttonText": "Verifica stato sistema",
-    "imagePath": "",
-    "imageMessage": "Sistema momentaneamente offline.",
+    "buttonText": "Ritenta",
+    "imagePath": "public/images/site-lock/20260516125756-20240823-164901.jpg",
+    "imageMessage": "Sistema momentaneamente offline. Sei stata cattiva con MassiTuo e ChatGpt lo protegge!!",
     "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
   },
-  "updated_at": "2026-05-16T09:10:39.425955+00:00"
+  "updated_at": "2026-05-16T12:57:56.546191+00:00"
 }
