@@ -91,7 +91,7 @@ const fullOgImage = ogImage
 <body>
   <section class="site-lock" data-site-lock hidden aria-live="polite">
     <div class="site-lock-shell" data-site-lock-phase="initial">
-      <div class="site-lock-panel">
+      <div class="site-lock-panel" data-site-lock-initial>
         <h1 data-site-lock-title>ERROR 404</h1>
         <p class="site-lock-message" data-site-lock-message>Il server non e' al momento raggiungibile.</p>
         <button class="site-lock-button" type="button" data-site-lock-action>Verifica stato sistema</button>
@@ -236,8 +236,10 @@ const fullOgImage = ogImage
       lock.hidden = !enabled;
       document.body.classList.toggle('site-is-locked', enabled);
       if (!enabled) {
+        const initial = document.querySelector('[data-site-lock-initial]');
         const second = document.querySelector('[data-site-lock-second]');
         const shell = document.querySelector('[data-site-lock-phase]');
+        if (initial instanceof HTMLElement) initial.hidden = false;
         if (second instanceof HTMLElement) second.hidden = true;
         if (shell instanceof HTMLElement) shell.setAttribute('data-site-lock-phase', 'initial');
         return;
@@ -303,7 +305,9 @@ const fullOgImage = ogImage
       const target = event.target;
       if (!(target instanceof Element)) return;
       if (!target.closest('[data-site-lock-action]')) return;
+      const initial = document.querySelector('[data-site-lock-initial]');
       const second = document.querySelector('[data-site-lock-second]');
+      if (initial instanceof HTMLElement) initial.hidden = true;
       if (second instanceof HTMLElement) second.hidden = false;
       const panel = target.closest('[data-site-lock-phase]');
       if (panel instanceof HTMLElement) panel.setAttribute('data-site-lock-phase', 'second');

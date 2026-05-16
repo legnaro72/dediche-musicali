@@ -510,6 +510,24 @@ def normalize_site_settings(settings: dict) -> dict:
     }
 
 
+def save_site_settings(updated: dict, message: str) -> None:
+    _, latest_sha = read_github_json(SITE_SETTINGS_PATH, DEFAULT_SITE_SETTINGS)
+    write_github_json(SITE_SETTINGS_PATH, updated, latest_sha, message)
+
+
+def force_restore_site_settings() -> None:
+    latest_settings, latest_sha = read_github_json(SITE_SETTINGS_PATH, DEFAULT_SITE_SETTINGS)
+    latest_settings = normalize_site_settings(latest_settings)
+    latest_settings["fakeError"]["enabled"] = False
+    latest_settings["updated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    write_github_json(
+        SITE_SETTINGS_PATH,
+        latest_settings,
+        latest_sha,
+        "Ripristina sito da Fake Error Mode",
+    )
+
+
 def get_google_credentials(scopes: list[str]) -> Credentials:
     try:
         service_account_info = st.secrets.get("gcp_service_account", None)
@@ -1390,6 +1408,18 @@ def render_site_configuration() -> None:
     )
 
     if save_config_clicked or restore_site_clicked:
+        if restore_site_clicked:
+            try:
+                force_restore_site_settings()
+                st.success(
+                    "Sito ripristinato: Fake Error Mode disattivata nel JSON remoto. "
+                    "Aggiorna il sito o attendi il prossimo controllo automatico."
+                )
+                return
+            except Exception as exc:
+                st.error(str(exc))
+                return
+
         image_path = current_image_path
         updated = {
             "buttons": {
@@ -1411,19 +1441,11 @@ def render_site_configuration() -> None:
             if lock_image is not None:
                 image_path = upload_site_lock_image(lock_image)
                 updated["fakeError"]["imagePath"] = image_path
-            write_github_json(
-                SITE_SETTINGS_PATH,
-                updated,
-                sha,
-                "Aggiorna configurazione sito",
+            save_site_settings(updated, "Aggiorna configurazione sito")
+            st.success(
+                "Configurazione salvata. Le pagine gia' aperte la rileggono automaticamente "
+                "entro circa 15 secondi."
             )
-            if restore_site_clicked:
-                st.success("Sito ripristinato: Fake Error Mode disattivata nel JSON.")
-            else:
-                st.success(
-                    "Configurazione salvata. Le pagine gia' aperte la rileggono automaticamente "
-                    "entro circa 15 secondi."
-                )
         except Exception as exc:
             st.error(str(exc))
 

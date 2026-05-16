@@ -255,6 +255,10 @@ body.site-is-locked > :not(.site-lock) {
   width: min(560px, 100%);
 }
 
+.site-lock-shell[data-site-lock-phase="second"] {
+  width: min(100%, 1120px);
+}
+
 .site-lock-panel {
   border: 1px solid var(--border);
   border-radius: 24px;
@@ -324,18 +328,28 @@ body.site-is-locked > :not(.site-lock) {
 }
 
 .site-lock-second {
-  margin-top: 1rem;
+  width: min(100%, 1120px);
+  min-height: calc(100dvh - 3rem);
+  display: grid;
+  align-content: center;
+  gap: 1rem;
+  margin: 0 auto;
   border-color: rgba(167, 139, 250, 0.35);
+}
+
+.site-lock-second[hidden] {
+  display: none !important;
 }
 
 .site-lock-second img {
   display: block;
-  width: min(100%, 420px);
-  max-height: 42vh;
+  width: min(100%, 920px);
+  max-height: 68vh;
   object-fit: contain;
   margin: 0 auto 1.25rem;
-  border-radius: 12px;
+  border-radius: 18px;
   border: 1px solid var(--border);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
 }
 
 .site-lock-admin {
