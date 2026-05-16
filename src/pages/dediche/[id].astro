@@ -125,7 +125,7 @@ const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
       <a href={dedication.audio.url} target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg">
         ▶ Ascolta
       </a>
-      <a href={dedication.vote.url} target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg">
+      <a href={dedication.vote.url} target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg" data-site-config-target="googleVote">
         ⭐ Votami
       </a>
       <DedicationPlus dedication={dedication} mode="button" />

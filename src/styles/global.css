@@ -221,6 +221,10 @@ section {
   font-size: 1.05rem;
 }
 
+[data-site-config-target][hidden] {
+  display: none !important;
+}
+
 /* Cards */
 .card {
   background: var(--bg-card);

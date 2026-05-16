@@ -40,6 +40,14 @@ GITHUB_REPO = os.environ.get("GITHUB_REPO", "legnaro72/dediche-musicali")
 GITHUB_BRANCH = os.environ.get("GITHUB_BRANCH", "main")
 DAILY_WORKFLOW_FILE = os.environ.get("DAILY_WORKFLOW_FILE", "daily-publish.yml")
 UPLOAD_DIR = "public/images/upload"
+SITE_SETTINGS_PATH = "public/config/site-settings.json"
+DEFAULT_SITE_SETTINGS = {
+    "buttons": {
+        "googleVote": True,
+        "plusVote": True,
+    },
+    "updated_at": "",
+}
 VALID_IMAGE_MODES = ("raw", "auto", "upload", "none")
 VALID_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
 VALID_STATUSES = ("draft", "scheduled", "published", "disabled")
@@ -378,6 +386,64 @@ def get_github_token() -> str:
             "Per Pubblica subito servono permessi Contents: write e Actions: write."
         )
     return token
+
+
+def github_headers() -> dict:
+    return {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {get_github_token()}",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+
+
+def read_github_json(repo_path: str, default: dict) -> tuple[dict, str | None]:
+    api_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{repo_path}"
+    response = requests.get(
+        api_url,
+        headers=github_headers(),
+        params={"ref": GITHUB_BRANCH},
+        timeout=20,
+    )
+
+    if response.status_code == 404:
+        return json.loads(json.dumps(default)), None
+    if response.status_code != 200:
+        raise ValueError(f"Lettura configurazione GitHub fallita: {response.text}")
+
+    payload = response.json()
+    raw_content = base64.b64decode(payload.get("content", "")).decode("utf-8")
+    data = json.loads(raw_content)
+    return data, payload.get("sha")
+
+
+def write_github_json(repo_path: str, data: dict, sha: str | None, message: str) -> None:
+    api_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{repo_path}"
+    payload = {
+        "message": message,
+        "content": base64.b64encode(
+            json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
+        ).decode("ascii"),
+        "branch": GITHUB_BRANCH,
+    }
+    if sha:
+        payload["sha"] = sha
+
+    response = requests.put(api_url, headers=github_headers(), json=payload, timeout=30)
+    if response.status_code not in (200, 201):
+        raise ValueError(f"Salvataggio configurazione GitHub fallito: {response.text}")
+
+
+def normalize_site_settings(settings: dict) -> dict:
+    buttons = settings.get("buttons") if isinstance(settings, dict) else {}
+    if not isinstance(buttons, dict):
+        buttons = {}
+    return {
+        "buttons": {
+            "googleVote": buttons.get("googleVote", True) is not False,
+            "plusVote": buttons.get("plusVote", True) is not False,
+        },
+        "updated_at": str(settings.get("updated_at", "") if isinstance(settings, dict) else ""),
+    }
 
 
 def get_google_credentials(scopes: list[str]) -> Credentials:
@@ -1163,15 +1229,71 @@ def render_historical() -> None:
             st.error(str(exc))
 
 
+def render_site_configuration() -> None:
+    st.title("Configurazione sito")
+    st.caption(
+        "Gestisce la visibilita' dei pulsanti nella home e nelle pagine dedica. "
+        "Il sito legge questa configurazione da GitHub e si aggiorna entro pochi secondi."
+    )
+
+    try:
+        settings, sha = read_github_json(SITE_SETTINGS_PATH, DEFAULT_SITE_SETTINGS)
+        settings = normalize_site_settings(settings)
+    except Exception as exc:
+        st.error(str(exc))
+        return
+
+    buttons = settings["buttons"]
+    google_vote_visible = st.checkbox(
+        "Mostra pulsante Votami (Google Form)",
+        value=buttons["googleVote"],
+        key="config_google_vote_visible",
+    )
+    plus_vote_visible = st.checkbox(
+        "Mostra pulsante Votami Plus",
+        value=buttons["plusVote"],
+        key="config_plus_vote_visible",
+    )
+
+    st.caption(
+        "File configurazione: "
+        f"https://raw.githubusercontent.com/{GITHUB_REPO}/{GITHUB_BRANCH}/{SITE_SETTINGS_PATH}"
+    )
+
+    if st.button("Salva configurazione sito", type="primary", use_container_width=True):
+        updated = {
+            "buttons": {
+                "googleVote": bool(google_vote_visible),
+                "plusVote": bool(plus_vote_visible),
+            },
+            "updated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        }
+        try:
+            write_github_json(
+                SITE_SETTINGS_PATH,
+                updated,
+                sha,
+                "Aggiorna configurazione visibilita pulsanti sito",
+            )
+            st.success(
+                "Configurazione salvata. Le pagine gia' aperte la rileggono automaticamente "
+                "entro circa 15 secondi."
+            )
+        except Exception as exc:
+            st.error(str(exc))
+
+
 def main() -> None:
     page_icon = STREAMLIT_ICON_PATH.read_bytes() if STREAMLIT_ICON_PATH.exists() else "🎵"
     st.set_page_config(page_title="DDGPilli Admin", page_icon=page_icon, layout="centered")
     inject_streamlit_pwa_tags()
-    tab_new, tab_historical = st.tabs(["Nuova dedica", "Historical"])
+    tab_new, tab_historical, tab_config = st.tabs(["Nuova dedica", "Historical", "Configurazione sito"])
     with tab_new:
         render_new_dedication()
     with tab_historical:
         render_historical()
+    with tab_config:
+        render_site_configuration()
 
 
 if __name__ == "__main__":

@@ -25,6 +25,10 @@ const {
 
 const base = (import.meta.env.BASE_URL ?? '/').replace(/([^/])$/, '$1/');
 const feedbackApiUrl = import.meta.env.PUBLIC_DDGPILLI_FEEDBACK_API_URL ?? (import.meta.env.DEV ? 'http://127.0.0.1:8787' : '');
+const siteConfigUrl = import.meta.env.PUBLIC_DDGPILLI_SITE_CONFIG_URL
+  ?? (import.meta.env.DEV
+    ? `${base}config/site-settings.json`
+    : 'https://raw.githubusercontent.com/legnaro72/dediche-musicali/main/public/config/site-settings.json');
 const siteUrl = import.meta.env.SITE ?? 'https://example.github.io';
 const fullCanonical = canonicalUrl ?? (siteUrl + Astro.url.pathname);
 const fullOgImage = ogImage
@@ -42,6 +46,7 @@ const fullOgImage = ogImage
   <meta name="application-name" content="DDGPilliSite" />
   <meta name="ddgpilli-base" content={base} />
   <meta name="ddgpilli-feedback-api" content={feedbackApiUrl} />
+  <meta name="ddgpilli-site-config-url" content={siteConfigUrl} />
 
   <!-- PWA / mobile app -->
   <link rel="manifest" href={`${base}manifest.json`} />
@@ -191,6 +196,45 @@ const fullOgImage = ogImage
   <script>
     const appBase = document.querySelector('meta[name="ddgpilli-base"]')?.getAttribute('content') ?? '/';
     window.__DDGPILLI_BASE = appBase;
+
+    const siteConfigUrl = document.querySelector('meta[name="ddgpilli-site-config-url"]')?.getAttribute('content')?.trim() || '';
+    const applySiteSettings = (settings) => {
+      const buttons = settings?.buttons || {};
+      const visibility = {
+        googleVote: buttons.googleVote !== false,
+        plusVote: buttons.plusVote !== false,
+      };
+
+      for (const [key, isVisible] of Object.entries(visibility)) {
+        document.querySelectorAll(`[data-site-config-target="${key}"]`).forEach((element) => {
+          if (element instanceof HTMLElement) element.hidden = !isVisible;
+        });
+      }
+    };
+
+    const loadSiteSettings = async () => {
+      if (!siteConfigUrl) return;
+      try {
+        const separator = siteConfigUrl.includes('?') ? '&' : '?';
+        const response = await fetch(`${siteConfigUrl}${separator}t=${Date.now()}`, { cache: 'no-store' });
+        if (!response.ok) return;
+        applySiteSettings(await response.json());
+      } catch (error) {
+        console.warn('Configurazione sito non caricata:', error);
+      }
+    };
+
+    if (!window.__DDGPILLI_SITE_CONFIG_READY) {
+      window.__DDGPILLI_SITE_CONFIG_READY = true;
+      loadSiteSettings();
+      window.setInterval(loadSiteSettings, 15000);
+      window.addEventListener('focus', loadSiteSettings);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') loadSiteSettings();
+      });
+      document.addEventListener('astro:page-load', loadSiteSettings);
+    }
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register(`${appBase}sw.js`, { scope: appBase }).catch((error) => {
