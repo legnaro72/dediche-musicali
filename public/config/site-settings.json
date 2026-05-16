@@ -4,7 +4,7 @@
     "plusVote": true
   },
   "fakeError": {
-    "enabled": false,
+    "enabled": true,
     "title": "ERROR 404",
     "message": "Il server non e' al momento raggiungibile.",
     "buttonText": "Ritenta",
@@ -12,5 +12,5 @@
     "imageMessage": "Attaccati al Tram!! Il sistema momentaneamente offline. Sei stata cattiva con MassiTuo e ChatGpt lo protegge!!",
     "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
   },
-  "updated_at": "2026-05-16T13:31:41.289618+00:00"
+  "updated_at": "2026-05-16T13:35:50.253261+00:00"
 }
