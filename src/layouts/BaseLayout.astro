@@ -232,7 +232,8 @@ const fullOgImage = ogImage
       const lock = document.querySelector('[data-site-lock]');
       if (!(lock instanceof HTMLElement)) return;
 
-      const enabled = fakeError?.enabled === true;
+      const enabledValue = fakeError?.enabled;
+      const enabled = enabledValue === true || enabledValue === 1 || String(enabledValue).toLowerCase() === 'true' || String(enabledValue).toLowerCase() === 'on';
       lock.hidden = !enabled;
       document.body.classList.toggle('site-is-locked', enabled);
       if (!enabled) {

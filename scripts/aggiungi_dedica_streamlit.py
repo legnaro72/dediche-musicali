@@ -528,6 +528,19 @@ def force_restore_site_settings() -> None:
     )
 
 
+def force_site_lock_enabled(enabled: bool) -> None:
+    latest_settings, latest_sha = read_github_json(SITE_SETTINGS_PATH, DEFAULT_SITE_SETTINGS)
+    latest_settings = normalize_site_settings(latest_settings)
+    latest_settings["fakeError"]["enabled"] = bool(enabled)
+    latest_settings["updated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    write_github_json(
+        SITE_SETTINGS_PATH,
+        latest_settings,
+        latest_sha,
+        "Attiva Fake Error Mode" if enabled else "Disattiva Fake Error Mode",
+    )
+
+
 def get_google_credentials(scopes: list[str]) -> Credentials:
     try:
         service_account_info = st.secrets.get("gcp_service_account", None)
@@ -1327,42 +1340,60 @@ def render_site_configuration() -> None:
 
     buttons = settings["buttons"]
     fake_error = settings["fakeError"]
-    config_scope = re.sub(r"[^a-zA-Z0-9_]", "_", settings.get("updated_at") or "default")
+    config_version = settings.get("updated_at") or "default"
+    if st.session_state.get("config_loaded_version") != config_version:
+        st.session_state["config_google_vote_visible"] = buttons["googleVote"]
+        st.session_state["config_plus_vote_visible"] = buttons["plusVote"]
+        st.session_state["config_fake_error_enabled"] = fake_error["enabled"]
+        st.session_state["config_fake_error_title"] = fake_error["title"]
+        st.session_state["config_fake_error_message"] = fake_error["message"]
+        st.session_state["config_fake_error_button"] = fake_error["buttonText"]
+        st.session_state["config_fake_error_image_message"] = fake_error["imageMessage"]
+        st.session_state["config_fake_error_admin_message"] = fake_error["adminMessage"]
+        st.session_state["config_loaded_version"] = config_version
+
+    def persist_fake_error_toggle() -> None:
+        try:
+            force_site_lock_enabled(bool(st.session_state.get("config_fake_error_enabled", False)))
+            st.session_state["config_toggle_status"] = (
+                "Fake Error Mode attivata nel JSON remoto."
+                if st.session_state.get("config_fake_error_enabled")
+                else "Fake Error Mode disattivata nel JSON remoto."
+            )
+        except Exception as exc:
+            st.session_state["config_toggle_status"] = str(exc)
 
     st.subheader("Pulsanti")
     google_vote_visible = st.checkbox(
         "Mostra pulsante Votami (Google Form)",
-        value=buttons["googleVote"],
-        key=f"config_google_vote_visible_{config_scope}",
+        key="config_google_vote_visible",
     )
     plus_vote_visible = st.checkbox(
         "Mostra pulsante Votami Plus",
-        value=buttons["plusVote"],
-        key=f"config_plus_vote_visible_{config_scope}",
+        key="config_plus_vote_visible",
     )
 
     st.divider()
     st.subheader("Fake Error / Site Locked Mode")
     fake_error_enabled = st.toggle(
         "Abilita Fake Error Mode",
-        value=fake_error["enabled"],
-        key=f"config_fake_error_enabled_{config_scope}",
+        key="config_fake_error_enabled",
+        on_change=persist_fake_error_toggle,
     )
+    if st.session_state.get("config_toggle_status"):
+        st.info(st.session_state["config_toggle_status"])
     fake_error_title = st.text_input(
         "Titolo errore principale",
-        value=fake_error["title"],
-        key=f"config_fake_error_title_{config_scope}",
+        key="config_fake_error_title",
     )
     fake_error_message = st.text_area(
         "Messaggio personalizzato iniziale",
-        value=fake_error["message"],
         height=120,
-        key=f"config_fake_error_message_{config_scope}",
+        key="config_fake_error_message",
     )
     fake_error_button = st.text_input(
         "Testo pulsante/interazione",
-        value=fake_error["buttonText"],
-        key=f"config_fake_error_button_{config_scope}",
+        key="config_fake_error_button",
     )
 
     current_image_path = fake_error["imagePath"]
@@ -1376,19 +1407,17 @@ def render_site_configuration() -> None:
     lock_image = st.file_uploader(
         "Sostituisci immagine seconda schermata",
         type=["png", "jpg", "jpeg", "webp"],
-        key=f"config_fake_error_image_{config_scope}",
+        key="config_fake_error_image",
     )
     fake_error_image_message = st.text_area(
         "Messaggio associato all'immagine",
-        value=fake_error["imageMessage"],
         height=140,
-        key=f"config_fake_error_image_message_{config_scope}",
+        key="config_fake_error_image_message",
     )
     fake_error_admin_message = st.text_area(
         "Messaggio amministrativo finale",
-        value=fake_error["adminMessage"],
         height=120,
-        key=f"config_fake_error_admin_message_{config_scope}",
+        key="config_fake_error_admin_message",
     )
 
     st.caption(
@@ -1396,7 +1425,11 @@ def render_site_configuration() -> None:
         f"https://raw.githubusercontent.com/{GITHUB_REPO}/{GITHUB_BRANCH}/{SITE_SETTINGS_PATH}"
     )
 
-    col_save_config, col_restore_site = st.columns(2)
+    col_enable_site, col_save_config, col_restore_site = st.columns(3)
+    enable_site_clicked = col_enable_site.button(
+        "Attiva Fake Error",
+        use_container_width=True,
+    )
     save_config_clicked = col_save_config.button(
         "Salva configurazione sito",
         type="primary",
@@ -1407,7 +1440,19 @@ def render_site_configuration() -> None:
         use_container_width=True,
     )
 
-    if save_config_clicked or restore_site_clicked:
+    if enable_site_clicked or save_config_clicked or restore_site_clicked:
+        if enable_site_clicked:
+            try:
+                force_site_lock_enabled(True)
+                st.success(
+                    "Fake Error Mode attivata nel JSON remoto. "
+                    "Aggiorna il sito o attendi il prossimo controllo automatico."
+                )
+                return
+            except Exception as exc:
+                st.error(str(exc))
+                return
+
         if restore_site_clicked:
             try:
                 force_restore_site_settings()
