@@ -31,7 +31,7 @@
     "description": "Dedica musicale del giorno con \"Sarà perché ti amo\" di Ricchi E Poveri."
   },
   "created_at": "2026-05-16T00:44:20.098205+02:00",
-  "updated_at": "2026-05-16T18:35:55.340Z",
+  "updated_at": "2026-05-16T18:35:56.696Z",
   "video": {
     "type": "youtube",
     "url": "https://youtube.com/shorts/f_Ka5tnCbYo?is=ljkcdqSedslRh6WG",
@@ -43,9 +43,9 @@
   "pensieroPilly": "Sei un mostro",
   "reactions": {
     "down": 0,
-    "like": 0,
+    "like": 1,
     "heart": 0,
-    "sun": 1
+    "sun": 0
   },
   "date_it": "16 maggio 2026"
 }
