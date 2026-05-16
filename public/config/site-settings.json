@@ -3,5 +3,14 @@
     "googleVote": false,
     "plusVote": true
   },
+  "fakeError": {
+    "enabled": false,
+    "title": "ERROR 404",
+    "message": "Il server non e' al momento raggiungibile.",
+    "buttonText": "Verifica stato sistema",
+    "imagePath": "",
+    "imageMessage": "Sistema momentaneamente offline.",
+    "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
+  },
   "updated_at": "2026-05-16T09:10:39.425955+00:00"
 }

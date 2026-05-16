@@ -465,7 +465,23 @@ def upload_site_lock_image(uploaded_file) -> str:
     response = requests.put(api_url, headers=github_headers(), json=payload, timeout=40)
     if response.status_code not in (200, 201):
         raise ValueError(f"Upload immagine fake error fallito: {response.text}")
-    return repo_path
+    return github_raw_url(repo_path)
+
+
+def github_raw_url(repo_path: str) -> str:
+    return f"https://raw.githubusercontent.com/{GITHUB_REPO}/{GITHUB_BRANCH}/{repo_path.lstrip('/')}"
+
+
+def normalize_site_lock_image_path(path: str) -> str:
+    value = str(path or "").strip()
+    if not value:
+        return ""
+    if value.startswith("http://") or value.startswith("https://"):
+        return value
+    repo_path = value.lstrip("/")
+    if not repo_path.startswith("public/"):
+        repo_path = f"public/{repo_path}"
+    return github_raw_url(repo_path)
 
 
 def normalize_site_settings(settings: dict) -> dict:
@@ -486,7 +502,7 @@ def normalize_site_settings(settings: dict) -> dict:
             "title": str(fake_error.get("title") or default_fake["title"]),
             "message": str(fake_error.get("message") or default_fake["message"]),
             "buttonText": str(fake_error.get("buttonText") or default_fake["buttonText"]),
-            "imagePath": str(fake_error.get("imagePath") or ""),
+            "imagePath": normalize_site_lock_image_path(str(fake_error.get("imagePath") or "")),
             "imageMessage": str(fake_error.get("imageMessage") or default_fake["imageMessage"]),
             "adminMessage": str(fake_error.get("adminMessage") or default_fake["adminMessage"]),
         },
@@ -1293,17 +1309,18 @@ def render_site_configuration() -> None:
 
     buttons = settings["buttons"]
     fake_error = settings["fakeError"]
+    config_scope = re.sub(r"[^a-zA-Z0-9_]", "_", settings.get("updated_at") or "default")
 
     st.subheader("Pulsanti")
     google_vote_visible = st.checkbox(
         "Mostra pulsante Votami (Google Form)",
         value=buttons["googleVote"],
-        key="config_google_vote_visible",
+        key=f"config_google_vote_visible_{config_scope}",
     )
     plus_vote_visible = st.checkbox(
         "Mostra pulsante Votami Plus",
         value=buttons["plusVote"],
-        key="config_plus_vote_visible",
+        key=f"config_plus_vote_visible_{config_scope}",
     )
 
     st.divider()
@@ -1311,49 +1328,49 @@ def render_site_configuration() -> None:
     fake_error_enabled = st.toggle(
         "Abilita Fake Error Mode",
         value=fake_error["enabled"],
-        key="config_fake_error_enabled",
+        key=f"config_fake_error_enabled_{config_scope}",
     )
     fake_error_title = st.text_input(
         "Titolo errore principale",
         value=fake_error["title"],
-        key="config_fake_error_title",
+        key=f"config_fake_error_title_{config_scope}",
     )
     fake_error_message = st.text_area(
         "Messaggio personalizzato iniziale",
         value=fake_error["message"],
         height=120,
-        key="config_fake_error_message",
+        key=f"config_fake_error_message_{config_scope}",
     )
     fake_error_button = st.text_input(
         "Testo pulsante/interazione",
         value=fake_error["buttonText"],
-        key="config_fake_error_button",
+        key=f"config_fake_error_button_{config_scope}",
     )
 
     current_image_path = fake_error["imagePath"]
     if current_image_path:
         st.caption("Immagine attualmente configurata")
         st.image(
-            f"https://raw.githubusercontent.com/{GITHUB_REPO}/{GITHUB_BRANCH}/{current_image_path}",
+            current_image_path,
             use_container_width=True,
         )
 
     lock_image = st.file_uploader(
         "Sostituisci immagine seconda schermata",
         type=["png", "jpg", "jpeg", "webp"],
-        key="config_fake_error_image",
+        key=f"config_fake_error_image_{config_scope}",
     )
     fake_error_image_message = st.text_area(
         "Messaggio associato all'immagine",
         value=fake_error["imageMessage"],
         height=140,
-        key="config_fake_error_image_message",
+        key=f"config_fake_error_image_message_{config_scope}",
     )
     fake_error_admin_message = st.text_area(
         "Messaggio amministrativo finale",
         value=fake_error["adminMessage"],
         height=120,
-        key="config_fake_error_admin_message",
+        key=f"config_fake_error_admin_message_{config_scope}",
     )
 
     st.caption(
@@ -1361,7 +1378,18 @@ def render_site_configuration() -> None:
         f"https://raw.githubusercontent.com/{GITHUB_REPO}/{GITHUB_BRANCH}/{SITE_SETTINGS_PATH}"
     )
 
-    if st.button("Salva configurazione sito", type="primary", use_container_width=True):
+    col_save_config, col_restore_site = st.columns(2)
+    save_config_clicked = col_save_config.button(
+        "Salva configurazione sito",
+        type="primary",
+        use_container_width=True,
+    )
+    restore_site_clicked = col_restore_site.button(
+        "Ripristina sito",
+        use_container_width=True,
+    )
+
+    if save_config_clicked or restore_site_clicked:
         image_path = current_image_path
         updated = {
             "buttons": {
@@ -1369,7 +1397,7 @@ def render_site_configuration() -> None:
                 "plusVote": bool(plus_vote_visible),
             },
             "fakeError": {
-                "enabled": bool(fake_error_enabled),
+                "enabled": False if restore_site_clicked else bool(fake_error_enabled),
                 "title": fake_error_title.strip() or DEFAULT_SITE_SETTINGS["fakeError"]["title"],
                 "message": fake_error_message.strip() or DEFAULT_SITE_SETTINGS["fakeError"]["message"],
                 "buttonText": fake_error_button.strip() or DEFAULT_SITE_SETTINGS["fakeError"]["buttonText"],
@@ -1389,10 +1417,13 @@ def render_site_configuration() -> None:
                 sha,
                 "Aggiorna configurazione sito",
             )
-            st.success(
-                "Configurazione salvata. Le pagine gia' aperte la rileggono automaticamente "
-                "entro circa 15 secondi."
-            )
+            if restore_site_clicked:
+                st.success("Sito ripristinato: Fake Error Mode disattivata nel JSON.")
+            else:
+                st.success(
+                    "Configurazione salvata. Le pagine gia' aperte la rileggono automaticamente "
+                    "entro circa 15 secondi."
+                )
         except Exception as exc:
             st.error(str(exc))
 

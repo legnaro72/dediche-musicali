@@ -92,15 +92,10 @@ const fullOgImage = ogImage
   <section class="site-lock" data-site-lock hidden aria-live="polite">
     <div class="site-lock-shell" data-site-lock-phase="initial">
       <div class="site-lock-panel">
-        <p class="site-lock-kicker">DDGPilli System</p>
         <h1 data-site-lock-title>ERROR 404</h1>
         <p class="site-lock-message" data-site-lock-message>Il server non e' al momento raggiungibile.</p>
         <button class="site-lock-button" type="button" data-site-lock-action>Verifica stato sistema</button>
-        <div class="site-lock-terminal" aria-hidden="true">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
+        <div class="site-lock-progress" aria-hidden="true"><span></span></div>
       </div>
 
       <div class="site-lock-panel site-lock-second" hidden data-site-lock-second>
@@ -240,7 +235,13 @@ const fullOgImage = ogImage
       const enabled = fakeError?.enabled === true;
       lock.hidden = !enabled;
       document.body.classList.toggle('site-is-locked', enabled);
-      if (!enabled) return;
+      if (!enabled) {
+        const second = document.querySelector('[data-site-lock-second]');
+        const shell = document.querySelector('[data-site-lock-phase]');
+        if (second instanceof HTMLElement) second.hidden = true;
+        if (shell instanceof HTMLElement) shell.setAttribute('data-site-lock-phase', 'initial');
+        return;
+      }
 
       setText('[data-site-lock-title]', fakeError.title || 'ERROR 404');
       setText('[data-site-lock-message]', fakeError.message || "Il server non e' al momento raggiungibile.");
