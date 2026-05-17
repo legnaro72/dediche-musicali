@@ -4,13 +4,13 @@
     "plusVote": true
   },
   "fakeError": {
-    "enabled": true,
+    "enabled": false,
     "title": "ERROR 404",
     "message": "Il server non e' al momento raggiungibile.",
     "buttonText": "Ritenta",
     "imagePath": "https://raw.githubusercontent.com/legnaro72/dediche-musicali/main/public/images/site-lock/20260516125756-20240823-164901.jpg",
-    "imageMessage": "Attaccati al Tram!! Il sistema momentaneamente offline. Sei stata cattiva con MassiTuo e ChatGpt lo protegge!!",
+    "imageMessage": "Attaccati al Tram!! Il sistema momentaneamente offline. Sei stata cattiva con MassiTuo!!Contatta Amministratore del sito!",
     "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
   },
-  "updated_at": "2026-05-16T13:23:21.310584+00:00"
+  "updated_at": "2026-05-16T18:32:55.692886+00:00"
 }

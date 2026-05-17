@@ -1,0 +1,43 @@
+{
+  "id": "2026-05-18-freed-from-desire-gala-molella-phil-jay",
+  "date": "2026-05-17",
+  "day_name": "domenica",
+  "status": "draft",
+  "song_title": "Freed From Desire",
+  "artist": "Gala, Molella, Phil Jay",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "🎵",
+  "audio": {
+    "url": "https://open.spotify.com/track/3u5N55tHf7hXATSQrjBh2q?si=Mi11SXYXTSuM-EuEmk4H3Q",
+    "type": "spotify"
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-05-18-freed-from-desire-gala-molella-phil-jay.webp",
+    "alt": "Dedica musicale Freed From Desire di Gala, Molella, Phil Jay",
+    "mode": "raw",
+    "source": "public/images/upload/2026-05-18-freed-from-desire-gala-molella-phil-jay.webp"
+  },
+  "short_phrase": "🎵",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "Freed From Desire - Gala, Molella, Phil Jay | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"Freed From Desire\" di Gala, Molella, Phil Jay."
+  },
+  "created_at": "2026-05-17T03:54:26.179214+02:00",
+  "updated_at": "2026-05-17T03:54:26.179214+02:00",
+  "votoPilly": null,
+  "pensieroPilly": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 0,
+    "sun": 0
+  }
+}
