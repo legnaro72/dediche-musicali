@@ -239,12 +239,26 @@ body.site-is-locked > :not(.site-lock) {
   inset: 0;
   z-index: 99999;
   display: grid;
-  place-items: center;
+  place-items: start center;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 1.5rem;
   background:
     radial-gradient(circle at 50% 15%, rgba(124, 58, 237, 0.26), transparent 34rem),
     linear-gradient(135deg, rgba(8, 7, 15, 0.96), rgba(13, 10, 24, 0.98));
   color: var(--text-primary);
+  /* consente lo scroll su iOS con momentum */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Centra verticalmente solo quando il contenuto ci sta */
+@supports (min-height: 100dvh) {
+  .site-lock {
+    min-height: 100dvh;
+  }
+}
+.site-lock > * {
+  margin: auto;
 }
 
 .site-lock[hidden] {
@@ -329,9 +343,10 @@ body.site-is-locked > :not(.site-lock) {
 
 .site-lock-second {
   width: min(100%, 1120px);
-  min-height: calc(100dvh - 3rem);
-  display: grid;
-  align-content: center;
+  /* non fissiamo più l'altezza minima: cresce con il contenuto */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 1rem;
   margin: 0 auto;
   border-color: rgba(167, 139, 250, 0.35);
@@ -344,7 +359,7 @@ body.site-is-locked > :not(.site-lock) {
 .site-lock-second img {
   display: block;
   width: min(100%, 920px);
-  max-height: 68vh;
+  max-height: 55vh;
   object-fit: contain;
   margin: 0 auto 1.25rem;
   border-radius: 18px;
@@ -355,6 +370,7 @@ body.site-is-locked > :not(.site-lock) {
 .site-lock-admin {
   margin: 0 auto;
   max-width: 34rem;
+  padding-bottom: 2rem;    /* impedisce che l'ultima riga venga tagliata dal bordo */
   color: #fecaca;
   font-size: 0.95rem;
   font-weight: 700;
@@ -523,6 +539,7 @@ body.site-is-locked > :not(.site-lock) {
   white-space: pre-line;
   display: -webkit-box;
   -webkit-line-clamp: 6;
+  line-clamp: 6;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -848,6 +865,7 @@ body.plus-vote-is-open .app-install {
   line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
