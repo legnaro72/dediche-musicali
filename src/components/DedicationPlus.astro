@@ -243,28 +243,32 @@ const data = {
       root.dataset.ready = 'true';
 
       const data = parseData(root);
-      let serverReactions = null;
       const initialCounts = normalizeCounts(data.reactions);
 
+      // countsStore è sempre la fonte di verità per la visualizzazione
+      const getDisplayCounts = () => {
+        const store = readObject(reactionCountKey);
+        return normalizeCounts(store[data.id] || initialCounts);
+      };
+
       const render = () => {
-        const countsStore = readObject(reactionCountKey);
+        const counts = getDisplayCounts();
         const choices = readObject(reactionChoiceKey);
-        const source = feedbackApiUrl()
-          ? (serverReactions || initialCounts)
-          : (countsStore[data.id] || initialCounts);
-        const counts = normalizeCounts(source);
         reactionKeys.forEach((key) => {
-          const count = root.querySelector(`[data-count="${key}"]`);
-          const button = root.querySelector(`[data-reaction="${key}"]`);
-          if (count instanceof HTMLElement) count.textContent = String(counts[key]);
-          if (button instanceof HTMLElement) button.classList.toggle('is-active', choices[data.id] === key);
+          const countEl = root.querySelector(`[data-count="${key}"]`);
+          const btn = root.querySelector(`[data-reaction="${key}"]`);
+          if (countEl instanceof HTMLElement) countEl.textContent = String(counts[key]);
+          if (btn instanceof HTMLElement) btn.classList.toggle('is-active', choices[data.id] === key);
         });
       };
 
+      // Sincronizza i conteggi dal server e aggiorna lo store locale
       const refreshServerReactions = async () => {
         const feedback = await fetchFeedback(data.id);
         if (feedback?.reactions) {
-          serverReactions = feedback.reactions;
+          const store = readObject(reactionCountKey);
+          store[data.id] = normalizeCounts(feedback.reactions);
+          writeObject(reactionCountKey, store);
           render();
         }
       };
@@ -274,11 +278,9 @@ const data = {
           const next = button.getAttribute('data-reaction');
           if (!reactionKeys.includes(next)) return;
 
-          const countsStore = readObject(reactionCountKey);
+          const store = readObject(reactionCountKey);
           const choices = readObject(reactionChoiceKey);
-          const previousCounts = normalizeCounts(feedbackApiUrl()
-            ? (serverReactions || initialCounts)
-            : (countsStore[data.id] || initialCounts));
+          const previousCounts = normalizeCounts(store[data.id] || initialCounts);
           const counts = normalizeCounts(previousCounts);
           const previous = choices[data.id];
 
@@ -295,9 +297,9 @@ const data = {
             choices[data.id] = next;
           }
 
-          serverReactions = counts;
-          countsStore[data.id] = counts;
-          writeObject(reactionCountKey, countsStore);
+          // Aggiornamento ottimistico immediato
+          store[data.id] = counts;
+          writeObject(reactionCountKey, store);
           writeObject(reactionChoiceKey, choices);
           render();
           if (button instanceof HTMLButtonElement) button.disabled = true;
@@ -308,29 +310,29 @@ const data = {
               reaction: isToggleOff ? null : next,
               previousReaction: previous || null,
             });
+            // Se l'API restituisce i conteggi aggiornati, sovrascriviamo lo store
             const savedReactions = feedbackReactions(apiResult);
             if (savedReactions) {
-              reactionKeys.forEach((key) => {
-                counts[key] = Math.max(0, Number(savedReactions[key] || 0));
-              });
-              serverReactions = counts;
+              const latestStore = readObject(reactionCountKey);
+              latestStore[data.id] = normalizeCounts(savedReactions);
+              writeObject(reactionCountKey, latestStore);
             }
           } catch (error) {
-            console.warn('Salvataggio reaction fallito.', error);
-            serverReactions = previousCounts;
-            countsStore[data.id] = previousCounts;
+            console.warn('Salvataggio reaction fallito, rollback locale.', error);
+            // In caso di errore: ripristino conteggi e scelta precedente
+            const latestStore = readObject(reactionCountKey);
+            latestStore[data.id] = previousCounts;
+            writeObject(reactionCountKey, latestStore);
+            const latestChoices = readObject(reactionChoiceKey);
             if (previous) {
-              choices[data.id] = previous;
+              latestChoices[data.id] = previous;
             } else {
-              delete choices[data.id];
+              delete latestChoices[data.id];
             }
+            writeObject(reactionChoiceKey, latestChoices);
           } finally {
             if (button instanceof HTMLButtonElement) button.disabled = false;
-            countsStore[data.id] = serverReactions || counts;
-            writeObject(reactionCountKey, countsStore);
-            writeObject(reactionChoiceKey, choices);
             render();
-            return;
           }
         });
       });

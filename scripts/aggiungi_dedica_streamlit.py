@@ -788,6 +788,30 @@ def upload_image_to_github(uploaded_file, asset_id: str) -> str:
     return repo_path
 
 
+def dispatch_deploy_pages() -> None:
+    """Avvia manualmente il workflow deploy.yml (Build + Deploy su GitHub Pages)."""
+    token = get_github_token()
+    deploy_workflow = os.environ.get("DEPLOY_WORKFLOW_FILE", "deploy.yml")
+    api_url = (
+        f"https://api.github.com/repos/{GITHUB_REPO}/actions/workflows/"
+        f"{deploy_workflow}/dispatches"
+    )
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {token}",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    payload = {"ref": GITHUB_BRANCH}
+    response = requests.post(api_url, headers=headers, json=payload, timeout=20)
+    if response.status_code != 204:
+        if response.status_code == 403:
+            raise ValueError(
+                "Avvio deploy GitHub Pages negato: il token GitHub non ha "
+                "permesso Actions: write. Aggiorna il PAT con Actions: Read and write."
+            )
+        raise ValueError(f"Avvio deploy GitHub Pages fallito: {response.text}")
+
+
 def dispatch_daily_publish(date_value: str, dedication_id: str = '', force_republish: bool = True) -> None:
     token = get_github_token()
     api_url = (
@@ -866,10 +890,7 @@ def prepare_values(values: dict) -> dict:
         raise ValueError("Inserisci l'artista.")
     if not cleaned["audio_url"].startswith("https://open.spotify.com/"):
         raise ValueError("Inserisci un URL Spotify valido.")
-    if not cleaned["dedication_text"]:
-        raise ValueError("Inserisci o genera dedication_text.")
-    if not cleaned["short_phrase"]:
-        raise ValueError("Inserisci o genera short_phrase.")
+    # dedication_text e short_phrase sono facoltativi: si possono lasciare vuoti e compilare dopo
     if cleaned["status"] not in VALID_STATUSES:
         raise ValueError(f"Status non valido. Usa uno tra: {', '.join(VALID_STATUSES)}")
     if cleaned["image_mode"] not in VALID_IMAGE_MODES:
@@ -967,12 +988,30 @@ def clear_texts(prefix: str) -> None:
     st.session_state[f"{prefix}_short_phrase"] = ""
 
 
-def generate_preview(prefix: str) -> None:
+def generate_dedication_text(prefix: str) -> None:
+    """Genera solo il testo della dedica (dedication_text), senza toccare short_phrase."""
     song = st.session_state.get(f"{prefix}_song_title", "").strip()
     artist = st.session_state.get(f"{prefix}_artist", "").strip()
     if not song or not artist:
-        st.warning("Inserisci prima titolo canzone e artista.")
+        st.session_state[f"{prefix}_gen_text_warning"] = True
         return
+    st.session_state[f"{prefix}_gen_text_warning"] = False
+    st.session_state[f"{prefix}_dedication_text"] = default_dedication_text(song, artist)
+
+
+def generate_short_phrase(prefix: str) -> None:
+    """Genera solo la frase breve (short_phrase), senza toccare dedication_text."""
+    st.session_state[f"{prefix}_short_phrase"] = default_short_phrase()
+
+
+def generate_preview(prefix: str) -> None:
+    """Genera entrambi i campi testo in un colpo solo."""
+    song = st.session_state.get(f"{prefix}_song_title", "").strip()
+    artist = st.session_state.get(f"{prefix}_artist", "").strip()
+    if not song or not artist:
+        st.session_state[f"{prefix}_gen_text_warning"] = True
+        return
+    st.session_state[f"{prefix}_gen_text_warning"] = False
     st.session_state[f"{prefix}_dedication_text"] = default_dedication_text(song, artist)
     st.session_state[f"{prefix}_short_phrase"] = default_short_phrase()
 
@@ -1125,13 +1164,41 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
             )
 
     st.subheader("Testi")
+    st.caption("Facoltativi: puoi salvare anche senza compilarli e aggiungerli in seguito.")
+
+    # --- dedication_text ---
     st.text_area(
-        "dedication_text",
+        "Testo della dedica (dedication_text)",
         key=f"{prefix}_dedication_text",
         height=180,
-        placeholder="Genera un'anteprima o scrivi il testo manualmente...",
+        placeholder="Scrivi il testo manualmente oppure clicca \"Genera testo dedica\"...",
     )
-    st.text_input("short_phrase", key=f"{prefix}_short_phrase")
+    if st.session_state.get(f"{prefix}_gen_text_warning"):
+        st.warning("Inserisci prima titolo canzone e artista per generare il testo.")
+    st.button(
+        "✍️ Genera testo dedica",
+        use_container_width=True,
+        on_click=generate_dedication_text,
+        args=(prefix,),
+        key=f"{prefix}_gen_dedication_text",
+        help="Genera un testo di dedica standard basato su titolo e artista.",
+    )
+
+    # --- short_phrase ---
+    st.text_input(
+        "Frase breve (short_phrase)",
+        key=f"{prefix}_short_phrase",
+        placeholder="Una breve frase evocativa, oppure clicca \"Genera frase\"...",
+    )
+    st.button(
+        "💬 Genera frase breve",
+        use_container_width=True,
+        on_click=generate_short_phrase,
+        args=(prefix,),
+        key=f"{prefix}_gen_short_phrase",
+        help="Inserisce la frase breve predefinita.",
+    )
+
     st.text_input("tags", key=f"{prefix}_tags")
 
     with st.expander("SEO e opzioni avanzate"):
@@ -1159,16 +1226,18 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
         st.text_input("video_title", key=f"{prefix}_video_title")
         st.text_area("video_description", key=f"{prefix}_video_description", height=80)
 
+    st.divider()
     col_preview, col_clear = st.columns(2)
     col_preview.button(
-        "Genera anteprima testo",
+        "✍️ Genera entrambi i testi",
         use_container_width=True,
         on_click=generate_preview,
         args=(prefix,),
         key=f"{prefix}_generate_preview",
+        help="Genera sia il testo della dedica sia la frase breve in un colpo solo.",
     )
     col_clear.button(
-        "Pulisci testi",
+        "🗑️ Pulisci testi",
         use_container_width=True,
         on_click=clear_texts,
         args=(prefix,),
@@ -1493,6 +1562,32 @@ def render_site_configuration() -> None:
             )
         except Exception as exc:
             st.error(str(exc))
+
+    st.divider()
+    st.subheader("🚀 Deploy GitHub Pages")
+    st.caption(
+        "Avvia manualmente il workflow **deploy.yml** su GitHub Actions: "
+        "esegue il build Astro e pubblica il sito su GitHub Pages. "
+        "Utile dopo modifiche manuali ai file JSON o alla configurazione."
+    )
+    deploy_pages_clicked = st.button(
+        "🚀 Deploy GitHub Pages ora",
+        type="primary",
+        use_container_width=True,
+        key="config_deploy_pages",
+    )
+    if deploy_pages_clicked:
+        with st.spinner("Avvio deploy GitHub Pages..."):
+            try:
+                dispatch_deploy_pages()
+                st.success(
+                    "✅ Workflow deploy.yml avviato. "
+                    "Il sito verrà aggiornato appena GitHub Actions termina il build "
+                    f"(solitamente 2-3 minuti). "
+                    f"Monitora lo stato su: https://github.com/{GITHUB_REPO}/actions"
+                )
+            except Exception as exc:
+                st.error(str(exc))
 
 
 def main() -> None:
