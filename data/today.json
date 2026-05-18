@@ -1,37 +1,37 @@
 {
-  "id": "2026-05-17-occidentali-s-karma-radio-edit-francesco-gabbani",
-  "date": "2026-05-17",
-  "day_name": "domenica",
+  "id": "2026-05-18-freed-from-desire-gala-molella-phil-jay",
+  "date": "2026-05-18",
+  "day_name": "lunedì",
   "status": "published",
-  "song_title": "Occidentali's Karma (Radio Edit)",
-  "artist": "Francesco Gabbani",
+  "song_title": "Freed From Desire",
+  "artist": "Gala, Molella, Phil Jay",
   "dedication_title": "La dedica del giorno",
-  "dedication_text": "Amore. Mio. Hai visto ? Ho scelto la foto che mi hai mandato perché tu le fai più belle di me! Io avevo già scelto quella con tu e i conetti con gli stuzzicadenti che entravano nel naso. Meno male che me ne sono accorto.🎵",
+  "dedication_text": "Questo è il brano utilizzato dalla lega serie a the campionato di calcio italiano. Oggi la dedico a te che non sei da seria ma sei da Champions da campionato dell'universo. Regina di tutte le stelle. La più luminosa, la più bella. La mia stella popolare.😘🏵🌹🥀1💫⭐️",
   "audio": {
-    "url": "https://open.spotify.com/track/1SUKJk2NLnZ8mNlDPT8EqM?si=6EXqs2PjT5KSElLug8TGiA",
+    "url": "https://open.spotify.com/track/3u5N55tHf7hXATSQrjBh2q?si=Mi11SXYXTSuM-EuEmk4H3Q",
     "type": "spotify"
   },
   "vote": {
     "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
   },
   "image": {
-    "path": "/images/dedications/2026-05-17-occidentali-s-karma-radio-edit-francesco-gabbani.webp",
-    "alt": "Dedica musicale Occidentali's Karma (Radio Edit) di Francesco Gabbani",
+    "path": "/images/dedications/2026-05-18-freed-from-desire-gala-molella-phil-jay.webp",
+    "alt": "Dedica musicale Freed From Desire di Gala, Molella, Phil Jay",
     "mode": "raw",
-    "source": "public/images/upload/2026-05-17-occidentali-s-karma-radio-edit-francesco-gabbani.webp"
+    "source": "public/images/upload/2026-05-18-freed-from-desire-gala-molella-phil-jay.webp"
   },
-  "short_phrase": "Internetlogi un po demodè✨",
+  "short_phrase": "Pilli, sul tetto della Champions League🌟🪐",
   "tags": [
     "musica",
     "emozioni",
     "dedica"
   ],
   "seo": {
-    "title": "Occidentali's Karma (Radio Edit) - Francesco Gabbani | DDGPilliSite",
-    "description": "Dedica musicale del giorno con \"Occidentali's Karma (Radio Edit)\" di Francesco Gabbani."
+    "title": "Freed From Desire - Gala, Molella, Phil Jay | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"Freed From Desire\" di Gala, Molella, Phil Jay."
   },
-  "created_at": "2026-05-17T00:42:57.537658+02:00",
-  "updated_at": "2026-05-17T00:42:58.108665+02:00",
+  "created_at": "2026-05-17T03:54:26.179214+02:00",
+  "updated_at": "2026-05-18T04:05:23.328797+02:00",
   "votoPilly": null,
   "pensieroPilly": "",
   "reactions": {
@@ -40,5 +40,5 @@
     "heart": 0,
     "sun": 0
   },
-  "date_it": "17 maggio 2026"
+  "date_it": "18 maggio 2026"
 }
