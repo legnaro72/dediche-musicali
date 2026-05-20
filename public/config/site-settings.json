@@ -3,7 +3,6 @@
     "googleVote": false,
     "plusVote": true
   },
-  "feedbackApiUrl": "",
   "fakeError": {
     "enabled": false,
     "title": "ERROR 404",
@@ -13,5 +12,5 @@
     "imageMessage": "Attaccati al Tram!! Il sistema momentaneamente offline. Sei stata cattiva con MassiTuo!!Contatta Amministratore del sito!",
     "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
   },
-  "updated_at": "2026-05-16T18:32:55.692886+00:00"
+  "updated_at": "2026-05-19T19:51:26.563358+00:00"
 }
