@@ -103,7 +103,9 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
     let apiFeedback = {};
 
     function feedbackApiUrl() {
-      return document.querySelector('meta[name="ddgpilli-feedback-api"]')?.getAttribute('content')?.trim() || '';
+      return document.querySelector('meta[name="ddgpilli-feedback-api"]')?.getAttribute('content')?.trim()
+        || window.__DDGPILLI_FEEDBACK_API_URL
+        || '';
     }
     const reactionLabels = { down: '👎', like: '👍', heart: '❤️', sun: '☀️' };
 

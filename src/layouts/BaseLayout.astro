@@ -228,6 +228,14 @@ const fullOgImage = ogImage
       if (element) element.textContent = value || '';
     };
 
+    const applyFeedbackApiUrl = (settings) => {
+      const configuredUrl = String(settings?.feedbackApiUrl || settings?.feedback?.apiUrl || '').trim();
+      if (!configuredUrl) return;
+      const meta = document.querySelector('meta[name="ddgpilli-feedback-api"]');
+      if (meta) meta.setAttribute('content', configuredUrl);
+      window.__DDGPILLI_FEEDBACK_API_URL = configuredUrl;
+    };
+
     const applyFakeErrorMode = (fakeError) => {
       const lock = document.querySelector('[data-site-lock]');
       if (!(lock instanceof HTMLElement)) return;
@@ -264,6 +272,7 @@ const fullOgImage = ogImage
     };
 
     const applySiteSettings = (settings) => {
+      applyFeedbackApiUrl(settings);
       const buttons = settings?.buttons || {};
       const visibility = {
         googleVote: buttons.googleVote !== false,
@@ -277,6 +286,7 @@ const fullOgImage = ogImage
       }
 
       applyFakeErrorMode(settings?.fakeError || {});
+      window.dispatchEvent(new CustomEvent('ddgpilli:site-settings-updated'));
     };
 
     const loadSiteSettings = async () => {

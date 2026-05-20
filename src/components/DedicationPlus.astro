@@ -84,7 +84,9 @@ const data = {
   }
 
   function feedbackApiUrl() {
-    return document.querySelector('meta[name="ddgpilli-feedback-api"]')?.getAttribute('content')?.trim() || '';
+    return document.querySelector('meta[name="ddgpilli-feedback-api"]')?.getAttribute('content')?.trim()
+      || window.__DDGPILLI_FEEDBACK_API_URL
+      || '';
   }
 
   async function postFeedback(path, payload) {

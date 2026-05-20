@@ -47,6 +47,7 @@ DEFAULT_SITE_SETTINGS = {
         "googleVote": True,
         "plusVote": True,
     },
+    "feedbackApiUrl": "",
     "fakeError": {
         "enabled": False,
         "title": "ERROR 404",
@@ -497,6 +498,7 @@ def normalize_site_settings(settings: dict) -> dict:
             "googleVote": buttons.get("googleVote", True) is not False,
             "plusVote": buttons.get("plusVote", True) is not False,
         },
+        "feedbackApiUrl": str(settings.get("feedbackApiUrl", "") if isinstance(settings, dict) else "").strip(),
         "fakeError": {
             "enabled": fake_error.get("enabled", False) is True,
             "title": str(fake_error.get("title") or default_fake["title"]),
@@ -1413,6 +1415,7 @@ def render_site_configuration() -> None:
     if st.session_state.get("config_loaded_version") != config_version:
         st.session_state["config_google_vote_visible"] = buttons["googleVote"]
         st.session_state["config_plus_vote_visible"] = buttons["plusVote"]
+        st.session_state["config_feedback_api_url"] = settings.get("feedbackApiUrl", "")
         st.session_state["config_fake_error_enabled"] = fake_error["enabled"]
         st.session_state["config_fake_error_title"] = fake_error["title"]
         st.session_state["config_fake_error_message"] = fake_error["message"]
@@ -1441,6 +1444,18 @@ def render_site_configuration() -> None:
         "Mostra pulsante Votami Plus",
         key="config_plus_vote_visible",
     )
+
+    st.divider()
+    st.subheader("API feedback")
+    feedback_api_url = st.text_input(
+        "URL API feedback per Votami Plus e reaction",
+        placeholder="https://ddgpilli-feedback.<account>.workers.dev",
+        key="config_feedback_api_url",
+    )
+    if not feedback_api_url.strip():
+        st.warning(
+            "API feedback non configurata: Votami Plus e reaction non possono salvare in modo persistente."
+        )
 
     st.divider()
     st.subheader("Fake Error / Site Locked Mode")
@@ -1540,6 +1555,7 @@ def render_site_configuration() -> None:
                 "googleVote": bool(google_vote_visible),
                 "plusVote": bool(plus_vote_visible),
             },
+            "feedbackApiUrl": feedback_api_url.strip(),
             "fakeError": {
                 "enabled": False if restore_site_clicked else bool(fake_error_enabled),
                 "title": fake_error_title.strip() or DEFAULT_SITE_SETTINGS["fakeError"]["title"],

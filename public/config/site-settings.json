@@ -3,6 +3,7 @@
     "googleVote": false,
     "plusVote": true
   },
+  "feedbackApiUrl": "",
   "fakeError": {
     "enabled": false,
     "title": "ERROR 404",
