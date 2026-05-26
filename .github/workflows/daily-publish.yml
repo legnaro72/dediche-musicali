@@ -2,7 +2,8 @@ name: 🎵 Pubblicazione Giornaliera
 
 on:
   schedule:
-    - cron: '0 0 * * *'   # 06:10 ora italiana (UTC+2) / 05:10 (UTC+1)
+    - cron: '0 5 * * *'   # 07:00 Europe/Rome con ora legale
+    - cron: '0 6 * * *'   # 07:00 Europe/Rome con ora solare
   workflow_dispatch:
     inputs:
       date:
@@ -43,21 +44,40 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+      - name: Verifica ora italiana
+        id: rome_time
+        run: |
+          ROME_HOUR="$(TZ=Europe/Rome date +%H)"
+          ROME_DATE="$(TZ=Europe/Rome date +%F)"
+          echo "hour=$ROME_HOUR" >> "$GITHUB_OUTPUT"
+          echo "date=$ROME_DATE" >> "$GITHUB_OUTPUT"
+          echo "Ora Europe/Rome: $ROME_DATE $ROME_HOUR:00"
+
+      - name: Salta schedule fuori dalle 07:00 italiane
+        if: ${{ github.event_name == 'schedule' && steps.rome_time.outputs.hour != '07' }}
+        run: |
+          echo "Esecuzione saltata: non sono le 07:00 Europe/Rome."
+          exit 0
+
       - name: Checkout
+        if: ${{ github.event_name != 'schedule' || steps.rome_time.outputs.hour == '07' }}
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Python
+        if: ${{ github.event_name != 'schedule' || steps.rome_time.outputs.hour == '07' }}
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
 
       - name: Installa dipendenze Python
+        if: ${{ github.event_name != 'schedule' || steps.rome_time.outputs.hour == '07' }}
         run: pip install -r requirements.txt
 
       - name: Sync da Google Sheet
+        if: ${{ github.event_name != 'schedule' || steps.rome_time.outputs.hour == '07' }}
         run: |
           TARGET_DATE="${{ inputs.date }}"
           [ -z "$TARGET_DATE" ] && TARGET_DATE="$(TZ=Europe/Rome date +%F)"
@@ -73,11 +93,13 @@ jobs:
           DEFAULT_VOTE_URL: ${{ secrets.DEFAULT_VOTE_URL }}
 
       - name: Valida dati
+        if: ${{ github.event_name != 'schedule' || steps.rome_time.outputs.hour == '07' }}
         run: python scripts/validate_dedications.py
         env:
           DEFAULT_VOTE_URL: ${{ secrets.DEFAULT_VOTE_URL }}
 
       - name: Pubblica dedica del giorno
+        if: ${{ github.event_name != 'schedule' || steps.rome_time.outputs.hour == '07' }}
         run: |
           TARGET_DATE="${{ inputs.date }}"
           [ -z "$TARGET_DATE" ] && TARGET_DATE="$(TZ=Europe/Rome date +%F)"
@@ -97,25 +119,25 @@ jobs:
           IMAGE_PROVIDER: ${{ secrets.IMAGE_PROVIDER }}
 
       - name: Setup Node.js
-        if: ${{ inputs.dry_run != 'true' }}
+        if: ${{ inputs.dry_run != 'true' && (github.event_name != 'schedule' || steps.rome_time.outputs.hour == '07') }}
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Installa dipendenze Node
-        if: ${{ inputs.dry_run != 'true' }}
+        if: ${{ inputs.dry_run != 'true' && (github.event_name != 'schedule' || steps.rome_time.outputs.hour == '07') }}
         run: npm ci
 
       - name: Build Astro
-        if: ${{ inputs.dry_run != 'true' }}
+        if: ${{ inputs.dry_run != 'true' && (github.event_name != 'schedule' || steps.rome_time.outputs.hour == '07') }}
         run: npm run build
         env:
           SITE_NAME: ${{ secrets.SITE_NAME }}
           SITE_URL: ${{ secrets.SITE_URL }}
 
       - name: Commit modifiche
-        if: ${{ inputs.dry_run != 'true' }}
+        if: ${{ inputs.dry_run != 'true' && (github.event_name != 'schedule' || steps.rome_time.outputs.hour == '07') }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -124,18 +146,18 @@ jobs:
           git push || true
 
       - name: Upload artifact Pages
-        if: ${{ inputs.dry_run != 'true' }}
+        if: ${{ inputs.dry_run != 'true' && (github.event_name != 'schedule' || steps.rome_time.outputs.hour == '07') }}
         uses: actions/upload-pages-artifact@v5
         with:
           path: ./dist
 
       - name: Deploy su GitHub Pages
-        if: ${{ inputs.dry_run != 'true' }}
+        if: ${{ inputs.dry_run != 'true' && (github.event_name != 'schedule' || steps.rome_time.outputs.hour == '07') }}
         id: deployment
         uses: actions/deploy-pages@v5
 
       - name: Invia email notifica DDG online
-        if: ${{ success() && inputs.dry_run != 'true' }}
+        if: ${{ success() && inputs.dry_run != 'true' && (github.event_name != 'schedule' || steps.rome_time.outputs.hour == '07') }}
         run: |
           if [ -z "$SMTP_HOST" ] || [ -z "$SMTP_USERNAME" ] || [ -z "$SMTP_PASSWORD" ]; then
             echo "SMTP non configurato: email notifica saltata."
@@ -152,4 +174,4 @@ jobs:
           SMTP_FROM: ${{ secrets.SMTP_FROM }}
           SMTP_USE_TLS: ${{ secrets.SMTP_USE_TLS }}
           SMTP_USE_SSL: ${{ secrets.SMTP_USE_SSL }}
-          DEPLOY_NOTIFICATION_TO: massimilinao.ferrando@gmail.com
+          DEPLOY_NOTIFICATION_TO: ${{ secrets.DEPLOY_NOTIFICATION_TO || 'massimiliano.ferrando@gmail.com' }}

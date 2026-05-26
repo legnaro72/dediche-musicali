@@ -18,7 +18,7 @@ except Exception:
     ZoneInfo = None
 
 
-DEFAULT_TO = "massimilinao.ferrando@gmail.com"
+DEFAULT_TO = "massimiliano.ferrando@gmail.com"
 DEFAULT_BODY = "Amore mio santissimo la DDG \u00e8 online!! Gloria a Pilli !!!"
 
 
@@ -37,13 +37,19 @@ def env_bool(name: str, default: bool = False) -> bool:
 
 def build_message(date_str: str) -> EmailMessage:
     sender = os.environ.get("SMTP_FROM") or os.environ.get("SMTP_USERNAME")
-    recipient = os.environ.get("DEPLOY_NOTIFICATION_TO", DEFAULT_TO)
+    recipients = [
+        recipient.strip()
+        for recipient in os.environ.get("DEPLOY_NOTIFICATION_TO", DEFAULT_TO).split(",")
+        if recipient.strip()
+    ]
     if not sender:
         raise ValueError("SMTP_FROM o SMTP_USERNAME non configurato.")
+    if not recipients:
+        raise ValueError("DEPLOY_NOTIFICATION_TO non contiene destinatari validi.")
 
     message = EmailMessage()
     message["From"] = sender
-    message["To"] = recipient
+    message["To"] = ", ".join(recipients)
     message["Subject"] = f"DDG {date_str} online"
     message.set_content(os.environ.get("DEPLOY_NOTIFICATION_BODY", DEFAULT_BODY))
     return message
