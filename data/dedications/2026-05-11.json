@@ -18,7 +18,11 @@
     "path": "/images/dedications/2026-05-11.webp",
     "alt": "Dedica musicale: Volare di Domenico Modugno del 11 maggio 2026",
     "mode": "raw",
+<<<<<<< Updated upstream
     "source": "public/images/upload/2026-05-11.webp"
+=======
+    "source": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600"
+>>>>>>> Stashed changes
   },
   "short_phrase": "Vola con la musica nel cuore.",
   "tags": [
@@ -30,6 +34,7 @@
     "title": "Volare – Domenico Modugno | DDGPilliSite",
     "description": "Dedica musicale del 11 maggio 2026: Volare di Domenico Modugno. Certe canzoni non invecchiano mai."
   },
+<<<<<<< Updated upstream
   "created_at": "2026-05-13T03:57:18.676089+02:00",
   "updated_at": "2026-05-13T03:57:18.676089+02:00",
   "votoPilly": null,
@@ -40,4 +45,8 @@
     "heart": 0,
     "sun": 0
   }
+=======
+  "created_at": "2026-05-12T14:31:24.722426+02:00",
+  "updated_at": "2026-05-12T14:31:24.722426+02:00"
+>>>>>>> Stashed changes
 }

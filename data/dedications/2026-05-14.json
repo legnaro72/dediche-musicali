@@ -2,11 +2,19 @@
   "id": "2026-05-14-resta-con-me-bambole-di-pezza",
   "date": "2026-05-14",
   "day_name": "giovedì",
+<<<<<<< Updated upstream
   "status": "published",
   "song_title": "Resta con me",
   "artist": "Bambole di pezza",
   "dedication_title": "La dedica del giorno",
   "dedication_text": "Ci sono canzoni che arrivano senza fare rumore, ma restano dentro piu di tante parole.\nOggi ti dedico \"Resta con me\" di Bambole di pezza, perche certe emozioni meritano di essere ascoltate fino in fondo.💙",
+=======
+  "status": "scheduled",
+  "song_title": "Resta con me",
+  "artist": "Bambole di pezza",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "Ci sono canzoni che arrivano senza fare rumore, ma restano dentro più di tante parole.\nOggi ti dedico “Resta con me” di Bambole di pezza, perché certe emozioni meritano di essere ascoltate fino in fondo. 🎵",
+>>>>>>> Stashed changes
   "audio": {
     "url": "https://open.spotify.com/intl-it/track/1GjQApTKIADKfSoZm8bHRK?si=9595791a4cb148df",
     "type": "spotify"
@@ -15,12 +23,21 @@
     "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
   },
   "image": {
+<<<<<<< Updated upstream
     "path": "/images/dedications/2026-05-14-resta-con-me-bambole-di-pezza.webp",
     "alt": "Dedica musicale Resta con me di Bambole di pezza",
     "mode": "raw",
     "source": "public/images/upload/2026-05-14.jpg"
   },
   "short_phrase": "Resta con me!!!✨💫🌟",
+=======
+    "path": "/images/dedications/2026-05-14.webp",
+    "alt": "Dedica musicale Resta con me di Bambole di pezza",
+    "mode": "raw",
+    "source": "D:\\dediche-musicali\\public\\images\\upload\\2026-05-14.jpg"
+  },
+  "short_phrase": "Alcune emozioni restano anche dopo l’ultima nota.",
+>>>>>>> Stashed changes
   "tags": [
     "musica",
     "emozioni",
@@ -30,6 +47,7 @@
     "title": "Resta con me – Bambole di pezza | DDGPilliSite",
     "description": "Dedica musicale del giorno con “Resta con me” di Bambole di pezza."
   },
+<<<<<<< Updated upstream
   "created_at": "2026-05-13T03:57:18.702877+02:00",
   "updated_at": "2026-05-14T03:59:53.174775+02:00",
   "date_it": "14 maggio 2026",
@@ -41,4 +59,8 @@
     "heart": 0,
     "sun": 0
   }
+=======
+  "created_at": "2026-05-12T14:31:24.734712+02:00",
+  "updated_at": "2026-05-12T14:31:24.734712+02:00"
+>>>>>>> Stashed changes
 }

@@ -19,6 +19,12 @@ service_account.json
 *.key
 google_credentials.json
 
+# Cache immagini remote (raw mode)
+.cache/images/*.jpg
+.cache/images/*.jpeg
+.cache/images/*.png
+.cache/images/*.webp
+
 # OS
 .DS_Store
 Thumbs.db

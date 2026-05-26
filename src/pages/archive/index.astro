@@ -118,10 +118,25 @@ const MONTH_NAMES: Record<string, string> = {
       .trim();
   }
 
+  function normalizeSearch(value: string) {
+    return value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   function applyFilters() {
+<<<<<<< Updated upstream
     const q = normalizeSearch(searchInput?.value ?? '');
     const artist = normalizeSearch(filterArtist?.value ?? '');
     const month = filterMonth?.value ?? ''; // YYYY-MM
+=======
+    const q = normalizeSearch(searchInput.value);
+    const artist = normalizeSearch(filterArtist.value);
+    const month = filterMonth.value; // YYYY-MM
+>>>>>>> Stashed changes
 
     let visible = 0;
     cards.forEach(card => {
