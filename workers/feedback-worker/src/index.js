@@ -175,6 +175,52 @@ function nowIsoRomeApprox() {
   return new Date().toISOString();
 }
 
+function romeDateTimeParts(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('it-IT', {
+    timeZone: 'Europe/Rome',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).formatToParts(date).reduce((acc, part) => {
+    acc[part.type] = part.value;
+    return acc;
+  }, {});
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    time: `${parts.hour}:${parts.minute}:${parts.second}`,
+  };
+}
+
+function truncateInput(value, maxLength) {
+  const text = String(value || '').trim();
+  return text.length <= maxLength ? text : `${text.slice(0, maxLength - 1)}…`;
+}
+
+async function dispatchVoteEmail(env, feedback) {
+  const workflow = env.VOTE_EMAIL_WORKFLOW_FILE || 'vote-email-notification.yml';
+  const when = romeDateTimeParts(new Date());
+  const response = await githubRequest(env, `actions/workflows/${workflow}/dispatches`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      ref: githubBranch(env),
+      inputs: {
+        date: when.date,
+        time: when.time,
+        score: String(feedback.votoPilly ?? ''),
+        thought: truncateInput(feedback.pensieroPilly || '', 6000),
+        title: truncateInput(feedback.title || '', 200),
+        artist: truncateInput(feedback.artist || '', 200),
+      },
+    }),
+  });
+  if (response.status !== 204) await response.text();
+}
+
 async function getFeedback(env, dedicationId) {
   const loaded = await loadDedicationById(env, dedicationId);
   return feedbackPayload(loaded.dedication);
@@ -203,7 +249,15 @@ async function saveVote(env, payload) {
   loaded.dedication.pensieroPilly = String(payload.pensieroPilly || '').trim();
   loaded.dedication.updated_at = nowIsoRomeApprox();
   await saveDedication(env, loaded, `Salva voto Pilly ${dedicationId}`);
-  return feedbackPayload(loaded.dedication);
+  const feedback = feedbackPayload(loaded.dedication);
+  try {
+    await dispatchVoteEmail(env, feedback);
+    feedback.vote_email_dispatched = true;
+  } catch (error) {
+    console.warn('Email voto Pilly non inviata:', error);
+    feedback.vote_email_dispatched = false;
+  }
+  return feedback;
 }
 
 async function saveReaction(env, payload) {

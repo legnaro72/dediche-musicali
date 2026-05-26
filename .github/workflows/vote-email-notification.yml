@@ -1,0 +1,65 @@
+name: Email voto Pilli
+
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Data voto'
+        required: true
+      time:
+        description: 'Ora voto'
+        required: true
+      score:
+        description: 'Voto salvato'
+        required: true
+      thought:
+        description: 'Frase del voto'
+        required: false
+        default: ''
+      title:
+        description: 'Titolo canzone'
+        required: false
+        default: ''
+      artist:
+        description: 'Artista'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: Invia email voto Pilli
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Invia email notifica voto
+        run: |
+          if [ -z "$SMTP_HOST" ] || [ -z "$SMTP_USERNAME" ] || [ -z "$SMTP_PASSWORD" ]; then
+            echo "SMTP non configurato: email notifica saltata."
+            exit 0
+          fi
+          python scripts/send_vote_email.py \
+            --date "${{ inputs.date }}" \
+            --time "${{ inputs.time }}" \
+            --score "${{ inputs.score }}" \
+            --thought "${{ inputs.thought }}" \
+            --title "${{ inputs.title }}" \
+            --artist "${{ inputs.artist }}"
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          SMTP_USE_TLS: ${{ secrets.SMTP_USE_TLS }}
+          SMTP_USE_SSL: ${{ secrets.SMTP_USE_SSL }}
+          DEPLOY_NOTIFICATION_TO: ${{ secrets.DEPLOY_NOTIFICATION_TO || 'massimiliano.ferrando@gmail.com' }}
