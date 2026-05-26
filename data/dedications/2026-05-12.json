@@ -18,11 +18,7 @@
     "path": "/images/dedications/2026-05-12.webp",
     "alt": "Dedica musicale Su di noi di Pupo",
     "mode": "raw",
-<<<<<<< Updated upstream
     "source": "public/images/upload/2026-05-12.webp"
-=======
-    "source": "D:\\dediche-musicali\\public\\images\\upload\\2026-05-12.jpg"
->>>>>>> Stashed changes
   },
   "short_phrase": "Alcune emozioni restano per sempre.",
   "tags": [
@@ -34,7 +30,6 @@
     "title": "Su di noi – Pupo | DDGPilliSite",
     "description": "Dedica musicale del giorno con “Su di noi” di Pupo."
   },
-<<<<<<< Updated upstream
   "created_at": "2026-05-13T03:57:18.702111+02:00",
   "updated_at": "2026-05-13T10:34:17.423681+02:00",
   "date_it": "12 maggio 2026",
@@ -46,8 +41,4 @@
     "heart": 0,
     "sun": 0
   }
-=======
-  "created_at": "2026-05-12T14:31:24.732432+02:00",
-  "updated_at": "2026-05-12T14:31:24.732432+02:00"
->>>>>>> Stashed changes
 }
