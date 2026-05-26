@@ -6,7 +6,7 @@ import json
 import os
 import re
 from pathlib import Path
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import quote, urlparse, urlunparse
 
 try:
     from zoneinfo import ZoneInfo
@@ -42,6 +42,11 @@ DAILY_WORKFLOW_FILE = os.environ.get("DAILY_WORKFLOW_FILE", "daily-publish.yml")
 UPLOAD_DIR = "public/images/upload"
 SITE_LOCK_IMAGE_DIR = "public/images/site-lock"
 SITE_SETTINGS_PATH = "public/config/site-settings.json"
+WHATSAPP_NOTIFY_NUMBER = os.environ.get("WHATSAPP_NOTIFY_NUMBER", "393403813481")
+WHATSAPP_NOTIFY_MESSAGE = os.environ.get(
+    "WHATSAPP_NOTIFY_MESSAGE",
+    "Ciao AmorPilli , la DDG \u00e8 online.",
+)
 DEFAULT_SITE_SETTINGS = {
     "buttons": {
         "googleVote": True,
@@ -382,6 +387,19 @@ def get_secret_or_env(name: str, default: str = "") -> str:
     except Exception:
         value = ""
     return str(value or os.environ.get(name, default) or "").strip()
+
+
+def whatsapp_notify_url() -> str:
+    number = re.sub(r"\D+", "", WHATSAPP_NOTIFY_NUMBER)
+    return f"https://wa.me/{number}?text={quote(WHATSAPP_NOTIFY_MESSAGE)}"
+
+
+def render_whatsapp_notification_button() -> None:
+    st.link_button(
+        "Invia notifica WhatsApp",
+        whatsapp_notify_url(),
+        use_container_width=True,
+    )
 
 
 def get_github_token() -> str:
@@ -1298,6 +1316,7 @@ def save_and_optionally_publish(prefix: str, uploaded_file, mode: str, publish_n
         st.success(
             "Workflow daily-publish avviato. Il sito verra' aggiornato appena GitHub Actions termina."
         )
+    render_whatsapp_notification_button()
 
 
 def render_new_dedication() -> None:
@@ -1532,6 +1551,7 @@ def render_site_configuration() -> None:
                     "Fake Error Mode attivata nel JSON remoto. "
                     "Aggiorna il sito o attendi il prossimo controllo automatico."
                 )
+                render_whatsapp_notification_button()
                 return
             except Exception as exc:
                 st.error(str(exc))
@@ -1544,6 +1564,7 @@ def render_site_configuration() -> None:
                     "Sito ripristinato: Fake Error Mode disattivata nel JSON remoto. "
                     "Aggiorna il sito o attendi il prossimo controllo automatico."
                 )
+                render_whatsapp_notification_button()
                 return
             except Exception as exc:
                 st.error(str(exc))
@@ -1576,6 +1597,7 @@ def render_site_configuration() -> None:
                 "Configurazione salvata. Le pagine gia' aperte la rileggono automaticamente "
                 "entro circa 15 secondi."
             )
+            render_whatsapp_notification_button()
         except Exception as exc:
             st.error(str(exc))
 
@@ -1602,6 +1624,7 @@ def render_site_configuration() -> None:
                     f"(solitamente 2-3 minuti). "
                     f"Monitora lo stato su: https://github.com/{GITHUB_REPO}/actions"
                 )
+                render_whatsapp_notification_button()
             except Exception as exc:
                 st.error(str(exc))
 

@@ -133,3 +133,23 @@ jobs:
         if: ${{ inputs.dry_run != 'true' }}
         id: deployment
         uses: actions/deploy-pages@v5
+
+      - name: Invia email notifica DDG online
+        if: ${{ success() && inputs.dry_run != 'true' }}
+        run: |
+          if [ -z "$SMTP_HOST" ] || [ -z "$SMTP_USERNAME" ] || [ -z "$SMTP_PASSWORD" ]; then
+            echo "SMTP non configurato: email notifica saltata."
+            exit 0
+          fi
+          TARGET_DATE="${{ inputs.date }}"
+          [ -z "$TARGET_DATE" ] && TARGET_DATE="$(TZ=Europe/Rome date +%F)"
+          python scripts/send_deploy_email.py --date "$TARGET_DATE"
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          SMTP_USE_TLS: ${{ secrets.SMTP_USE_TLS }}
+          SMTP_USE_SSL: ${{ secrets.SMTP_USE_SSL }}
+          DEPLOY_NOTIFICATION_TO: massimilinao.ferrando@gmail.com
