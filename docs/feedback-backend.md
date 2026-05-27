@@ -19,7 +19,9 @@ all'utente e tiene il token GitHub fuori dal browser.
 ### Cosa devi fare una sola volta
 
 1. Crea un token GitHub fine-grained per il repository `legnaro72/dediche-musicali`.
-   Permessi minimi: `Contents: Read and write`.
+   Permessi minimi:
+   - `Contents: Read and write`
+   - `Actions: Read and write`
 2. Accedi a Cloudflare:
 
 ```bash
@@ -66,7 +68,7 @@ DDGPILLI_FEEDBACK_HOST=0.0.0.0
 DDGPILLI_FEEDBACK_ORIGIN=https://legnaro72.github.io
 ```
 
-Il token deve avere permesso `Contents: Read and write` sul repository.
+Il token deve avere permessi `Contents: Read and write` e `Actions: Read and write` sul repository.
 
 ## Variabile ambiente frontend
 
