@@ -2,8 +2,7 @@ name: 🎵 Pubblicazione Giornaliera
 
 on:
   schedule:
-    - cron: '10 8 * 4-10 *'        # 10:10 Europe/Rome circa, periodo ora legale
-    - cron: '10 9 * 11,12,1,2,3 *' # 10:10 Europe/Rome circa, periodo ora solare
+    - cron: '20 11 * * *' # 13:20 Europe/Rome con ora legale, test automatico
   workflow_dispatch:
     inputs:
       date:
