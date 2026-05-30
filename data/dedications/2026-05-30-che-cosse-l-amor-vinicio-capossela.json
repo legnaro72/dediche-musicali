@@ -31,9 +31,9 @@
     "description": "Dedica musicale del giorno con \"Che cossè l'amor\" di Vinicio Capossela."
   },
   "created_at": "2026-05-30T07:07:39.720225+02:00",
-  "updated_at": "2026-05-30T15:32:14.078Z",
-  "votoPilly": null,
-  "pensieroPilly": "",
+  "updated_at": "2026-05-30T15:35:01.062Z",
+  "votoPilly": 10,
+  "pensieroPilly": "Ps. ricordati di portarmi la figurina stasera!!! 😄😄😄🎶🎶🎶",
   "reactions": {
     "down": 0,
     "like": 0,
