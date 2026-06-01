@@ -1,4 +1,4 @@
-name: 🎵 Pubblicazione Giornaliera
+﻿name: ðŸŽµ Pubblicazione Giornaliera
 
 on:
   schedule:
@@ -11,7 +11,7 @@ on:
         required: false
         default: ''
       force_republish:
-        description: 'Forza ripubblicazione anche se già pubblicata'
+        description: 'Forza ripubblicazione anche se giÃ  pubblicata'
         required: false
         default: false
         type: boolean
@@ -130,7 +130,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/ public/images/dedications/ || true
-          git diff --cached --quiet || git commit -m "🎵 Dedica del giorno - $(date +'%Y-%m-%d') [skip ci]"
+          git diff --cached --quiet || git commit -m "ðŸŽµ Dedica del giorno - $(date +'%Y-%m-%d') [skip ci]"
           git push || true
 
       - name: Upload artifact Pages
@@ -163,3 +163,5 @@ jobs:
           SMTP_USE_TLS: ${{ secrets.SMTP_USE_TLS }}
           SMTP_USE_SSL: ${{ secrets.SMTP_USE_SSL }}
           DEPLOY_NOTIFICATION_TO: ${{ secrets.DEPLOY_NOTIFICATION_TO || 'massimiliano.ferrando@gmail.com' }}
+          DEPLOY_EXPECTED_REPOSITORY: legnaro72/dediche-musicali
+

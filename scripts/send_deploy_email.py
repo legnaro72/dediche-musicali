@@ -1,4 +1,4 @@
-"""
+﻿"""
 Invia la notifica email di deploy giornaliero completato.
 
 Configurazione via variabili d'ambiente o GitHub Secrets:
@@ -22,6 +22,14 @@ DEFAULT_TO = "massimiliano.ferrando@gmail.com"
 DEFAULT_BODY = "Amore mio santissimo la DDG \u00e8 online!! Gloria a Pilli !!!"
 
 
+
+def ensure_expected_repository() -> bool:
+    expected = os.environ.get("DEPLOY_EXPECTED_REPOSITORY", "").strip().lower()
+    current = os.environ.get("GITHUB_REPOSITORY", "").strip().lower()
+    if not expected or not current or expected == current:
+        return True
+    print(f"Email notifica saltata: repository corrente {current}, atteso {expected}.")
+    return False
 def get_rome_today() -> str:
     if ZoneInfo is not None:
         return datetime.datetime.now(ZoneInfo("Europe/Rome")).date().isoformat()
@@ -59,7 +67,9 @@ def send_message(message: EmailMessage) -> None:
     host = os.environ.get("SMTP_HOST", "").strip()
     username = os.environ.get("SMTP_USERNAME", "").strip()
     password = os.environ.get("SMTP_PASSWORD", "")
-    port = int(os.environ.get("SMTP_PORT", "465" if env_bool("SMTP_USE_SSL") else "587"))
+    default_port = "465" if env_bool("SMTP_USE_SSL") else "587"
+    port_value = os.environ.get("SMTP_PORT", "").strip() or default_port
+    port = int(port_value)
 
     if not host or not username or not password:
         raise ValueError("SMTP_HOST, SMTP_USERNAME e SMTP_PASSWORD sono obbligatori.")
@@ -81,6 +91,8 @@ def main() -> None:
     args = parser.parse_args()
 
     date_str = args.date.strip() or os.environ.get("DDG_ONLINE_DATE", "").strip() or get_rome_today()
+    if not ensure_expected_repository():
+        return
     message = build_message(date_str)
     send_message(message)
     print(f"Email notifica inviata a {message['To']}")
@@ -88,3 +100,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
