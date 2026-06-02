@@ -31,12 +31,12 @@
     "description": "Dedica musicale del giorno con \"Comuni Immortali\" di Achille Lauro."
   },
   "created_at": "2026-06-02T14:30:48.875014+02:00",
-  "updated_at": "2026-06-02T15:25:14.700Z",
+  "updated_at": "2026-06-02T20:16:19.485Z",
   "voteAverage": 10,
   "thoughtsText": "[Paola Faggioni] Funzionano le ddg 😀✨🎶🎶🎶",
   "reactions": {
     "down": 0,
-    "like": 0,
+    "like": 1,
     "heart": 1,
     "sun": 0
   },
@@ -68,6 +68,14 @@
       "value": "heart",
       "createdAt": "2026-06-02T15:21:39.544Z",
       "updatedAt": "2026-06-02T15:21:39.544Z"
+    },
+    {
+      "userId": "fe5599ca-7b24-4cdb-be77-6f2e44489d43",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "value": "like",
+      "createdAt": "2026-06-02T20:16:19.485Z",
+      "updatedAt": "2026-06-02T20:16:19.485Z"
     }
   ],
   "date_it": "2 giugno 2026"
