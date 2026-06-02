@@ -31,9 +31,9 @@
     "description": "Dedica musicale del giorno con \"Comuni Immortali\" di Achille Lauro."
   },
   "created_at": "2026-06-02T14:30:48.875014+02:00",
-  "updated_at": "2026-06-02T20:16:19.485Z",
-  "voteAverage": 10,
-  "thoughtsText": "[Paola Faggioni] Funzionano le ddg 😀✨🎶🎶🎶",
+  "updated_at": "2026-06-02T20:18:15.764Z",
+  "voteAverage": 9,
+  "thoughtsText": "[Paola Faggioni] Funzionano le ddg 😀✨🎶🎶🎶\n\n[Massimiliano Ferrando] E ci mancherebbe!!!🥰😍",
   "reactions": {
     "down": 0,
     "like": 1,
@@ -48,6 +48,14 @@
       "value": 10,
       "createdAt": "2026-06-02T15:25:14.700Z",
       "updatedAt": "2026-06-02T15:25:14.700Z"
+    },
+    {
+      "userId": "fe5599ca-7b24-4cdb-be77-6f2e44489d43",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "value": 8,
+      "createdAt": "2026-06-02T20:18:15.764Z",
+      "updatedAt": "2026-06-02T20:18:15.764Z"
     }
   ],
   "thoughts": [
@@ -58,6 +66,14 @@
       "text": "Funzionano le ddg 😀✨🎶🎶🎶",
       "createdAt": "2026-06-02T15:25:14.700Z",
       "updatedAt": "2026-06-02T15:25:14.700Z"
+    },
+    {
+      "userId": "fe5599ca-7b24-4cdb-be77-6f2e44489d43",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "text": "E ci mancherebbe!!!🥰😍",
+      "createdAt": "2026-06-02T20:18:15.764Z",
+      "updatedAt": "2026-06-02T20:18:15.764Z"
     }
   ],
   "reactionEntries": [
