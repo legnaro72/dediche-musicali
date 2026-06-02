@@ -31,12 +31,12 @@
     "description": "Dedica musicale del giorno con \"La Nostra Pelle\" di Ex-Otago, Willie Peyote."
   },
   "created_at": "2026-05-31T07:07:45.942067+02:00",
-  "updated_at": "2026-05-31T07:07:46.551085+02:00",
+  "updated_at": "2026-06-02T00:08:16.889Z",
   "votoPilly": null,
   "pensieroPilly": "",
   "reactions": {
     "down": 0,
-    "like": 0,
+    "like": 1,
     "heart": 0,
     "sun": 0
   },
