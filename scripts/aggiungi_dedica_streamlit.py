@@ -1,4 +1,5 @@
-﻿import base64
+# -*- coding: cp1252 -*-
+import base64
 import datetime
 import html
 import io
@@ -69,7 +70,7 @@ DEFAULT_SITE_SETTINGS = {
     "updated_at": "",
 }
 VALID_IMAGE_MODES = ("raw", "auto", "upload", "none")
-VALID_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
+VALID_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif"}
 VALID_STATUSES = ("draft", "scheduled", "published", "disabled")
 VALID_VIDEO_TYPES = ("", "youtube", "mp4", "external")
 UPLOAD_IMAGE_MAX_SIDE = int(os.environ.get("UPLOAD_IMAGE_MAX_SIDE", "1400"))
@@ -115,11 +116,11 @@ SHEET_COLUMNS = [
     "video_description",
 ]
 
-QUICK_EMOJIS = ["🎵", "❤️", "✨", "🌙", "🌹", "😊", "🙏", "🎧"]
+QUICK_EMOJIS = ["??", "??", "?", "??", "??", "??", "??", "??"]
 EXTENDED_EMOJIS = [
-    "🎶", "💙", "💛", "💜", "💫", "🌟", "☀️", "🌻",
-    "🔥", "😍", "🥹", "🕊️", "🎤", "💭", "🌈", "🍀",
-    "⭐", "💌", "🤍", "🫶", "🌊", "🎹", "🎸", "🪩",
+    "??", "??", "??", "??", "??", "??", "??", "??",
+    "??", "??", "??", "???", "??", "??", "??", "??",
+    "?", "??", "??", "??", "??", "??", "??", "??",
 ]
 
 
@@ -174,11 +175,11 @@ def inject_streamlit_pwa_tags() -> None:
 def slugify(text: str) -> str:
     text = text.lower().strip()
     replacements = {
-        "à": "a", "á": "a", "â": "a", "ã": "a", "ä": "a",
-        "è": "e", "é": "e", "ê": "e", "ë": "e",
-        "ì": "i", "í": "i", "î": "i", "ï": "i",
-        "ò": "o", "ó": "o", "ô": "o", "õ": "o", "ö": "o",
-        "ù": "u", "ú": "u", "û": "u", "ü": "u",
+        "�": "a", "�": "a", "�": "a", "�": "a", "�": "a",
+        "�": "e", "�": "e", "�": "e", "�": "e",
+        "�": "i", "�": "i", "�": "i", "�": "i",
+        "�": "o", "�": "o", "�": "o", "�": "o", "�": "o",
+        "�": "u", "�": "u", "�": "u", "�": "u",
     }
     for src, dst in replacements.items():
         text = text.replace(src, dst)
@@ -314,14 +315,14 @@ def fetch_spotify_open_graph(url: str) -> tuple[str, str]:
     description = html.unescape(description_match.group(1).strip()) if description_match else ""
     artist = ""
 
-    description_parts = [part.strip() for part in description.split("·") if part.strip()]
+    description_parts = [part.strip() for part in description.split("�") if part.strip()]
     if len(description_parts) >= 3 and description_parts[-2].lower() in {"brano", "song"}:
         artist = description_parts[0]
     else:
         patterns = [
-            r"Listen to .+? on Spotify\.\s*Song\s*·\s*(.+?)\s*·\s*\d{4}",
-            r"Song\s*·\s*(.+?)\s*·\s*\d{4}",
-            r"Brano\s*·\s*(.+?)\s*·\s*\d{4}",
+            r"Listen to .+? on Spotify\.\s*Song\s*�\s*(.+?)\s*�\s*\d{4}",
+            r"Song\s*�\s*(.+?)\s*�\s*\d{4}",
+            r"Brano\s*�\s*(.+?)\s*�\s*\d{4}",
         ]
         for pattern in patterns:
             match = re.search(pattern, description, flags=re.IGNORECASE)
@@ -385,7 +386,7 @@ def default_dedication_text(song_title: str, artist: str) -> str:
         "Ci sono canzoni che arrivano senza fare rumore, "
         "ma restano dentro piu' di tante parole.\n"
         f"Oggi ti dedico \"{song_title}\" di {artist}, "
-        "perche' certe emozioni meritano di essere ascoltate fino in fondo. 🎵"
+        "perche' certe emozioni meritano di essere ascoltate fino in fondo. ??"
     )
 
 
@@ -681,7 +682,9 @@ def remember_uploaded_image(prefix: str, uploaded_file):
 
 
 def optimize_uploaded_image(uploaded_file) -> tuple[bytes, dict]:
-    from PIL import Image, ImageOps, ImageSequence
+    from PIL import Image, ImageFile, ImageOps
+
+    ImageFile.LOAD_TRUNCATED_IMAGES = True
 
     original_bytes = uploaded_file.getvalue()
     original_name = uploaded_file.name or "immagine"
@@ -704,8 +707,9 @@ def optimize_uploaded_image(uploaded_file) -> tuple[bytes, dict]:
         frame_count = getattr(img, "n_frames", 1) or 1
         is_animated = bool(getattr(img, "is_animated", False) or frame_count > 1)
         if is_animated:
-            img.seek(0)
-            img = next(ImageSequence.Iterator(img)).copy()
+            img.seek(frame_count - 1)
+            img.load()
+            img = img.copy()
         else:
             img.load()
         img = ImageOps.exif_transpose(img)
@@ -770,7 +774,7 @@ def upload_image_to_github(uploaded_file, asset_id: str) -> str:
     original_name = uploaded_file.name or ""
     ext = Path(original_name).suffix.lower()
     if ext not in VALID_IMAGE_EXTS:
-        raise ValueError("Formato immagine non supportato. Usa JPG, JPEG, PNG, WEBP, HEIC oppure HEIF.")
+        raise ValueError("Formato immagine non supportato. Usa JPG, JPEG, PNG, WEBP, GIF, HEIC oppure HEIF.")
 
     optimized_bytes, image_info = optimize_uploaded_image(uploaded_file)
     upload_name = f"{asset_id}.webp"
@@ -1168,7 +1172,7 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
     )
     uploaded_file = st.file_uploader(
         "Nuova immagine per raw/upload",
-        type=["jpg", "jpeg", "png", "webp", "heic", "heif"],
+        type=["jpg", "jpeg", "png", "webp", "gif", "heic", "heif"],
         disabled=image_mode not in ("raw", "upload"),
         key=f"{prefix}_uploaded_file",
     )
@@ -1208,7 +1212,7 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
     if st.session_state.get(f"{prefix}_gen_text_warning"):
         st.warning("Inserisci prima titolo canzone e artista per generare il testo.")
     st.button(
-        "✍️ Genera testo dedica",
+        "?? Genera testo dedica",
         use_container_width=True,
         on_click=generate_dedication_text,
         args=(prefix,),
@@ -1223,7 +1227,7 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
         placeholder="Una breve frase evocativa, oppure clicca \"Genera frase\"...",
     )
     st.button(
-        "💬 Genera frase breve",
+        "?? Genera frase breve",
         use_container_width=True,
         on_click=generate_short_phrase,
         args=(prefix,),
@@ -1261,7 +1265,7 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
     st.divider()
     col_preview, col_clear = st.columns(2)
     col_preview.button(
-        "✍️ Genera entrambi i testi",
+        "?? Genera entrambi i testi",
         use_container_width=True,
         on_click=generate_preview,
         args=(prefix,),
@@ -1269,7 +1273,7 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
         help="Genera sia il testo della dedica sia la frase breve in un colpo solo.",
     )
     col_clear.button(
-        "🗑️ Pulisci testi",
+        "??? Pulisci testi",
         use_container_width=True,
         on_click=clear_texts,
         args=(prefix,),
@@ -2106,14 +2110,14 @@ def render_site_configuration() -> None:
             st.error(str(exc))
 
     st.divider()
-    st.subheader("🚀 Deploy GitHub Pages")
+    st.subheader("?? Deploy GitHub Pages")
     st.caption(
         "Avvia manualmente il workflow **deploy.yml** su GitHub Actions: "
         "esegue il build Astro e pubblica il sito su GitHub Pages. "
         "Utile dopo modifiche manuali ai file JSON o alla configurazione."
     )
     deploy_pages_clicked = st.button(
-        "🚀 Deploy GitHub Pages ora",
+        "?? Deploy GitHub Pages ora",
         type="primary",
         use_container_width=True,
         key="config_deploy_pages",
@@ -2123,8 +2127,8 @@ def render_site_configuration() -> None:
             try:
                 dispatch_deploy_pages()
                 st.success(
-                    "✅ Workflow deploy.yml avviato. "
-                    "Il sito verrà aggiornato appena GitHub Actions termina il build "
+                    "? Workflow deploy.yml avviato. "
+                    "Il sito verr� aggiornato appena GitHub Actions termina il build "
                     f"(solitamente 2-3 minuti). "
                     f"Monitora lo stato su: https://github.com/{GITHUB_REPO}/actions"
                 )
@@ -2134,7 +2138,7 @@ def render_site_configuration() -> None:
 
 
 def main() -> None:
-    page_icon = STREAMLIT_ICON_PATH.read_bytes() if STREAMLIT_ICON_PATH.exists() else "🎵"
+    page_icon = STREAMLIT_ICON_PATH.read_bytes() if STREAMLIT_ICON_PATH.exists() else "??"
     st.set_page_config(page_title="DDGPilli Admin", page_icon=page_icon, layout="centered")
     inject_streamlit_pwa_tags()
     tab_new, tab_historical, tab_config, tab_visits, tab_garbage = st.tabs([
