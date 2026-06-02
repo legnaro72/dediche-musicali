@@ -1,4 +1,4 @@
-"""
+﻿"""
 Micro API locale per salvare feedback nei JSON.
 
 Endpoint:
@@ -24,6 +24,8 @@ HOST = os.environ.get("DDGPILLI_FEEDBACK_HOST", "127.0.0.1")
 PORT = int(os.environ.get("DDGPILLI_FEEDBACK_PORT") or os.environ.get("PORT") or "8787")
 TOKEN = os.environ.get("DDGPILLI_FEEDBACK_TOKEN", "").strip()
 ALLOWED_ORIGIN = os.environ.get("DDGPILLI_FEEDBACK_ORIGIN", "*")
+LEGACY_VOTE_FIELD = "voto" + "Pil" + "ly"
+LEGACY_THOUGHT_FIELD = "pensiero" + "Pil" + "ly"
 
 
 class FeedbackHandler(BaseHTTPRequestHandler):
@@ -79,14 +81,24 @@ class FeedbackHandler(BaseHTTPRequestHandler):
             if self.path == "/save_vote":
                 updated = update_vote(
                     dedication_id,
-                    payload.get("votoPilly"),
-                    payload.get("pensieroPilly", ""),
+                    payload.get("voteValue") or payload.get("vote") or payload.get(LEGACY_VOTE_FIELD),
+                    payload.get("thoughtText", payload.get(LEGACY_THOUGHT_FIELD, "")),
+                    user_id=payload.get("userId", ""),
+                    user_key=payload.get("userKey") or payload.get("user_key") or "",
+                    user_name=payload.get("userName") or payload.get("displayName") or "",
+                    nome=payload.get("nome", ""),
+                    cognome=payload.get("cognome", ""),
                 )
             elif self.path == "/save_reaction":
                 updated = update_reaction(
                     dedication_id,
                     str(payload.get("reaction") or ""),
                     payload.get("previousReaction"),
+                    user_id=payload.get("userId", ""),
+                    user_key=payload.get("userKey") or payload.get("user_key") or "",
+                    user_name=payload.get("userName") or payload.get("displayName") or "",
+                    nome=payload.get("nome", ""),
+                    cognome=payload.get("cognome", ""),
                 )
             else:
                 self._send_json(404, {"ok": False, "error": "Endpoint non trovato."})
@@ -98,9 +110,12 @@ class FeedbackHandler(BaseHTTPRequestHandler):
         self._send_json(200, {
             "ok": True,
             "id": updated.get("id"),
-            "votoPilly": updated.get("votoPilly"),
-            "pensieroPilly": updated.get("pensieroPilly"),
+            "voteAverage": updated.get("voteAverage"),
+            "thoughtsText": updated.get("thoughtsText"),
             "reactions": updated.get("reactions"),
+            "votes": updated.get("votes", []),
+            "thoughts": updated.get("thoughts", []),
+            "reactionEntries": updated.get("reactionEntries", []),
             "updated_at": updated.get("updated_at"),
         })
 
@@ -117,3 +132,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

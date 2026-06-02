@@ -1,4 +1,4 @@
----
+﻿---
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -20,9 +20,12 @@ const statsData = dedications.map(d => ({
   date: d.date,
   title: d.song_title,
   artist: d.artist,
-  votoPilly: d.votoPilly ?? null,
-  pensieroPilly: d.pensieroPilly ?? '',
+  voteAverage: d.voteAverage ?? null,
+  thoughtsText: d.thoughtsText ?? '',
   reactions: d.reactions ?? {},
+  votes: d.votes ?? [],
+  thoughts: d.thoughts ?? [],
+  reactionEntries: d.reactionEntries ?? [],
 }));
 const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
 ---
@@ -34,8 +37,10 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
   <section class="stats-page">
     <div class="container">
       <div class="stats-header anim-1">
-        <span class="section-label">Panoramica</span>
-        <h1 class="section-title" style="font-family:var(--font-serif)">Statistiche</h1>
+        <span class="section-label"><span class="tone-red">Panoramica</span></span>
+        <h1 class="section-title" style="font-family:var(--font-serif)">
+          <span class="tone-blue">Statistiche</span>
+        </h1>
         <div class="divider"></div>
       </div>
 
@@ -135,6 +140,27 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
       return item ? `${item.title} - ${item.artist}` : '-';
     }
 
+    function normalizedVotes(item) {
+      const votes = Array.isArray(item.votes) ? item.votes : [];
+      return votes
+        .filter(v => Number.isInteger(Number(v.value)) && Number(v.value) >= 1 && Number(v.value) <= 10)
+        .map(v => ({
+          ...item,
+          userId: v.userId || '',
+          userName: v.userName || 'Utente',
+          voteValue: Number(v.value),
+        }));
+    }
+
+    function thoughtsFor(item) {
+      return Array.isArray(item.thoughts) ? item.thoughts : [];
+    }
+
+    function thoughtForVote(item) {
+      const thought = thoughtsFor(item).find(t => t.userId && t.userId === item.userId);
+      return thought?.text ? `[${thought.userName || item.userName}] ${thought.text}` : '-';
+    }
+
     function renderRanking(selector, items, formatter) {
       const list = document.querySelector(selector);
       if (!list) return;
@@ -163,19 +189,18 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
         title: item.title,
         artist: item.artist,
       }));
-      const voteMap = new Map();
-
-      runtimeDedications.forEach((item) => {
-        if (item.votoPilly) voteMap.set(item.id, item);
+      const votes = runtimeDedications.flatMap((item) => {
+        const nominalVotes = normalizedVotes(item);
+        if (nominalVotes.length) return nominalVotes;
+        if (Number.isInteger(Number(item.voteAverage)) && Number(item.voteAverage) >= 1 && Number(item.voteAverage) <= 10) {
+          return [{ ...item, userId: 'legacy', userName: 'Storico', voteValue: Number(item.voteAverage) }];
+        }
+        return [];
       });
 
-      const votes = [...voteMap.values()]
-        .filter(v => Number.isInteger(Number(v.votoPilly)) && Number(v.votoPilly) >= 1 && Number(v.votoPilly) <= 10)
-        .map(v => ({ ...v, votoPilly: Number(v.votoPilly) }));
-
-      const sum = votes.reduce((acc, item) => acc + item.votoPilly, 0);
-      const sortedVotes = [...votes].sort((a, b) => b.votoPilly - a.votoPilly || a.title.localeCompare(b.title));
-      const lowVotes = [...votes].sort((a, b) => a.votoPilly - b.votoPilly || a.title.localeCompare(b.title));
+      const sum = votes.reduce((acc, item) => acc + item.voteValue, 0);
+      const sortedVotes = [...votes].sort((a, b) => b.voteValue - a.voteValue || a.title.localeCompare(b.title));
+      const lowVotes = [...votes].sort((a, b) => a.voteValue - b.voteValue || a.title.localeCompare(b.title));
 
       const reactionTotals = { down: 0, like: 0, heart: 0, sun: 0 };
       const withReactions = runtimeDedications.map((item) => {
@@ -190,8 +215,8 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
 
       setText('[data-stat="totalVotes"]', votes.length);
       setText('[data-stat="averageVote"]', votes.length ? (sum / votes.length).toFixed(1) : '-');
-      setText('[data-stat="highestVote"]', sortedVotes[0]?.votoPilly ?? '-');
-      setText('[data-stat="lowestVote"]', lowVotes[0]?.votoPilly ?? '-');
+      setText('[data-stat="highestVote"]', sortedVotes[0]?.voteValue ?? '-');
+      setText('[data-stat="lowestVote"]', lowVotes[0]?.voteValue ?? '-');
       setText('[data-stat="totalReactions"]', totalReactions);
       setText('[data-stat="topReaction"]', totalReactions ? reactionLabels[topReaction] : '-');
       setText('[data-stat="highestSong"]', songLabel(sortedVotes[0]));
@@ -200,7 +225,7 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
       setText('[data-stat="likeSong"]', likeSong?.counts.like ? songLabel(likeSong) : '-');
       reactionKeys.forEach((key) => setText(`[data-reaction-total="${key}"]`, reactionTotals[key]));
 
-      renderRanking('[data-ranking="votes"]', sortedVotes, item => `${item.votoPilly}/10 - ${songLabel(item)}`);
+      renderRanking('[data-ranking="votes"]', sortedVotes, item => `${item.voteValue}/10 - ${songLabel(item)}`);
       renderRanking('[data-ranking="heart"]', withReactions.filter(i => i.counts.heart > 0).sort((a, b) => b.counts.heart - a.counts.heart), item => `${item.counts.heart} ❤️ - ${songLabel(item)}`);
       renderRanking('[data-ranking="sun"]', withReactions.filter(i => i.counts.sun > 0).sort((a, b) => b.counts.sun - a.counts.sun), item => `${item.counts.sun} ☀️ - ${songLabel(item)}`);
 
@@ -213,9 +238,9 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
         body.append(row);
         return;
       }
-      votes.sort((a, b) => b.date.localeCompare(a.date)).forEach((item) => {
+      votes.sort((a, b) => b.date.localeCompare(a.date) || String(a.userName).localeCompare(String(b.userName))).forEach((item) => {
         const row = document.createElement('tr');
-        [item.date, item.title, item.artist, `${item.votoPilly}/10`, item.pensieroPilly || '-'].forEach((value) => {
+        [item.date, item.title, item.artist, `[${item.userName}] ${item.voteValue}/10`, thoughtForVote(item)].forEach((value) => {
           const cell = document.createElement('td');
           cell.textContent = value;
           row.append(cell);
@@ -245,3 +270,4 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
     window.addEventListener('storage', renderStats);
   </script>
 </BaseLayout>
+

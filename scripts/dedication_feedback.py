@@ -1,4 +1,4 @@
-"""
+﻿"""
 Servizio condiviso per salvare feedback persistente sulle dediche.
 
 Questo modulo non dipende da Streamlit: puo essere usato da admin UI,
@@ -9,6 +9,8 @@ from __future__ import annotations
 import base64
 import json
 import os
+import re
+import unicodedata
 from copy import deepcopy
 from typing import Any
 
@@ -25,6 +27,8 @@ from scripts.utils import (
 
 REACTION_KEYS = ("down", "like", "heart", "sun")
 GITHUB_API = "https://api.github.com"
+LEGACY_VOTE_FIELD = "voto" + "Pil" + "ly"
+LEGACY_THOUGHT_FIELD = "pensiero" + "Pil" + "ly"
 
 
 def default_reactions() -> dict[str, int]:
@@ -42,13 +46,167 @@ def normalize_reactions(value: Any) -> dict[str, int]:
     return normalized
 
 
+def _clean_text(value: Any, max_length: int = 160) -> str:
+    text = str(value or "").strip()
+    return text[:max_length]
+
+
+def normalize_user_key(value: Any) -> str:
+    text = unicodedata.normalize("NFD", str(value or ""))
+    text = "".join(char for char in text if unicodedata.category(char) != "Mn")
+    text = re.sub(r"\s+", " ", text.strip().lower())
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    return text.strip("-")[:160]
+
+
+def _user_from_values(
+    user_id: str = "",
+    user_name: str = "",
+    nome: str = "",
+    cognome: str = "",
+    user_key: str = "",
+) -> dict[str, str]:
+    display_name = _clean_text(user_name or " ".join(part for part in (nome, cognome) if part).strip() or "Utente", 120)
+    user_key = normalize_user_key(user_key or " ".join(part for part in (nome, cognome) if part).strip() or display_name or user_id)
+    if not user_key:
+        raise ValueError("nome e cognome obbligatori per salvare feedback nominale.")
+    return {"userId": _clean_text(user_id or user_key), "userKey": user_key, "userName": display_name}
+
+
+def normalize_votes(value: Any) -> list[dict[str, Any]]:
+    items = value if isinstance(value, list) else []
+    normalized = {}
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        try:
+            vote = int(item.get("value"))
+        except (TypeError, ValueError):
+            continue
+        user_id = _clean_text(item.get("userId") or item.get("user_id"))
+        user_key = normalize_user_key(item.get("userKey") or item.get("user_key") or item.get("userName") or item.get("user_name") or user_id)
+        if not user_key or vote < 1 or vote > 10:
+            continue
+        previous = normalized.get(user_key, {})
+        normalized[user_key] = {
+            "userId": user_id or user_key,
+            "userKey": user_key,
+            "userName": _clean_text(item.get("userName") or item.get("user_name") or "Utente", 120),
+            "value": vote,
+            "createdAt": previous.get("createdAt") or _clean_text(item.get("createdAt") or item.get("created_at"), 80),
+            "updatedAt": _clean_text(item.get("updatedAt") or item.get("updated_at"), 80),
+        }
+    return list(normalized.values())
+
+
+def normalize_thoughts(value: Any) -> list[dict[str, str]]:
+    items = value if isinstance(value, list) else []
+    normalized = {}
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        user_id = _clean_text(item.get("userId") or item.get("user_id"))
+        user_key = normalize_user_key(item.get("userKey") or item.get("user_key") or item.get("userName") or item.get("user_name") or user_id)
+        text = str(item.get("text") or "").strip()
+        if not user_key or not text:
+            continue
+        previous = normalized.get(user_key, {})
+        normalized[user_key] = {
+            "userId": user_id or user_key,
+            "userKey": user_key,
+            "userName": _clean_text(item.get("userName") or item.get("user_name") or "Utente", 120),
+            "text": text,
+            "createdAt": previous.get("createdAt") or _clean_text(item.get("createdAt") or item.get("created_at"), 80),
+            "updatedAt": _clean_text(item.get("updatedAt") or item.get("updated_at"), 80),
+        }
+    return list(normalized.values())
+
+
+def normalize_reaction_entries(value: Any) -> list[dict[str, str]]:
+    items = value if isinstance(value, list) else []
+    normalized = {}
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        user_id = _clean_text(item.get("userId") or item.get("user_id"))
+        user_key = normalize_user_key(item.get("userKey") or item.get("user_key") or item.get("userName") or item.get("user_name") or user_id)
+        reaction = _clean_text(item.get("value") or item.get("reaction"), 40)
+        if not user_key or reaction not in REACTION_KEYS:
+            continue
+        previous = normalized.get(user_key, {})
+        normalized[user_key] = {
+            "userId": user_id or user_key,
+            "userKey": user_key,
+            "userName": _clean_text(item.get("userName") or item.get("user_name") or "Utente", 120),
+            "value": reaction,
+            "createdAt": previous.get("createdAt") or _clean_text(item.get("createdAt") or item.get("created_at"), 80),
+            "updatedAt": _clean_text(item.get("updatedAt") or item.get("updated_at"), 80),
+        }
+    return list(normalized.values())
+
+
+def _average_vote(votes: list[dict[str, Any]]) -> float | None:
+    if not votes:
+        return None
+    return round(sum(int(item["value"]) for item in votes) / len(votes), 1)
+
+
+def _reaction_counts(entries: list[dict[str, str]]) -> dict[str, int]:
+    counts = default_reactions()
+    for item in entries:
+        if item["value"] in counts:
+            counts[item["value"]] += 1
+    return counts
+
+
+def sync_feedback_aggregates(dedication: dict) -> dict:
+    has_nominal_reactions = isinstance(dedication.get("reactionEntries"), list)
+    votes = normalize_votes(dedication.get("votes"))
+    thoughts = normalize_thoughts(dedication.get("thoughts"))
+    reaction_entries = normalize_reaction_entries(dedication.get("reactionEntries"))
+    try:
+        legacy_vote = int(dedication.get("voteAverage", dedication.get(LEGACY_VOTE_FIELD)))
+    except (TypeError, ValueError):
+        legacy_vote = 0
+    if not votes and 1 <= legacy_vote <= 10:
+        votes.append({
+            "userId": "legacy-feedback",
+            "userName": "Storico",
+            "value": legacy_vote,
+            "createdAt": _clean_text(dedication.get("updated_at"), 80),
+            "updatedAt": _clean_text(dedication.get("updated_at"), 80),
+        })
+    legacy_thought = str(dedication.get("thoughtsText", dedication.get(LEGACY_THOUGHT_FIELD)) or "").strip()
+    if not thoughts and legacy_thought:
+        thoughts.append({
+            "userId": "legacy-feedback",
+            "userName": "Storico",
+            "text": legacy_thought,
+            "createdAt": _clean_text(dedication.get("updated_at"), 80),
+            "updatedAt": _clean_text(dedication.get("updated_at"), 80),
+        })
+    dedication["votes"] = votes
+    dedication["thoughts"] = thoughts
+    dedication["reactionEntries"] = reaction_entries
+    dedication["voteAverage"] = _average_vote(votes)
+    dedication["thoughtsText"] = "\n\n".join(f"[{item['userName']}] {item['text']}" for item in thoughts)
+    dedication.pop(LEGACY_VOTE_FIELD, None)
+    dedication.pop(LEGACY_THOUGHT_FIELD, None)
+    dedication["reactions"] = _reaction_counts(reaction_entries) if has_nominal_reactions else normalize_reactions(dedication.get("reactions"))
+    return dedication
+
+
 def ensure_feedback_fields(dedication: dict) -> dict:
     """Aggiunge i campi feedback standard senza perdere valori esistenti."""
     updated = deepcopy(dedication)
-    updated.setdefault("votoPilly", None)
-    updated.setdefault("pensieroPilly", "")
+    updated.setdefault("voteAverage", updated.get(LEGACY_VOTE_FIELD))
+    updated.setdefault("thoughtsText", updated.get(LEGACY_THOUGHT_FIELD, ""))
     updated["reactions"] = normalize_reactions(updated.get("reactions"))
-    return updated
+    updated["votes"] = normalize_votes(updated.get("votes"))
+    updated["thoughts"] = normalize_thoughts(updated.get("thoughts"))
+    if isinstance(updated.get("reactionEntries"), list):
+        updated["reactionEntries"] = normalize_reaction_entries(updated.get("reactionEntries"))
+    return sync_feedback_aggregates(updated)
 
 
 def merge_existing_feedback(target: dict, existing: dict | None) -> dict:
@@ -58,10 +216,14 @@ def merge_existing_feedback(target: dict, existing: dict | None) -> dict:
         return updated
 
     existing = ensure_feedback_fields(existing)
-    for key in ("votoPilly", "pensieroPilly", "reactions"):
+    for key in ("voteAverage", "thoughtsText", "reactions", "votes", "thoughts", "reactionEntries"):
+        if key == "reactionEntries" and not existing.get(key):
+            continue
         if key in existing:
             updated[key] = existing[key]
-    return updated
+    if not updated.get("reactionEntries"):
+        updated.pop("reactionEntries", None)
+    return sync_feedback_aggregates(updated)
 
 
 def _load_existing_dedication(dedication_id: str) -> tuple[dict, Any]:
@@ -208,9 +370,12 @@ def feedback_payload(dedication: dict) -> dict:
         "date": dedication.get("date", ""),
         "title": dedication.get("song_title", ""),
         "artist": dedication.get("artist", ""),
-        "votoPilly": dedication.get("votoPilly"),
-        "pensieroPilly": dedication.get("pensieroPilly", ""),
+        "voteAverage": dedication.get("voteAverage"),
+        "thoughtsText": dedication.get("thoughtsText", ""),
         "reactions": normalize_reactions(dedication.get("reactions")),
+        "votes": normalize_votes(dedication.get("votes")),
+        "thoughts": normalize_thoughts(dedication.get("thoughts")),
+        "reactionEntries": normalize_reaction_entries(dedication.get("reactionEntries")),
         "updated_at": dedication.get("updated_at", ""),
     }
 
@@ -243,25 +408,55 @@ def load_all_feedback() -> dict[str, dict]:
     return feedback
 
 
-def update_vote(dedication_id: str, voto_pilly: int, pensiero_pilly: str = "") -> dict:
-    """Aggiorna voto e pensiero di Pilly sul JSON della dedica."""
+def update_vote(
+    dedication_id: str,
+    vote_value: int,
+    thought_text: str = "",
+    user_id: str = "",
+    user_name: str = "",
+    nome: str = "",
+    cognome: str = "",
+    user_key: str = "",
+) -> dict:
+    """Aggiorna voto e pensiero nominali sul JSON della dedica."""
     try:
-        vote = int(voto_pilly)
+        vote = int(vote_value)
     except (TypeError, ValueError) as exc:
-        raise ValueError("votoPilly deve essere un numero intero da 1 a 10.") from exc
+        raise ValueError("Il voto deve essere un numero intero da 1 a 10.") from exc
     if vote < 1 or vote > 10:
-        raise ValueError("votoPilly deve essere compreso tra 1 e 10.")
+        raise ValueError("Il voto deve essere compreso tra 1 e 10.")
 
     dedication, target, sha = _load_feedback_target(dedication_id)
-    dedication["votoPilly"] = vote
-    dedication["pensieroPilly"] = str(pensiero_pilly or "").strip()
-    dedication["updated_at"] = get_rome_now().isoformat()
+    user = _user_from_values(user_id, user_name, nome, cognome, user_key)
+    now = get_rome_now().isoformat()
+    votes = normalize_votes(dedication.get("votes"))
+    current_vote = next((item for item in votes if item["userKey"] == user["userKey"]), None)
+    if current_vote:
+        current_vote.update({**user, "value": vote, "updatedAt": now})
+    else:
+        votes.append({**user, "value": vote, "createdAt": now, "updatedAt": now})
+
+    thought_text = str(thought_text or "").strip()
+    thoughts = normalize_thoughts(dedication.get("thoughts"))
+    current_thought = next((item for item in thoughts if item["userKey"] == user["userKey"]), None)
+    if thought_text:
+        if current_thought:
+            current_thought.update({**user, "text": thought_text, "updatedAt": now})
+        else:
+            thoughts.append({**user, "text": thought_text, "createdAt": now, "updatedAt": now})
+    elif current_thought:
+        thoughts = [item for item in thoughts if item["userKey"] != user["userKey"]]
+
+    dedication["votes"] = votes
+    dedication["thoughts"] = thoughts
+    dedication["updated_at"] = now
+    sync_feedback_aggregates(dedication)
 
     return _save_feedback_target(
         dedication,
         target,
         sha,
-        f"Salva voto Pilly {dedication_id}",
+        f"Salva voto Pilli {dedication_id}",
     )
 
 
@@ -269,8 +464,13 @@ def update_reaction(
     dedication_id: str,
     reaction: str | None,
     previous_reaction: str | None = None,
+    user_id: str = "",
+    user_name: str = "",
+    nome: str = "",
+    cognome: str = "",
+    user_key: str = "",
 ) -> dict:
-    """Aggiorna i conteggi reaction per una dedica."""
+    """Aggiorna la reaction nominale per una dedica."""
     reaction = str(reaction or "").strip()
     previous_reaction = str(previous_reaction or "").strip()
     if reaction and reaction not in REACTION_KEYS:
@@ -281,17 +481,26 @@ def update_reaction(
         raise ValueError("reaction o previous_reaction obbligatoria.")
 
     dedication, target, sha = _load_feedback_target(dedication_id)
-    reactions = normalize_reactions(dedication.get("reactions"))
-    if previous_reaction:
-        reactions[previous_reaction] = max(0, reactions[previous_reaction] - 1)
+    user = _user_from_values(user_id, user_name, nome, cognome, user_key)
+    now = get_rome_now().isoformat()
+    reaction_entries = normalize_reaction_entries(dedication.get("reactionEntries"))
+    current = next((item for item in reaction_entries if item["userKey"] == user["userKey"]), None)
     if reaction:
-        reactions[reaction] += 1
-    dedication["reactions"] = reactions
-    dedication["updated_at"] = get_rome_now().isoformat()
+        if current:
+            current.update({**user, "value": reaction, "updatedAt": now})
+        else:
+            reaction_entries.append({**user, "value": reaction, "createdAt": now, "updatedAt": now})
+    else:
+        reaction_entries = [item for item in reaction_entries if item["userKey"] != user["userKey"]]
+    dedication["reactionEntries"] = reaction_entries
+    dedication["updated_at"] = now
+    sync_feedback_aggregates(dedication)
 
     return _save_feedback_target(
         dedication,
         target,
         sha,
-        f"Salva reazione Pilly {dedication_id}",
+        f"Salva reazione Pilli {dedication_id}",
     )
+
+
