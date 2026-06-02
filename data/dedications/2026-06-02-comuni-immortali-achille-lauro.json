@@ -31,17 +31,44 @@
     "description": "Dedica musicale del giorno con \"Comuni Immortali\" di Achille Lauro."
   },
   "created_at": "2026-06-02T14:30:48.875014+02:00",
-  "updated_at": "2026-06-02T14:30:49.425545+02:00",
-  "voteAverage": null,
-  "thoughtsText": "",
+  "updated_at": "2026-06-02T15:25:14.700Z",
+  "voteAverage": 10,
+  "thoughtsText": "[Paola Faggioni] Funzionano le ddg 😀✨🎶🎶🎶",
   "reactions": {
     "down": 0,
     "like": 0,
-    "heart": 0,
+    "heart": 1,
     "sun": 0
   },
-  "votes": [],
-  "thoughts": [],
-  "reactionEntries": [],
+  "votes": [
+    {
+      "userId": "34f9e465-56bc-406e-857c-0c12396a0b6e",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "value": 10,
+      "createdAt": "2026-06-02T15:25:14.700Z",
+      "updatedAt": "2026-06-02T15:25:14.700Z"
+    }
+  ],
+  "thoughts": [
+    {
+      "userId": "34f9e465-56bc-406e-857c-0c12396a0b6e",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "text": "Funzionano le ddg 😀✨🎶🎶🎶",
+      "createdAt": "2026-06-02T15:25:14.700Z",
+      "updatedAt": "2026-06-02T15:25:14.700Z"
+    }
+  ],
+  "reactionEntries": [
+    {
+      "userId": "34f9e465-56bc-406e-857c-0c12396a0b6e",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "value": "heart",
+      "createdAt": "2026-06-02T15:21:39.544Z",
+      "updatedAt": "2026-06-02T15:21:39.544Z"
+    }
+  ],
   "date_it": "2 giugno 2026"
 }
