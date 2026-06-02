@@ -1090,10 +1090,10 @@ def render_emoji_picker(prefix: str) -> None:
 
     st.markdown("**Emoji rapide**")
     cols = st.columns(len(QUICK_EMOJIS))
-    for col, emoji in zip(cols, QUICK_EMOJIS):
+    for index, (col, emoji) in enumerate(zip(cols, QUICK_EMOJIS)):
         col.button(
             emoji,
-            key=f"{prefix}_quick_{emoji}",
+            key=f"{prefix}_quick_{index}",
             on_click=add_to_active_text,
             args=(emoji, prefix),
         )
@@ -1102,10 +1102,10 @@ def render_emoji_picker(prefix: str) -> None:
         for row_start in range(0, len(EXTENDED_EMOJIS), 8):
             row = EXTENDED_EMOJIS[row_start:row_start + 8]
             cols = st.columns(len(row))
-            for col, emoji in zip(cols, row):
+            for index, (col, emoji) in enumerate(zip(cols, row)):
                 col.button(
                     emoji,
-                    key=f"{prefix}_extended_{row_start}_{emoji}",
+                    key=f"{prefix}_extended_{row_start}_{index}",
                     on_click=add_to_active_text,
                     args=(emoji, prefix),
                 )
