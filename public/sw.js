@@ -1,4 +1,5 @@
-const CACHE_VERSION = 'ddgpilli-pwa-v4';
+const CACHE_VERSION = 'dediche-musicali-pwa-v5';
+const CACHE_PREFIX = 'dediche-musicali-pwa-';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const APP_SCOPE = new URL(self.registration.scope);
@@ -30,7 +31,11 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((key) => !key.startsWith(CACHE_VERSION)).map((key) => caches.delete(key))))
+      .then((keys) => Promise.all(
+        keys
+          .filter((key) => key.startsWith(CACHE_PREFIX) && !key.startsWith(CACHE_VERSION))
+          .map((key) => caches.delete(key))
+      ))
       .then(() => self.clients.claim())
   );
 });
@@ -57,6 +62,21 @@ self.addEventListener('fetch', (event) => {
 
   const isStaticAsset = /\.(?:css|js|png|jpg|jpeg|webp|svg|woff2?|ttf|json|xml)$/i.test(url.pathname);
   if (!isStaticAsset) return;
+
+  const isFreshAsset = /\.(?:png|jpg|jpeg|webp|svg|json)$/i.test(url.pathname);
+  if (isFreshAsset) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (!response || response.status !== 200) return response;
+          const copy = response.clone();
+          caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, copy));
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(request).then((cached) => {
