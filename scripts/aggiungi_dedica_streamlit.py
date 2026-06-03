@@ -117,14 +117,12 @@ SHEET_COLUMNS = [
     "video_description",
 ]
 
-QUICK_EMOJIS = ["??", "??", "?", "??", "??", "??", "??", "??"]
+QUICK_EMOJIS = ["\U0001F3B5", "\u2764\ufe0f", "\u2728", "\U0001F319", "\U0001F339", "\U0001F60A", "\U0001F64F", "\U0001F3A7"]
 EXTENDED_EMOJIS = [
-    "??", "??", "??", "??", "??", "??", "??", "??",
-    "??", "??", "??", "???", "??", "??", "??", "??",
-    "?", "??", "??", "??", "??", "??", "??", "??",
+    "\U0001F3B6", "\U0001F499", "\U0001F49B", "\U0001F49C", "\U0001F4AB", "\U0001F31F", "\u2600\ufe0f", "\U0001F33B",
+    "\U0001F525", "\U0001F60D", "\U0001F979", "\U0001F54A\ufe0f", "\U0001F3A4", "\U0001F4AD", "\U0001F308", "\U0001F340",
+    "\u2B50", "\U0001F48C", "\U0001F90D", "\U0001FAF6", "\U0001F30A", "\U0001F3B9", "\U0001F3B8", "\U0001FAA9",
 ]
-
-
 def inject_streamlit_pwa_tags() -> None:
     favicon_href = ""
     if STREAMLIT_ICON_PATH.exists():
@@ -387,7 +385,7 @@ def default_dedication_text(song_title: str, artist: str) -> str:
         "Ci sono canzoni che arrivano senza fare rumore, "
         "ma restano dentro piu' di tante parole.\n"
         f"Oggi ti dedico \"{song_title}\" di {artist}, "
-        "perche' certe emozioni meritano di essere ascoltate fino in fondo. ??"
+        "perche' certe emozioni meritano di essere ascoltate fino in fondo. \U0001F3B5"
     )
 
 
@@ -1213,7 +1211,7 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
     if st.session_state.get(f"{prefix}_gen_text_warning"):
         st.warning("Inserisci prima titolo canzone e artista per generare il testo.")
     st.button(
-        "?? Genera testo dedica",
+        "\u2728 Genera testo dedica",
         use_container_width=True,
         on_click=generate_dedication_text,
         args=(prefix,),
@@ -1228,7 +1226,7 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
         placeholder="Una breve frase evocativa, oppure clicca \"Genera frase\"...",
     )
     st.button(
-        "?? Genera frase breve",
+        "\U0001F4AB Genera frase breve",
         use_container_width=True,
         on_click=generate_short_phrase,
         args=(prefix,),
@@ -1266,7 +1264,7 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
     st.divider()
     col_preview, col_clear = st.columns(2)
     col_preview.button(
-        "?? Genera entrambi i testi",
+        "\u2728 Genera entrambi i testi",
         use_container_width=True,
         on_click=generate_preview,
         args=(prefix,),
@@ -1274,7 +1272,7 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
         help="Genera sia il testo della dedica sia la frase breve in un colpo solo.",
     )
     col_clear.button(
-        "??? Pulisci testi",
+        "\U0001F9F9 Pulisci testi",
         use_container_width=True,
         on_click=clear_texts,
         args=(prefix,),
@@ -2111,14 +2109,14 @@ def render_site_configuration() -> None:
             st.error(str(exc))
 
     st.divider()
-    st.subheader("?? Deploy GitHub Pages")
+    st.subheader("\U0001F680 Deploy GitHub Pages")
     st.caption(
         "Avvia manualmente il workflow **deploy.yml** su GitHub Actions: "
         "esegue il build Astro e pubblica il sito su GitHub Pages. "
         "Utile dopo modifiche manuali ai file JSON o alla configurazione."
     )
     deploy_pages_clicked = st.button(
-        "?? Deploy GitHub Pages ora",
+        "\U0001F680 Deploy GitHub Pages ora",
         type="primary",
         use_container_width=True,
         key="config_deploy_pages",
@@ -2128,7 +2126,7 @@ def render_site_configuration() -> None:
             try:
                 dispatch_deploy_pages()
                 st.success(
-                    "? Workflow deploy.yml avviato. "
+                    "\u2705 Workflow deploy.yml avviato. "
                     "Il sito verrà aggiornato appena GitHub Actions termina il build "
                     f"(solitamente 2-3 minuti). "
                     f"Monitora lo stato su: https://github.com/{GITHUB_REPO}/actions"
@@ -2139,7 +2137,7 @@ def render_site_configuration() -> None:
 
 
 def main() -> None:
-    page_icon = STREAMLIT_ICON_PATH.read_bytes() if STREAMLIT_ICON_PATH.exists() else "??"
+    page_icon = STREAMLIT_ICON_PATH.read_bytes() if STREAMLIT_ICON_PATH.exists() else "\U0001F3B5"
     st.set_page_config(page_title="DDGPilli Admin", page_icon=page_icon, layout="centered")
     inject_streamlit_pwa_tags()
     tab_new, tab_historical, tab_config, tab_visits, tab_garbage = st.tabs([
