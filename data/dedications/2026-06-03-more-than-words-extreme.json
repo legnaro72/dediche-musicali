@@ -31,14 +31,14 @@
     "description": "Dedica musicale del giorno con \"More Than Words\" di Extreme."
   },
   "created_at": "2026-06-03T07:07:39.001989+02:00",
-  "updated_at": "2026-06-03T12:32:24.387Z",
+  "updated_at": "2026-06-03T12:32:41.322Z",
   "voteAverage": 10,
   "thoughtsText": "[Paola Faggioni] 10  perché mi piace un sacco e perché c’è il sole",
   "reactions": {
     "down": 0,
     "like": 0,
     "heart": 0,
-    "sun": 0
+    "sun": 1
   },
   "votes": [
     {
@@ -60,6 +60,15 @@
       "updatedAt": "2026-06-03T12:32:24.387Z"
     }
   ],
-  "reactionEntries": [],
+  "reactionEntries": [
+    {
+      "userId": "2c73f444-3bda-4109-a3ce-09beda222bcf",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "value": "sun",
+      "createdAt": "2026-06-03T12:32:41.322Z",
+      "updatedAt": "2026-06-03T12:32:41.322Z"
+    }
+  ],
   "date_it": "3 giugno 2026"
 }
