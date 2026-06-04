@@ -31,17 +31,35 @@
     "description": "Dedica musicale del giorno con \"Enter Sandman - Remastered 2021\" di Metallica."
   },
   "created_at": "2026-06-04T07:07:39.619599+02:00",
-  "updated_at": "2026-06-04T21:25:12.536Z",
-  "voteAverage": null,
-  "thoughtsText": "",
+  "updated_at": "2026-06-04T21:26:28.777Z",
+  "voteAverage": 6,
+  "thoughtsText": "[Paola Faggioni] …un po’ troppo…metallica…😂😂😂..però la copertina è l’album..10! 😄",
   "reactions": {
     "down": 0,
     "like": 0,
     "heart": 0,
     "sun": 1
   },
-  "votes": [],
-  "thoughts": [],
+  "votes": [
+    {
+      "userId": "2c73f444-3bda-4109-a3ce-09beda222bcf",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "value": 6,
+      "createdAt": "2026-06-04T21:26:28.777Z",
+      "updatedAt": "2026-06-04T21:26:28.777Z"
+    }
+  ],
+  "thoughts": [
+    {
+      "userId": "2c73f444-3bda-4109-a3ce-09beda222bcf",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "text": "…un po’ troppo…metallica…😂😂😂..però la copertina è l’album..10! 😄",
+      "createdAt": "2026-06-04T21:26:28.777Z",
+      "updatedAt": "2026-06-04T21:26:28.777Z"
+    }
+  ],
   "reactionEntries": [
     {
       "userId": "2c73f444-3bda-4109-a3ce-09beda222bcf",
