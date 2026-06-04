@@ -296,6 +296,17 @@
       "source": "site",
       "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7.4 Mobile/15E148 Safari/604.1",
       "createdAt": "2026-06-03T12:26:10.215Z"
+    },
+    {
+      "visitId": "ca1035c7-1fcb-4090-a562-daf415cd2aab",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "visitedAt": "2026-06-04T06:37:37.294Z",
+      "visitDate": "2026-06-04",
+      "page": "/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7.4 Mobile/15E148 Safari/604.1",
+      "createdAt": "2026-06-04T06:37:37.294Z"
     }
   ]
 }
