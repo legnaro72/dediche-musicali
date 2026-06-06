@@ -450,6 +450,17 @@
       "source": "site",
       "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7.4 Mobile/15E148 Safari/604.1",
       "createdAt": "2026-06-05T10:14:46.383Z"
+    },
+    {
+      "visitId": "799dacb9-f7b1-436a-a79e-c8256bf00464",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "visitedAt": "2026-06-06T08:12:05.431Z",
+      "visitDate": "2026-06-06",
+      "page": "/statistiche/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36",
+      "createdAt": "2026-06-06T08:12:05.431Z"
     }
   ]
 }
