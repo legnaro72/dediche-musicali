@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'dediche-musicali-pwa-v5';
+const CACHE_VERSION = 'dediche-musicali-pwa-v6';
 const CACHE_PREFIX = 'dediche-musicali-pwa-';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
