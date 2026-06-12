@@ -1,0 +1,74 @@
+{
+  "id": "2026-06-08-mamma-mia-abba",
+  "date": "2026-06-08",
+  "day_name": "lunedì",
+  "status": "published",
+  "song_title": "Mamma Mia",
+  "artist": "ABBA",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "Amore, mi dispiace che sei triste. A me fa star tanto male, il fatto che tu sia triste... tu non hai un idea di quanto mi fa stare male. Vorrei saperti sempre Felice contenta e soprattutto avere il controllo sulle tue emozioni,  poterti regalare un sorriso ogni secondo che viene scandito dall'orologio. E invece mi viene difficile perché poi anche quando provo a scardinare la tua tristezza, tu mi dici che non hai voglia di parlare che non vuoi sentirmi perché ti dà fastidio il telefono. E allora l'unico modo sarebbe essere di poterti stringere abbracciare.\nOra mi sento male. Perché una tosse micidiale. Ti dedico questa canzone perche so che ti fa allegria... oh Pilli mia!❤️🎵",
+  "audio": {
+    "url": "https://open.spotify.com/track/2TxCwUlqaOH3TIyJqGgR91?si=bEM6AGRySGyrlfCffw4QLA",
+    "type": "spotify"
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-06-08-mamma-mia-abba.webp",
+    "alt": "Dedica musicale Mamma Mia di ABBA",
+    "mode": "raw",
+    "source": "public/images/upload/2026-06-08-mamma-mia-abba.webp"
+  },
+  "short_phrase": "Pilli Mia!!✨",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "Mamma Mia - ABBA | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"Mamma Mia\" di ABBA."
+  },
+  "created_at": "2026-06-08T13:15:04.286733+02:00",
+  "updated_at": "2026-06-08T12:17:41.508Z",
+  "voteAverage": 10,
+  "thoughtsText": "[Paola Faggioni] Ovvio che è dieci",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 0,
+    "sun": 1
+  },
+  "votes": [
+    {
+      "userId": "6434f67f-9d85-43c3-a0ed-279bffdcee34",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "value": 10,
+      "createdAt": "2026-06-08T12:17:41.508Z",
+      "updatedAt": "2026-06-08T12:17:41.508Z"
+    }
+  ],
+  "thoughts": [
+    {
+      "userId": "6434f67f-9d85-43c3-a0ed-279bffdcee34",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "text": "Ovvio che è dieci",
+      "createdAt": "2026-06-08T12:17:41.508Z",
+      "updatedAt": "2026-06-08T12:17:41.508Z"
+    }
+  ],
+  "reactionEntries": [
+    {
+      "userId": "6434f67f-9d85-43c3-a0ed-279bffdcee34",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "value": "sun",
+      "createdAt": "2026-06-08T12:15:01.256Z",
+      "updatedAt": "2026-06-08T12:15:01.256Z"
+    }
+  ],
+  "date_it": "8 giugno 2026"
+}
