@@ -1,19 +1,19 @@
 {
-    "buttons":  {
-                    "googleVote":  false,
-                    "plusVote":  true
-                },
-    "feedbackApiUrl":  "https://ddgpilli-feedback.massimiliano-ferrando.workers.dev",
-    "fakeError":  {
-                      "enabled":  false,
-                      "title":  "ERROR 404",
-                      "message":  "Il server non e\u0027 al momento raggiungibile.",
-                      "buttonText":  "Ritenta",
-                      "imagePath":  "https://raw.githubusercontent.com/legnaro72/dediche-musicali/main/public/images/site-lock/20260516125756-20240823-164901.jpg",
-                      "imageMessage":  "Attaccati al Tram!! Il sistema momentaneamente offline. Sei stata cattiva con MassiTuo!!Contatta Amministratore del sito!",
-                      "adminMessage":  "Per il ripristino del servizio contattare l\u0027amministratore del sito."
-                  },
-    "updated_at":  "2026-05-20T07:17:41.840040+00:00",
-    "siteEffect":  "none",
-    "effectIntensity":  "medium"
+  "buttons": {
+    "googleVote": false,
+    "plusVote": true
+  },
+  "feedbackApiUrl": "https://ddgpilli-feedback.massimiliano-ferrando.workers.dev",
+  "siteEffect": "sparkles",
+  "effectIntensity": "medium",
+  "fakeError": {
+    "enabled": false,
+    "title": "ERROR 404",
+    "message": "Il server non e' al momento raggiungibile.",
+    "buttonText": "Ritenta",
+    "imagePath": "https://raw.githubusercontent.com/legnaro72/dediche-musicali/main/public/images/site-lock/20260516125756-20240823-164901.jpg",
+    "imageMessage": "Attaccati al Tram!! Il sistema momentaneamente offline. Sei stata cattiva con MassiTuo!!Contatta Amministratore del sito!",
+    "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
+  },
+  "updated_at": "2026-06-12T23:29:50.793686+00:00"
 }
