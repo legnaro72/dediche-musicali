@@ -19,7 +19,7 @@ if (existsSync(dataDir)) {
 
 const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
 
-// La dedica più recente con date <= oggi e status published/scheduled
+// La dedica piÃ¹ recente con date <= oggi e status published/scheduled
 const published = all
   .filter(d => d.status === 'published' && d.date <= today)
   .sort((a, b) => {
@@ -47,15 +47,15 @@ function fmtDate(dateStr: string, dayName?: string) {
 ---
 
 <BaseLayout
-  title="DDGPilliSite — Dediche Musicali"
+  title="DDGPilliSite â€” Dediche Musicali"
   description="Una nuova dedica musicale ogni giorno. Ascolta, senti, condividi."
-  ogTitle="DDGPilliSite — Dediche Musicali"
+  ogTitle="DDGPilliSite â€” Dediche Musicali"
   ogDescription="Una nuova dedica musicale ogni giorno. Ascolta, senti, condividi."
   ogImage="/images/og-default.png"
   enableBackgroundMusic={true}
 >
 
-  <!-- ═══ HERO ═══ -->
+  <!-- â•â•â• HERO â•â•â• -->
   <section class="hero">
     <div class="hero-bg"></div>
     <!-- Ambient orbs -->
@@ -80,7 +80,7 @@ function fmtDate(dateStr: string, dayName?: string) {
           <DedicationPlus dedication={dedication} mode="reactions" />
           </>
         ) : (
-          <div class="img-placeholder">♪</div>
+          <div class="img-placeholder">&#9834;</div>
         )}
       </div>
 
@@ -104,7 +104,7 @@ function fmtDate(dateStr: string, dayName?: string) {
                 rel="noopener noreferrer"
                 class="btn btn-primary btn-lg"
               >
-                ▶ Ascolta
+                â–¶ Ascolta
               </a>
               <a
                 href={dedication.vote?.url}
@@ -113,11 +113,11 @@ function fmtDate(dateStr: string, dayName?: string) {
                 class="btn btn-secondary btn-lg"
                 data-site-config-target="googleVote"
               >
-                ⭐ Votami
+                â­ Votami
               </a>
               <DedicationPlus dedication={dedication} mode="button" />
               <a href={`${base}dediche/${dedication.id}/`} class="btn btn-secondary btn-lg">
-                Leggi tutto →
+                Leggi tutto â†’
               </a>
               <a href={`${base}link-utili/`} class="btn btn-secondary btn-lg">
                 Link utili
@@ -149,7 +149,7 @@ function fmtDate(dateStr: string, dayName?: string) {
           </>
         ) : (
           <div>
-            <h1 class="hero-song anim-1" style="font-family:var(--font-serif)">Nessuna dedica oggi 🎵</h1>
+            <h1 class="hero-song anim-1" style="font-family:var(--font-serif)">Nessuna dedica oggi ðŸŽµ</h1>
             <p class="hero-text anim-2">Torna domani per la prossima dedica musicale!</p>
             <a href={`${base}archive/`} class="btn btn-primary btn-lg anim-3">Vedi archivio</a>
           </div>
@@ -158,7 +158,7 @@ function fmtDate(dateStr: string, dayName?: string) {
     </div>
   </section>
 
-  <!-- ═══ AUDIO EMBED ═══ -->
+  <!-- â•â•â• AUDIO EMBED â•â•â• -->
   {dedication && (
     <section style="padding:2rem 0;background:var(--bg-surface);">
       <div class="container-narrow reveal">
@@ -181,7 +181,7 @@ function fmtDate(dateStr: string, dayName?: string) {
     </section>
   )}
 
-  <!-- ═══ RECENT DEDICHE ═══ -->
+  <!-- â•â•â• RECENT DEDICHE â•â•â• -->
   {recent.length > 0 && (
     <section style="padding:5rem 0;">
       <div class="container">
@@ -207,7 +207,7 @@ function fmtDate(dateStr: string, dayName?: string) {
         </div>
         <div style="text-align:center;margin-top:3rem;" class="reveal">
           <a href={`${base}archive/`} class="btn btn-secondary">
-            Vedi tutto l'archivio →
+            Vedi tutto l'archivio â†’
           </a>
         </div>
       </div>
