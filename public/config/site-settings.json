@@ -4,8 +4,8 @@
     "plusVote": true
   },
   "feedbackApiUrl": "https://ddgpilli-feedback.massimiliano-ferrando.workers.dev",
-  "siteEffect": "stars",
-  "effectIntensity": "low",
+  "siteEffect": "diamond_pilli",
+  "effectIntensity": "high",
   "fakeError": {
     "enabled": false,
     "title": "ERROR 404",

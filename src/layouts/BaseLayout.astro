@@ -223,7 +223,9 @@ const fullOgImage = ogImage
     const appBase = document.querySelector('meta[name="ddgpilli-base"]')?.getAttribute('content') ?? '/';
     window.__DDGPILLI_BASE = appBase;
 
-    const siteConfigUrl = document.querySelector('meta[name="ddgpilli-site-config-url"]')?.getAttribute('content')?.trim() || '';
+    const configuredSiteConfigUrl = document.querySelector('meta[name="ddgpilli-site-config-url"]')?.getAttribute('content')?.trim() || '';
+    const isLocalPreview = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+    const siteConfigUrl = isLocalPreview ? `${appBase}config/site-settings.json` : configuredSiteConfigUrl;
     const resolveSiteAsset = (path) => {
       if (!path) return '';
       if (/^https?:\/\//i.test(path)) return path;
@@ -281,9 +283,30 @@ const fullOgImage = ogImage
     const applyGlobalSiteEffectFallback = (settings) => {
       const root = document.getElementById('global-site-effect');
       if (!(root instanceof HTMLElement)) return;
-      const validEffects = new Set(['sparkles', 'snow', 'hearts', 'balloons', 'confetti', 'fireworks', 'stars']);
+      const validEffects = new Set([
+        'sparkles',
+        'snow',
+        'hearts',
+        'hearts_red_blue',
+        'music_notes',
+        'glow_bubbles',
+        'petals',
+        'confetti',
+        'balloons',
+        'stars',
+        'shooting_stars',
+        'concert_lights',
+        'soft_flashes',
+        'fireworks',
+        'diamond_pilli',
+        'diamond_pip',
+        'soccer_balls',
+        'smiling_suns',
+        'glitter_butterflies',
+      ]);
       const validIntensities = new Set(['low', 'medium', 'high']);
-      const effect = String(settings?.siteEffect || 'none').trim();
+      const rawEffect = String(settings?.siteEffect || 'none').trim();
+      const effect = rawEffect === 'diamond_pip' ? 'diamond_pilli' : rawEffect;
       if (!validEffects.has(effect)) {
         delete root.dataset.effect;
         delete root.dataset.intensity;
