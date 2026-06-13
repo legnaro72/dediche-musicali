@@ -17,7 +17,7 @@ export interface Props {
 
 const {
   title,
-  description = 'Dediche musicali giornaliere — ascolta, senti, condividi.',
+  description = 'Dediche musicali giornaliere â€” ascolta, senti, condividi.',
   ogTitle,
   ogDescription,
   ogImage,
@@ -115,7 +115,7 @@ const fullOgImage = ogImage
   <!-- Navbar -->
   <nav class="navbar" id="navbar">
     <div class="container navbar-inner">
-      <a class="navbar-brand" href={base}>♪ DDGPilli</a>
+      <a class="navbar-brand" href={base}>â™ª DDGPilli</a>
       
       <button
         class="navbar-menu-toggle"
@@ -135,7 +135,7 @@ const fullOgImage = ogImage
             aria-pressed="true"
             aria-label="Disattiva musica di sottofondo"
           >
-            <span class="ambient-audio-icon" aria-hidden="true">♪</span>
+            <span class="ambient-audio-icon" aria-hidden="true">â™ª</span>
           </button>
           <p class="ambient-audio-hint" data-background-music-hint hidden>
             Tocca per attivare la musica
@@ -166,13 +166,13 @@ const fullOgImage = ogImage
     </div>
     <div class="app-install-actions">
       <button class="app-install-btn" type="button" data-app-install-btn>Installa</button>
-      <button class="app-install-close" type="button" aria-label="Nascondi invito installazione" data-app-install-close>×</button>
+      <button class="app-install-close" type="button" aria-label="Nascondi invito installazione" data-app-install-close>Ã—</button>
     </div>
   </div>
 
   <div class="app-install-modal" data-app-install-modal hidden>
     <div class="app-install-dialog" role="dialog" aria-modal="true" aria-labelledby="install-title">
-      <button class="app-install-dialog-close" type="button" aria-label="Chiudi" data-app-install-modal-close>×</button>
+      <button class="app-install-dialog-close" type="button" aria-label="Chiudi" data-app-install-modal-close>Ã—</button>
       <h2 id="install-title">Aggiungi alla Home</h2>
       <p data-app-install-modal-text>
         Apri il menu del browser e scegli "Aggiungi a schermata Home".
@@ -204,16 +204,16 @@ const fullOgImage = ogImage
   <footer class="footer">
     <div class="container">
       <p>
-        ♪ <strong>DDGPilliSite</strong> — Dediche musicali giornaliere
-        &nbsp;·&nbsp;
+        â™ª <strong>DDGPilliSite</strong> â€” Dediche musicali giornaliere
+        &nbsp;Â·&nbsp;
         <a href={`${base}archive/`}>Archivio</a>
-        &nbsp;·&nbsp;
+        &nbsp;Â·&nbsp;
         <a href={`${base}statistiche/`}>Statistiche</a>
-        &nbsp;·&nbsp;
-        <button data-uid-edit class="uid-footer-edit-btn" aria-label="Modifica nome e cognome">✏️</button>
+        &nbsp;Â·&nbsp;
+        <button data-uid-edit class="uid-footer-edit-btn" aria-label="Modifica nome e cognome">âœï¸</button>
       </p>
       <p style="margin-top:0.5rem; font-size:0.75rem; opacity:0.5;">
-        Pubblicato su GitHub Pages · Gratuito, open source, fatto con amore 🎵
+        Pubblicato su GitHub Pages Â· Gratuito, open source, fatto con amore ðŸŽµ
       </p>
     </div>
   </footer>
@@ -278,6 +278,22 @@ const fullOgImage = ogImage
       }
     };
 
+    const applyGlobalSiteEffectFallback = (settings) => {
+      const root = document.getElementById('global-site-effect');
+      if (!(root instanceof HTMLElement)) return;
+      const validEffects = new Set(['sparkles', 'snow', 'hearts', 'balloons', 'confetti', 'fireworks', 'stars']);
+      const validIntensities = new Set(['low', 'medium', 'high']);
+      const effect = String(settings?.siteEffect || 'none').trim();
+      if (!validEffects.has(effect)) {
+        delete root.dataset.effect;
+        delete root.dataset.intensity;
+        return;
+      }
+      const intensity = String(settings?.effectIntensity || 'medium').trim();
+      root.dataset.effect = effect;
+      root.dataset.intensity = validIntensities.has(intensity) ? intensity : 'medium';
+    };
+
     const applySiteSettings = (settings) => {
       window.__DDGPILLI_SITE_SETTINGS = settings || {};
       applyFeedbackApiUrl(settings);
@@ -294,6 +310,7 @@ const fullOgImage = ogImage
       }
 
       applyFakeErrorMode(settings?.fakeError || {});
+      applyGlobalSiteEffectFallback(settings || {});
       window.__DDGPILLI_APPLY_GLOBAL_SITE_EFFECT?.(settings || {});
       window.dispatchEvent(new CustomEvent('ddgpilli:site-settings-updated', { detail: settings || {} }));
     };
