@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'dediche-musicali-pwa-v6';
+const CACHE_VERSION = 'dediche-musicali-pwa-v7';
 const CACHE_PREFIX = 'dediche-musicali-pwa-';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
@@ -7,10 +7,7 @@ const APP_BASE = APP_SCOPE.pathname.replace(/\/$/, '');
 
 const basePath = (path) => `${APP_BASE}${path}`;
 const CORE_ASSETS = [
-  basePath('/'),
-  basePath('/archive/'),
   basePath('/manifest.json'),
-  basePath('/pwa-config.json'),
   basePath('/favicon/favicon.svg'),
   basePath('/icons/icon-192.png'),
   basePath('/icons/icon-512.png'),
@@ -47,15 +44,24 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin || !url.pathname.startsWith(APP_BASE)) return;
 
-  if (request.mode === 'navigate') {
+  if (url.pathname === basePath('/pwa-config.json') || url.pathname.startsWith(basePath('/background-music/'))) {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: 'no-store' })
         .then((response) => {
+          if (!response || response.status !== 200) return response;
           const copy = response.clone();
           caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, copy));
           return response;
         })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match(basePath('/'))))
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request, { cache: 'no-store' })
+        .catch(() => caches.match(basePath('/manifest.json')).then(() => Response.error()))
     );
     return;
   }
