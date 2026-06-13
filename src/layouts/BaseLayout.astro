@@ -437,9 +437,11 @@ const fullOgImage = ogImage
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register(`${appBase}sw.js`, { scope: appBase }).catch((error) => {
-          console.warn('PWA service worker non registrato:', error);
-        });
+        navigator.serviceWorker.getRegistrations?.().then((registrations) => {
+          registrations.forEach((registration) => {
+            if (registration.scope.includes('/dediche-musicali/')) registration.unregister();
+          });
+        }).catch(() => {});
       }, { once: true });
     }
 
