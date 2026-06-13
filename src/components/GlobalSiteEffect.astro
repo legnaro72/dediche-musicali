@@ -324,11 +324,12 @@
   .global-site-effect {
     position: fixed;
     inset: 0;
-    z-index: 250;
+    z-index: 260;
     pointer-events: none;
     overflow: hidden;
-    opacity: 0.9;
-    mix-blend-mode: screen;
+    opacity: 1;
+    mix-blend-mode: normal;
+    isolation: isolate;
   }
 
   .global-site-effect canvas {
@@ -355,7 +356,7 @@
 
   .global-site-effect[data-effect="diamond_pilli"] {
     opacity: 0.98;
-    mix-blend-mode: screen;
+    mix-blend-mode: normal;
   }
 
   .global-site-effect[data-effect="diamond_pilli"] .global-site-effect-item {
