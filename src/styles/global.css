@@ -1,4 +1,4 @@
-/* DDGPilliSite — global.css */
+/* DDGPilliSite global.css */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
 
 :root {
@@ -513,7 +513,7 @@ body.site-is-locked > :not(.site-lock) {
 }
 
 .hero-artist::before {
-  content: '— ';
+  content: '- ';
 }
 
 .hero-ded-label {
