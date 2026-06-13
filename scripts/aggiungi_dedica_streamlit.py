@@ -2066,7 +2066,9 @@ def render_site_configuration() -> None:
     buttons = settings["buttons"]
     fake_error = settings["fakeError"]
     config_version = settings.get("updated_at") or "default"
-    if st.session_state.get("config_loaded_version") != config_version:
+    config_dirty = bool(st.session_state.get("config_site_dirty", False))
+    config_first_load = "config_loaded_version" not in st.session_state
+    if config_first_load or (st.session_state.get("config_loaded_version") != config_version and not config_dirty):
         st.session_state["config_site_effect"] = settings.get("siteEffect", DEFAULT_SITE_SETTINGS["siteEffect"])
         st.session_state["config_effect_intensity"] = settings.get("effectIntensity", DEFAULT_SITE_SETTINGS["effectIntensity"])
         st.session_state["config_google_vote_visible"] = buttons["googleVote"]
@@ -2080,9 +2082,13 @@ def render_site_configuration() -> None:
         st.session_state["config_fake_error_admin_message"] = fake_error["adminMessage"]
         st.session_state["config_loaded_version"] = config_version
 
+    def mark_site_config_dirty() -> None:
+        st.session_state["config_site_dirty"] = True
+
     def persist_fake_error_toggle() -> None:
         try:
             force_site_lock_enabled(bool(st.session_state.get("config_fake_error_enabled", False)))
+            st.session_state["config_site_dirty"] = False
             st.session_state["config_toggle_status"] = (
                 "Fake Error Mode attivata nel JSON remoto."
                 if st.session_state.get("config_fake_error_enabled")
@@ -2099,15 +2105,23 @@ def render_site_configuration() -> None:
         options=list(SITE_EFFECT_OPTIONS.values()),
         format_func=lambda value: effect_label_by_value.get(value, value),
         key="config_site_effect",
+        on_change=mark_site_config_dirty,
     )
     effect_intensity = st.selectbox(
         "Intensita' effetto",
         options=list(EFFECT_INTENSITY_OPTIONS.values()),
         format_func=lambda value: intensity_label_by_value.get(value, value),
         key="config_effect_intensity",
+        on_change=mark_site_config_dirty,
     )
     if site_effect == "auto":
         st.info("Automatico e' pronto per regole future: in questa versione equivale a Nessun effetto.")
+    save_effects_clicked = st.button(
+        "Salva configurazione sito",
+        type="primary",
+        use_container_width=True,
+        key="config_save_effects",
+    )
 
     st.divider()
     st.subheader("Pulsanti")
@@ -2199,7 +2213,7 @@ def render_site_configuration() -> None:
         use_container_width=True,
     )
 
-    if enable_site_clicked or save_config_clicked or restore_site_clicked:
+    if enable_site_clicked or save_effects_clicked or save_config_clicked or restore_site_clicked:
         if enable_site_clicked:
             try:
                 force_site_lock_enabled(True)
@@ -2207,6 +2221,7 @@ def render_site_configuration() -> None:
                     "Fake Error Mode attivata nel JSON remoto. "
                     "Aggiorna il sito o attendi il prossimo controllo automatico."
                 )
+                st.session_state["config_site_dirty"] = False
                 render_whatsapp_notification_button()
                 return
             except Exception as exc:
@@ -2220,6 +2235,7 @@ def render_site_configuration() -> None:
                     "Sito ripristinato: Fake Error Mode disattivata nel JSON remoto. "
                     "Aggiorna il sito o attendi il prossimo controllo automatico."
                 )
+                st.session_state["config_site_dirty"] = False
                 render_whatsapp_notification_button()
                 return
             except Exception as exc:
@@ -2251,6 +2267,8 @@ def render_site_configuration() -> None:
                 image_path = upload_site_lock_image(lock_image)
                 updated["fakeError"]["imagePath"] = image_path
             save_site_settings(updated, "Aggiorna configurazione sito")
+            st.session_state["config_loaded_version"] = updated["updated_at"]
+            st.session_state["config_site_dirty"] = False
             st.success(
                 "Configurazione salvata. Le pagine gia' aperte la rileggono automaticamente "
                 "entro circa 15 secondi."
