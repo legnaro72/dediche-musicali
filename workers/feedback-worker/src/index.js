@@ -605,7 +605,7 @@ async function trackVisit(env, request, payload) {
   };
   current.visits.push(visit);
   loaded.data = current;
-  await saveJsonPath(env, loaded, `Registra visita sito ${visitDate}`);
+  await saveJsonPath(env, loaded, `Registra visita sito ${visitDate} [skip ci]`);
   return visit;
 }
 
