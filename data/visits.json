@@ -1957,6 +1957,17 @@
       "source": "site",
       "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
       "createdAt": "2026-06-13T21:01:32.549Z"
+    },
+    {
+      "visitId": "883fc5c0-8a36-4bef-97cc-e2610b5d2d6c",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "visitedAt": "2026-06-13T21:01:54.979Z",
+      "visitDate": "2026-06-13",
+      "page": "/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+      "createdAt": "2026-06-13T21:01:54.979Z"
     }
   ]
 }
