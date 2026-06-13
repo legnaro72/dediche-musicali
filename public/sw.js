@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'dediche-musicali-pwa-v7';
+const CACHE_VERSION = 'dediche-musicali-pwa-v8';
 const CACHE_PREFIX = 'dediche-musicali-pwa-';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
@@ -68,6 +68,21 @@ self.addEventListener('fetch', (event) => {
 
   const isStaticAsset = /\.(?:css|js|png|jpg|jpeg|webp|svg|woff2?|ttf|json|xml)$/i.test(url.pathname);
   if (!isStaticAsset) return;
+
+  const isBuildAsset = url.pathname.startsWith(basePath('/_astro/')) && /\.(?:css|js)$/i.test(url.pathname);
+  if (isBuildAsset) {
+    event.respondWith(
+      fetch(request, { cache: 'no-store' })
+        .then((response) => {
+          if (!response || response.status !== 200) return response;
+          const copy = response.clone();
+          caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, copy));
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
 
   const isFreshAsset = /\.(?:png|jpg|jpeg|webp|svg|json)$/i.test(url.pathname);
   if (isFreshAsset) {
