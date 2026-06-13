@@ -1,4 +1,4 @@
-﻿const REACTION_KEYS = ['down', 'like', 'heart', 'sun'];
+const REACTION_KEYS = ['down', 'like', 'heart', 'sun'];
 const LEGACY_VOTE_FIELD = `voto${'Pil' + 'ly'}`;
 const LEGACY_THOUGHT_FIELD = `pensiero${'Pil' + 'ly'}`;
 const VISITS_PATH = 'data/visits.json';
@@ -605,7 +605,7 @@ async function trackVisit(env, request, payload) {
   };
   current.visits.push(visit);
   loaded.data = current;
-  await saveJsonPath(env, loaded, `Registra visita sito ${visitDate}`);
+  await saveJsonPath(env, loaded, `Registra visita sito ${visitDate} [skip ci]`);
   return visit;
 }
 
