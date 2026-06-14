@@ -4,7 +4,7 @@
     "plusVote": true
   },
   "feedbackApiUrl": "https://ddgpilli-feedback.massimiliano-ferrando.workers.dev",
-  "siteEffect": "concert_lights",
+  "siteEffect": "fireworks",
   "effectIntensity": "low",
   "effectBackdrop": true,
   "effectFloatingItems": true,
@@ -18,5 +18,5 @@
     "imageMessage": "Attaccati al Tram!! Il sistema momentaneamente offline. Sei stata cattiva con MassiTuo!!Contatta Amministratore del sito!",
     "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
   },
-  "updated_at": "2026-06-14T21:09:18.760736+00:00"
+  "updated_at": "2026-06-14T21:11:35.571850+00:00"
 }
