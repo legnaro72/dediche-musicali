@@ -7,8 +7,6 @@
   "siteEffect": "diamond_pilli",
   "effectIntensity": "low",
   "effectBackdrop": true,
-  "effectFloatingItems": true,
-  "effectBackdropText": false,
   "fakeError": {
     "enabled": false,
     "title": "ERROR 404",
@@ -18,5 +16,5 @@
     "imageMessage": "Attaccati al Tram!! Il sistema momentaneamente offline. Sei stata cattiva con MassiTuo!!Contatta Amministratore del sito!",
     "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
   },
-  "updated_at": "2026-06-14T06:10:35.183855+00:00"
+  "updated_at": "2026-06-14T20:00:11.272257+00:00"
 }
