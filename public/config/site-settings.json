@@ -6,6 +6,7 @@
   "feedbackApiUrl": "https://ddgpilli-feedback.massimiliano-ferrando.workers.dev",
   "siteEffect": "diamond_pilli",
   "effectIntensity": "high",
+  "effectBackdrop": false,
   "fakeError": {
     "enabled": false,
     "title": "ERROR 404",

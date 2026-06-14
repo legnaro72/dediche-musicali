@@ -54,6 +54,12 @@
     return validIntensities.has(intensity) ? intensity : 'medium';
   };
 
+  const normalizeBackdrop = (value) => {
+    if (value === true || value === 1) return true;
+    const normalized = String(value || '').trim().toLowerCase();
+    return normalized === 'true' || normalized === '1' || normalized === 'on' || normalized === 'yes';
+  };
+
   const baseOptions = (effect, intensity) => ({
     key: `${effect}:${intensity}`,
     options: {
@@ -255,6 +261,7 @@
     if (root) {
       delete root.dataset.effect;
       delete root.dataset.intensity;
+      delete root.dataset.backdrop;
     }
     if (activeContainer) {
       activeContainer.destroy();
@@ -266,6 +273,7 @@
   const applyGlobalSiteEffect = async (settings) => {
     const effect = normalizeEffect(settings?.siteEffect);
     const intensity = normalizeIntensity(settings?.effectIntensity);
+    const backdrop = normalizeBackdrop(settings?.effectBackdrop);
     const root = document.getElementById(effectRootId);
     if (!root || reducedMotion() || effect === 'none') {
       await clearEffect();
@@ -274,6 +282,7 @@
 
     root.dataset.effect = effect;
     root.dataset.intensity = intensity;
+    root.dataset.backdrop = backdrop ? 'on' : 'off';
 
     if (customEffects.has(effect)) {
       if (activeContainer) {
@@ -495,6 +504,14 @@
     position: absolute;
     inset: -12%;
     pointer-events: none;
+  }
+
+  .global-site-effect[data-backdrop="off"]::before,
+  .global-site-effect[data-backdrop="off"]::after {
+    content: none !important;
+    display: none !important;
+    animation: none !important;
+    box-shadow: none !important;
   }
 
   .global-site-effect[data-effect="diamond_pilli"]::before,

@@ -63,6 +63,7 @@ DEFAULT_SITE_SETTINGS = {
     "feedbackApiUrl": "",
     "siteEffect": "none",
     "effectIntensity": "medium",
+    "effectBackdrop": False,
     "fakeError": {
         "enabled": False,
         "title": "ERROR 404",
@@ -559,6 +560,8 @@ def normalize_site_settings(settings: dict) -> dict:
     effect_intensity = str(settings.get("effectIntensity", DEFAULT_SITE_SETTINGS["effectIntensity"]) if isinstance(settings, dict) else "").strip()
     if effect_intensity not in EFFECT_INTENSITY_OPTIONS.values():
         effect_intensity = DEFAULT_SITE_SETTINGS["effectIntensity"]
+    raw_effect_backdrop = settings.get("effectBackdrop", DEFAULT_SITE_SETTINGS["effectBackdrop"]) if isinstance(settings, dict) else DEFAULT_SITE_SETTINGS["effectBackdrop"]
+    effect_backdrop = raw_effect_backdrop is True or raw_effect_backdrop == 1 or str(raw_effect_backdrop).strip().lower() in {"true", "1", "on", "yes"}
     return {
         "buttons": {
             "googleVote": buttons.get("googleVote", True) is not False,
@@ -567,6 +570,7 @@ def normalize_site_settings(settings: dict) -> dict:
         "feedbackApiUrl": str(settings.get("feedbackApiUrl", "") if isinstance(settings, dict) else "").strip(),
         "siteEffect": site_effect,
         "effectIntensity": effect_intensity,
+        "effectBackdrop": effect_backdrop,
         "fakeError": {
             "enabled": fake_error.get("enabled", False) is True,
             "title": str(fake_error.get("title") or default_fake["title"]),
@@ -2071,6 +2075,7 @@ def render_site_configuration() -> None:
     if config_first_load or (st.session_state.get("config_loaded_version") != config_version and not config_dirty):
         st.session_state["config_site_effect"] = settings.get("siteEffect", DEFAULT_SITE_SETTINGS["siteEffect"])
         st.session_state["config_effect_intensity"] = settings.get("effectIntensity", DEFAULT_SITE_SETTINGS["effectIntensity"])
+        st.session_state["config_effect_backdrop"] = settings.get("effectBackdrop", DEFAULT_SITE_SETTINGS["effectBackdrop"])
         st.session_state["config_google_vote_visible"] = buttons["googleVote"]
         st.session_state["config_plus_vote_visible"] = buttons["plusVote"]
         st.session_state["config_feedback_api_url"] = settings.get("feedbackApiUrl", "")
@@ -2113,6 +2118,12 @@ def render_site_configuration() -> None:
         format_func=lambda value: intensity_label_by_value.get(value, value),
         key="config_effect_intensity",
         on_change=mark_site_config_dirty,
+    )
+    effect_backdrop = st.toggle(
+        "Sfondo brillante dell'effetto",
+        key="config_effect_backdrop",
+        on_change=mark_site_config_dirty,
+        help="Se spento, restano solo elementi/canvas fluttuanti e sparisce il fondale denso dell'effetto.",
     )
     if site_effect == "auto":
         st.info("Automatico e' pronto per regole future: in questa versione equivale a Nessun effetto.")
@@ -2251,6 +2262,7 @@ def render_site_configuration() -> None:
             "feedbackApiUrl": feedback_api_url.strip(),
             "siteEffect": site_effect,
             "effectIntensity": effect_intensity,
+            "effectBackdrop": bool(effect_backdrop),
             "fakeError": {
                 "enabled": False if restore_site_clicked else bool(fake_error_enabled),
                 "title": fake_error_title.strip() or DEFAULT_SITE_SETTINGS["fakeError"]["title"],

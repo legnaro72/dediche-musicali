@@ -310,11 +310,17 @@ const fullOgImage = ogImage
       if (!validEffects.has(effect)) {
         delete root.dataset.effect;
         delete root.dataset.intensity;
+        delete root.dataset.backdrop;
         return;
       }
       const intensity = String(settings?.effectIntensity || 'medium').trim();
+      const backdropValue = settings?.effectBackdrop;
+      const backdrop = backdropValue === true
+        || backdropValue === 1
+        || ['true', '1', 'on', 'yes'].includes(String(backdropValue || '').trim().toLowerCase());
       root.dataset.effect = effect;
       root.dataset.intensity = validIntensities.has(intensity) ? intensity : 'medium';
+      root.dataset.backdrop = backdrop ? 'on' : 'off';
     };
 
     const applySiteSettings = (settings) => {
