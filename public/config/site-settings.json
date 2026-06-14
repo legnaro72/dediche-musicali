@@ -8,7 +8,7 @@
   "effectIntensity": "low",
   "effectBackdrop": true,
   "effectFloatingItems": true,
-  "effectBackdropText": true,
+  "effectBackdropText": false,
   "fakeError": {
     "enabled": false,
     "title": "ERROR 404",
@@ -18,5 +18,5 @@
     "imageMessage": "Attaccati al Tram!! Il sistema momentaneamente offline. Sei stata cattiva con MassiTuo!!Contatta Amministratore del sito!",
     "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
   },
-  "updated_at": "2026-06-14T21:16:08.345284+00:00"
+  "updated_at": "2026-06-14T21:21:10.660944+00:00"
 }
