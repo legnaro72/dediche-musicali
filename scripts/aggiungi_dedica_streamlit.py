@@ -2142,10 +2142,10 @@ def render_site_configuration() -> None:
         help="Per Pilli controlla le scritte Pilli che fluttuano nello schermo; per cuori e altri effetti custom controlla le icone grandi fluttuanti.",
     )
     effect_backdrop_text = st.toggle(
-        "Scritte Pilli fisse nello sfondo",
+        "Oggetti fissi nello sfondo",
         key="config_effect_backdrop_text",
         on_change=mark_site_config_dirty,
-        help="Controlla solo le scritte Pilli ripetute e lampeggianti nel fondale dell'effetto Pilli, senza spegnere scintillio o Pilli fluttuanti.",
+        help="Spegne gli oggetti ripetuti e lampeggianti del fondale, per esempio Pilli, cuori, palloni o soli fissi in alto a sinistra, senza spegnere scintillio o oggetti fluttuanti.",
     )
     if site_effect == "auto":
         st.info("Automatico e' pronto per regole future: in questa versione equivale a Nessun effetto.")

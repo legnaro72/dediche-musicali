@@ -563,9 +563,9 @@
     animation: ddgff-fallback-diamond 9s ease-in-out infinite, ddgff-glitter 1.6s ease-in-out infinite;
   }
 
-  .global-site-effect[data-effect="diamond_pilli"][data-backdrop-text="off"]::before,
-  .global-site-effect[data-effect="diamond_pilli"][data-backdrop-text="off"]::after {
-    content: "";
+  .global-site-effect[data-backdrop-text="off"]::before,
+  .global-site-effect[data-backdrop-text="off"]::after {
+    content: "" !important;
     color: transparent;
     text-shadow: none;
   }

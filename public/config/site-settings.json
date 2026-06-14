@@ -7,6 +7,8 @@
   "siteEffect": "diamond_pilli",
   "effectIntensity": "low",
   "effectBackdrop": true,
+  "effectFloatingItems": true,
+  "effectBackdropText": false,
   "fakeError": {
     "enabled": false,
     "title": "ERROR 404",
