@@ -55,6 +55,21 @@
   };
 
   const normalizeBackdrop = (value) => {
+    if (value === undefined || value === null || value === '') return true;
+    if (value === true || value === 1) return true;
+    const normalized = String(value || '').trim().toLowerCase();
+    return normalized === 'true' || normalized === '1' || normalized === 'on' || normalized === 'yes';
+  };
+
+  const normalizeFloatingItems = (value) => {
+    if (value === undefined || value === null || value === '') return true;
+    if (value === true || value === 1) return true;
+    const normalized = String(value || '').trim().toLowerCase();
+    return normalized === 'true' || normalized === '1' || normalized === 'on' || normalized === 'yes';
+  };
+
+  const normalizeBackdropText = (value) => {
+    if (value === undefined || value === null || value === '') return true;
     if (value === true || value === 1) return true;
     const normalized = String(value || '').trim().toLowerCase();
     return normalized === 'true' || normalized === '1' || normalized === 'on' || normalized === 'yes';
@@ -262,6 +277,8 @@
       delete root.dataset.effect;
       delete root.dataset.intensity;
       delete root.dataset.backdrop;
+      delete root.dataset.items;
+      delete root.dataset.backdropText;
     }
     if (activeContainer) {
       activeContainer.destroy();
@@ -274,6 +291,8 @@
     const effect = normalizeEffect(settings?.siteEffect);
     const intensity = normalizeIntensity(settings?.effectIntensity);
     const backdrop = normalizeBackdrop(settings?.effectBackdrop);
+    const floatingItems = normalizeFloatingItems(settings?.effectFloatingItems);
+    const backdropText = normalizeBackdropText(settings?.effectBackdropText);
     const root = document.getElementById(effectRootId);
     if (!root || reducedMotion() || effect === 'none') {
       await clearEffect();
@@ -283,16 +302,19 @@
     root.dataset.effect = effect;
     root.dataset.intensity = intensity;
     root.dataset.backdrop = backdrop ? 'on' : 'off';
+    root.dataset.items = floatingItems ? 'on' : 'off';
+    root.dataset.backdropText = backdropText ? 'on' : 'off';
 
     if (customEffects.has(effect)) {
       if (activeContainer) {
         activeContainer.destroy();
         activeContainer = null;
       }
-      const key = `${effect}:${intensity}`;
+      const key = `${effect}:${intensity}:${floatingItems ? 'items-on' : 'items-off'}`;
       if (activeKey === key) return;
       activeKey = key;
-      applyCustomEffect(root, effect, intensity);
+      clearCustomEffect();
+      if (floatingItems) applyCustomEffect(root, effect, intensity);
       return;
     }
 
@@ -506,6 +528,11 @@
     pointer-events: none;
   }
 
+  .global-site-effect[data-items="off"] .global-site-effect-item {
+    display: none !important;
+    animation: none !important;
+  }
+
   .global-site-effect[data-backdrop="off"]::before,
   .global-site-effect[data-backdrop="off"]::after {
     content: none !important;
@@ -534,6 +561,13 @@
       radial-gradient(circle, rgba(147, 197, 253, 0.86) 0 1px, transparent 4px) 86px 28px / 156px 156px;
     filter: drop-shadow(0 0 calc(10px * var(--effect-glow, 1)) rgba(255, 255, 255, 0.76));
     animation: ddgff-fallback-diamond 9s ease-in-out infinite, ddgff-glitter 1.6s ease-in-out infinite;
+  }
+
+  .global-site-effect[data-effect="diamond_pilli"][data-backdrop-text="off"]::before,
+  .global-site-effect[data-effect="diamond_pilli"][data-backdrop-text="off"]::after {
+    content: "";
+    color: transparent;
+    text-shadow: none;
   }
 
   .global-site-effect[data-effect="diamond_pilli"]::after {

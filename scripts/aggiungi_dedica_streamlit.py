@@ -63,7 +63,9 @@ DEFAULT_SITE_SETTINGS = {
     "feedbackApiUrl": "",
     "siteEffect": "none",
     "effectIntensity": "medium",
-    "effectBackdrop": False,
+    "effectBackdrop": True,
+    "effectFloatingItems": True,
+    "effectBackdropText": True,
     "fakeError": {
         "enabled": False,
         "title": "ERROR 404",
@@ -562,6 +564,10 @@ def normalize_site_settings(settings: dict) -> dict:
         effect_intensity = DEFAULT_SITE_SETTINGS["effectIntensity"]
     raw_effect_backdrop = settings.get("effectBackdrop", DEFAULT_SITE_SETTINGS["effectBackdrop"]) if isinstance(settings, dict) else DEFAULT_SITE_SETTINGS["effectBackdrop"]
     effect_backdrop = raw_effect_backdrop is True or raw_effect_backdrop == 1 or str(raw_effect_backdrop).strip().lower() in {"true", "1", "on", "yes"}
+    raw_effect_items = settings.get("effectFloatingItems", DEFAULT_SITE_SETTINGS["effectFloatingItems"]) if isinstance(settings, dict) else DEFAULT_SITE_SETTINGS["effectFloatingItems"]
+    effect_floating_items = raw_effect_items is True or raw_effect_items == 1 or str(raw_effect_items).strip().lower() in {"true", "1", "on", "yes"}
+    raw_effect_backdrop_text = settings.get("effectBackdropText", DEFAULT_SITE_SETTINGS["effectBackdropText"]) if isinstance(settings, dict) else DEFAULT_SITE_SETTINGS["effectBackdropText"]
+    effect_backdrop_text = raw_effect_backdrop_text is True or raw_effect_backdrop_text == 1 or str(raw_effect_backdrop_text).strip().lower() in {"true", "1", "on", "yes"}
     return {
         "buttons": {
             "googleVote": buttons.get("googleVote", True) is not False,
@@ -571,6 +577,8 @@ def normalize_site_settings(settings: dict) -> dict:
         "siteEffect": site_effect,
         "effectIntensity": effect_intensity,
         "effectBackdrop": effect_backdrop,
+        "effectFloatingItems": effect_floating_items,
+        "effectBackdropText": effect_backdrop_text,
         "fakeError": {
             "enabled": fake_error.get("enabled", False) is True,
             "title": str(fake_error.get("title") or default_fake["title"]),
@@ -2076,6 +2084,8 @@ def render_site_configuration() -> None:
         st.session_state["config_site_effect"] = settings.get("siteEffect", DEFAULT_SITE_SETTINGS["siteEffect"])
         st.session_state["config_effect_intensity"] = settings.get("effectIntensity", DEFAULT_SITE_SETTINGS["effectIntensity"])
         st.session_state["config_effect_backdrop"] = settings.get("effectBackdrop", DEFAULT_SITE_SETTINGS["effectBackdrop"])
+        st.session_state["config_effect_floating_items"] = settings.get("effectFloatingItems", DEFAULT_SITE_SETTINGS["effectFloatingItems"])
+        st.session_state["config_effect_backdrop_text"] = settings.get("effectBackdropText", DEFAULT_SITE_SETTINGS["effectBackdropText"])
         st.session_state["config_google_vote_visible"] = buttons["googleVote"]
         st.session_state["config_plus_vote_visible"] = buttons["plusVote"]
         st.session_state["config_feedback_api_url"] = settings.get("feedbackApiUrl", "")
@@ -2120,10 +2130,22 @@ def render_site_configuration() -> None:
         on_change=mark_site_config_dirty,
     )
     effect_backdrop = st.toggle(
-        "Sfondo brillante dell'effetto",
+        "Sfondo brillante / scintillio",
         key="config_effect_backdrop",
         on_change=mark_site_config_dirty,
-        help="Se spento, restano solo elementi/canvas fluttuanti e sparisce il fondale denso dell'effetto.",
+        help="Controlla il fondale luminoso dell'effetto.",
+    )
+    effect_floating_items = st.toggle(
+        "Scritte / icone fluttuanti",
+        key="config_effect_floating_items",
+        on_change=mark_site_config_dirty,
+        help="Per Pilli controlla le scritte Pilli che fluttuano nello schermo; per cuori e altri effetti custom controlla le icone grandi fluttuanti.",
+    )
+    effect_backdrop_text = st.toggle(
+        "Scritte Pilli fisse nello sfondo",
+        key="config_effect_backdrop_text",
+        on_change=mark_site_config_dirty,
+        help="Controlla solo le scritte Pilli ripetute e lampeggianti nel fondale dell'effetto Pilli, senza spegnere scintillio o Pilli fluttuanti.",
     )
     if site_effect == "auto":
         st.info("Automatico e' pronto per regole future: in questa versione equivale a Nessun effetto.")
@@ -2263,6 +2285,8 @@ def render_site_configuration() -> None:
             "siteEffect": site_effect,
             "effectIntensity": effect_intensity,
             "effectBackdrop": bool(effect_backdrop),
+            "effectFloatingItems": bool(effect_floating_items),
+            "effectBackdropText": bool(effect_backdrop_text),
             "fakeError": {
                 "enabled": False if restore_site_clicked else bool(fake_error_enabled),
                 "title": fake_error_title.strip() or DEFAULT_SITE_SETTINGS["fakeError"]["title"],
