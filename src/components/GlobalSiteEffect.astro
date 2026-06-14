@@ -244,7 +244,7 @@
     if (effect === 'hearts_red_blue') return index % 2 ? '♥' : '❤';
     if (effect === 'soccer_balls') return '⚽';
     if (effect === 'smiling_suns') return '☀';
-    if (effect === 'glitter_butterflies') return '🦋';
+    if (effect === 'glitter_butterflies') return '';
     return '';
   };
 
@@ -435,30 +435,50 @@
   }
 
   .global-site-effect[data-effect="glitter_butterflies"] .global-site-effect-item {
-    font-size: calc(1.28rem * var(--size));
-    color: #f5d0fe;
-    text-shadow:
-      0 0 calc(8px * var(--effect-glow, 1)) rgba(255, 255, 255, 0.9),
-      0 0 calc(18px * var(--effect-glow, 1)) rgba(240, 171, 252, 0.74),
-      0 0 calc(26px * var(--effect-glow, 1)) rgba(147, 197, 253, 0.5);
-    filter: drop-shadow(calc(-10px * var(--size)) 5px 8px rgba(240, 171, 252, 0.28));
+    width: calc(1.65rem * var(--size));
+    height: calc(1.1rem * var(--size));
+    font-size: 0;
+    opacity: 0.82;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(191, 219, 254, 0.5) 48%, rgba(240, 171, 252, 0.16));
+    border-radius: 999px;
+    box-shadow:
+      0 0 calc(8px * var(--effect-glow, 1)) rgba(255, 255, 255, 0.62),
+      0 0 calc(18px * var(--effect-glow, 1)) rgba(147, 197, 253, 0.42),
+      0 0 calc(28px * var(--effect-glow, 1)) rgba(240, 171, 252, 0.28);
+    filter: drop-shadow(calc(-8px * var(--size)) 5px 8px rgba(147, 197, 253, 0.24));
     animation:
       ddgff-butterfly-flight calc(var(--dur) / var(--effect-rate, 1)) ease-in-out infinite,
       ddgff-custom-pulse calc((var(--dur) * 0.36) / var(--effect-rate, 1)) ease-in-out infinite;
   }
 
+  .global-site-effect[data-effect="glitter_butterflies"] .global-site-effect-item::before,
   .global-site-effect[data-effect="glitter_butterflies"] .global-site-effect-item::after {
     content: "";
     position: absolute;
-    width: 1.8em;
-    height: 0.26em;
-    right: 42%;
-    top: 58%;
-    border-radius: 999px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), rgba(240, 171, 252, 0.25), transparent);
-    filter: blur(4px);
-    opacity: 0.78;
-    transform: rotate(-18deg);
+    top: 50%;
+    width: 58%;
+    height: 92%;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    background:
+      radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.88) 0 2px, transparent 3px),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.76), rgba(191, 219, 254, 0.5) 46%, rgba(240, 171, 252, 0.2) 78%, transparent);
+    opacity: 0.92;
+    filter: blur(0.15px);
+    transform-origin: center right;
+    clip-path: polygon(8% 8%, 100% 48%, 12% 94%, 0 58%);
+  }
+
+  .global-site-effect[data-effect="glitter_butterflies"] .global-site-effect-item::before {
+    right: 50%;
+    border-radius: 72% 18% 72% 22%;
+    transform: translateY(-50%) rotate(-16deg);
+  }
+
+  .global-site-effect[data-effect="glitter_butterflies"] .global-site-effect-item::after {
+    left: 50%;
+    border-radius: 18% 72% 22% 72%;
+    transform: translateY(-50%) scaleX(-1) rotate(-16deg);
   }
 
   .global-site-effect[data-effect="hearts_red_blue"] .global-site-effect-item {
