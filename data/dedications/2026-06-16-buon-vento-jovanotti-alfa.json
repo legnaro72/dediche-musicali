@@ -31,14 +31,14 @@
     "description": "Dedica musicale del giorno con \"Buon Vento\" di Jovanotti, Alfa."
   },
   "created_at": "2026-06-16T07:07:46.444965+02:00",
-  "updated_at": "2026-06-16T18:12:35.429Z",
+  "updated_at": "2026-06-16T22:57:28.009Z",
   "voteAverage": 10,
   "thoughtsText": "[Paola Faggioni] Stupenda…buon vento🌊🌊🌊 🌊☀️",
   "reactions": {
     "down": 0,
     "like": 0,
     "heart": 1,
-    "sun": 0
+    "sun": 1
   },
   "votes": [
     {
@@ -68,6 +68,14 @@
       "value": "heart",
       "createdAt": "2026-06-16T18:10:46.406Z",
       "updatedAt": "2026-06-16T18:10:46.406Z"
+    },
+    {
+      "userId": "df9db58a-feed-49fa-8ffe-62664c069200",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "value": "sun",
+      "createdAt": "2026-06-16T22:57:28.009Z",
+      "updatedAt": "2026-06-16T22:57:28.009Z"
     }
   ],
   "date_it": "16 giugno 2026"
