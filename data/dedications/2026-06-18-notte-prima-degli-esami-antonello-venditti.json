@@ -31,7 +31,7 @@
     "description": "Dedica musicale del giorno con \"Notte prima degli esami\" di Antonello Venditti."
   },
   "created_at": "2026-06-17T23:11:01.143170+02:00",
-  "updated_at": "2026-06-17T23:11:01.661746+02:00",
+  "updated_at": "2026-06-17T21:37:04.747Z",
   "video": {
     "type": "youtube",
     "url": "https://www.youtube.com/watch?v=KwPG6HvY9PQ&list=RDKwPG6HvY9PQ&start_radio=1",
@@ -44,11 +44,20 @@
   "reactions": {
     "down": 0,
     "like": 0,
-    "heart": 0,
+    "heart": 1,
     "sun": 0
   },
   "votes": [],
   "thoughts": [],
-  "reactionEntries": [],
+  "reactionEntries": [
+    {
+      "userId": "6434f67f-9d85-43c3-a0ed-279bffdcee34",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "value": "heart",
+      "createdAt": "2026-06-17T21:37:04.747Z",
+      "updatedAt": "2026-06-17T21:37:04.747Z"
+    }
+  ],
   "date_it": "18 giugno 2026"
 }
