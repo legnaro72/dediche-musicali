@@ -31,17 +31,26 @@
     "description": "Dedica musicale del giorno con \"Firestones\" di Tony Brundo, Nico Bruno."
   },
   "created_at": "2026-06-21T07:07:40.032835+02:00",
-  "updated_at": "2026-06-22T12:48:44.837Z",
+  "updated_at": "2026-06-22T22:07:22.999Z",
   "voteAverage": null,
   "thoughtsText": "",
   "reactions": {
     "down": 0,
     "like": 0,
-    "heart": 0,
+    "heart": 1,
     "sun": 0
   },
   "votes": [],
   "thoughts": [],
-  "reactionEntries": [],
+  "reactionEntries": [
+    {
+      "userId": "6434f67f-9d85-43c3-a0ed-279bffdcee34",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "value": "heart",
+      "createdAt": "2026-06-22T22:07:22.999Z",
+      "updatedAt": "2026-06-22T22:07:22.999Z"
+    }
+  ],
   "date_it": "21 giugno 2026"
 }
