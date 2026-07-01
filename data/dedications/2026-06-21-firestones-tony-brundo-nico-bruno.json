@@ -1,0 +1,56 @@
+{
+  "id": "2026-06-21-firestones-tony-brundo-nico-bruno",
+  "date": "2026-06-21",
+  "day_name": "domenica",
+  "status": "published",
+  "song_title": "Firestones",
+  "artist": "Tony Brundo, Nico Bruno",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "Ingressino Stone!!🐬🌊🥰",
+  "audio": {
+    "url": "https://open.spotify.com/track/44Ue93Itp15xfcFeLTkHmo?si=-iy_vmMfRCKs3OnXrcc9rA",
+    "type": "spotify"
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-06-21-firestones-tony-brundo-nico-bruno.webp",
+    "alt": "Dedica musicale Firestones di Tony Brundo, Nico Bruno",
+    "mode": "raw",
+    "source": "public/images/upload/2026-06-21-firestones-tony-brundo-nico-bruno.webp"
+  },
+  "short_phrase": "U scoggiu!♥️🌞",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "Firestones - Tony Brundo, Nico Bruno | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"Firestones\" di Tony Brundo, Nico Bruno."
+  },
+  "created_at": "2026-06-21T07:07:40.032835+02:00",
+  "updated_at": "2026-06-22T22:07:22.999Z",
+  "voteAverage": null,
+  "thoughtsText": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 1,
+    "sun": 0
+  },
+  "votes": [],
+  "thoughts": [],
+  "reactionEntries": [
+    {
+      "userId": "6434f67f-9d85-43c3-a0ed-279bffdcee34",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "value": "heart",
+      "createdAt": "2026-06-22T22:07:22.999Z",
+      "updatedAt": "2026-06-22T22:07:22.999Z"
+    }
+  ],
+  "date_it": "21 giugno 2026"
+}
