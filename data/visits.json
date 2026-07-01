@@ -5015,6 +5015,17 @@
       "source": "site",
       "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/149 Version/11.1.1 Safari/605.1.15",
       "createdAt": "2026-07-01T14:22:55.701Z"
+    },
+    {
+      "visitId": "eeb50738-5473-4fa8-9c46-bea79dfed8a4",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "visitedAt": "2026-07-01T14:22:56.945Z",
+      "visitDate": "2026-07-01",
+      "page": "/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/149 Version/11.1.1 Safari/605.1.15",
+      "createdAt": "2026-07-01T14:22:56.945Z"
     }
   ]
 }
