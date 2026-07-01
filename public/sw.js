@@ -10,10 +10,10 @@ self.addEventListener('activate', (event) => {
       .keys()
       .then((keys) => Promise.all(keys.filter((key) => key.startsWith(CACHE_PREFIX)).map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
-      .then(() => self.registration.unregister())
   );
 });
 
 self.addEventListener('fetch', () => {
-  // Cache disattivata temporaneamente: lascia passare tutto alla rete.
+  // Cache disattivata: il service worker resta registrato per la PWA,
+  // ma lascia passare tutto alla rete per evitare contenuti non aggiornati.
 });

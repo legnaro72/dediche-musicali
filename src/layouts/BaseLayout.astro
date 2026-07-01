@@ -54,7 +54,7 @@ const fullOgImage = ogImage
   <link rel="manifest" href={`${base}manifest.json`} />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <meta name="apple-mobile-web-app-title" content="DDGPilli" />
   <link rel="apple-touch-icon" sizes="180x180" href={`${base}icons/apple-touch-icon.png`} />
   <link rel="apple-touch-startup-image" href={`${base}icons/apple-splash-2048.png`} />
@@ -477,11 +477,9 @@ const fullOgImage = ogImage
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.getRegistrations?.().then((registrations) => {
-          registrations.forEach((registration) => {
-            if (registration.scope.includes('/dediche-musicali/')) registration.unregister();
-          });
-        }).catch(() => {});
+        navigator.serviceWorker.register(`${appBase}sw.js`, { scope: appBase }).catch((error) => {
+          console.warn('Service worker non registrato:', error);
+        });
       }, { once: true });
     }
 
@@ -503,17 +501,11 @@ const fullOgImage = ogImage
 
       document.querySelectorAll('[data-nav-toggle]').forEach((toggle) => {
         toggle.addEventListener('click', toggleMobileMenu);
-        toggle.addEventListener('touchend', toggleMobileMenu, { passive: false });
       });
 
       document.addEventListener('click', (event) => {
         const target = event.target;
         if (!(target instanceof Element)) return;
-
-        if (target.closest('[data-nav-toggle]')) {
-          toggleMobileMenu(event);
-          return;
-        }
 
         if (target.closest('#primary-navigation a')) {
           setMobileMenuOpen(false);

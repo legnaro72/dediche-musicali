@@ -100,7 +100,7 @@ section {
   left: 0;
   right: 0;
   z-index: 300;
-  padding: 1rem 0;
+  padding: calc(1rem + env(safe-area-inset-top, 0px)) 0 1rem;
   transition: var(--transition);
 }
 
@@ -108,7 +108,7 @@ section {
   background: rgba(8, 7, 15, 0.9);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  padding: 0.75rem 0;
+  padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 0 0.75rem;
 }
 
 .navbar-inner { display:flex; align-items:center; justify-content:space-between; gap:1.5rem; isolation:isolate; }
@@ -1110,7 +1110,7 @@ button.video-poster {
   position: fixed;
   left: clamp(1rem, 4vw, 1.5rem);
   right: clamp(1rem, 4vw, 1.5rem);
-  bottom: clamp(5rem, 10vw, 5.5rem);
+  bottom: calc(clamp(5rem, 10vw, 5.5rem) + env(safe-area-inset-bottom, 0px));
   z-index: 130;
   max-width: 520px;
   display: flex;
@@ -1724,10 +1724,10 @@ button.video-poster {
 
   .navbar-nav {
     position: absolute;
-    top: calc(100% + 0.75rem);
+    top: calc(100% + 0.6rem);
     left: clamp(1rem, 5vw, 2rem);
     right: clamp(1rem, 5vw, 2rem);
-    z-index: 165;
+    z-index: 420;
     display: none;
     flex-direction: column;
     gap: 0;
@@ -1786,7 +1786,7 @@ button.video-poster {
   }
 
   .app-install {
-    bottom: 4.8rem;
+    bottom: calc(4.8rem + env(safe-area-inset-bottom, 0px));
   }
 
   .ambient-audio-toggle {
