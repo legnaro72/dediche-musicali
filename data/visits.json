@@ -4190,6 +4190,17 @@
       "source": "site",
       "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7.6 Mobile/15E148 Safari/604.1",
       "createdAt": "2026-08-12T21:11:54.788Z"
+    },
+    {
+      "visitId": "eaa111d0-6353-4576-933b-223631067bfa",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "visitedAt": "2026-08-12T22:43:13.079Z",
+      "visitDate": "2026-08-13",
+      "page": "/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36",
+      "createdAt": "2026-08-12T22:43:13.079Z"
     }
   ]
 }
