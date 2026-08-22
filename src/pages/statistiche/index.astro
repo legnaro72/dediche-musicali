@@ -255,6 +255,19 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
     }
 
     renderStats();
+    async function loadApiFeedback() {
+      const baseUrl = feedbackApiUrl();
+      if (!baseUrl) return;
+      try {
+        const response = await fetch(`${baseUrl.replace(/\/$/, '')}/feedback/all`, { cache: 'no-store' });
+        const result = await response.json();
+        if (response.ok && result.ok !== false && result.feedback) apiFeedback = result.feedback;
+      } catch {
+        apiFeedback = {};
+      }
+      renderStats();
+    }
+    loadApiFeedback();
     window.addEventListener('ddgpilli:stats-updated', (event) => {
       const detail = event instanceof CustomEvent ? event.detail : null;
       if (detail?.id && detail.feedback) apiFeedback[detail.id] = detail.feedback;

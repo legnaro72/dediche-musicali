@@ -563,6 +563,9 @@ const data = {
           try {
             const apiResult = await postFeedback('/save_reaction', {
               id: data.id,
+              date: data.date,
+              title: data.title,
+              artist: data.artist,
               reaction: isToggleOff ? null : next,
               previousReaction: previous || null,
               userId: identity.userId || '',

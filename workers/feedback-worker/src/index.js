@@ -2,6 +2,7 @@ const REACTION_KEYS = ['down', 'like', 'heart', 'sun'];
 const LEGACY_VOTE_FIELD = `voto${'Pil' + 'ly'}`;
 const LEGACY_THOUGHT_FIELD = `pensiero${'Pil' + 'ly'}`;
 const VISITS_PATH = 'data/visits.json';
+const FEEDBACK_STORE_PATH = 'data/feedback.json';
 
 function allowedCorsOrigin(request, env = {}) {
   const requestOrigin = request?.headers?.get('origin') || '';
@@ -422,6 +423,40 @@ async function saveDedication(env, loaded, message) {
   return loaded.dedication;
 }
 
+async function loadFeedbackRecord(env, dedicationId, hints = {}) {
+  try {
+    return await loadDedicationById(env, dedicationId);
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.includes('GitHub API 404')) throw error;
+  }
+
+  const store = await loadJsonPath(env, FEEDBACK_STORE_PATH, { feedback: {} });
+  const feedback = store.data?.feedback && typeof store.data.feedback === 'object'
+    ? store.data.feedback
+    : {};
+  store.data = { feedback };
+  const existing = feedback[dedicationId] && typeof feedback[dedicationId] === 'object'
+    ? feedback[dedicationId]
+    : {};
+  return {
+    dedication: ensureFeedbackFields({
+      id: dedicationId,
+      date: normalizeText(hints.date || '', 20),
+      song_title: normalizeText(hints.title || hints.song_title || '', 240),
+      artist: normalizeText(hints.artist || '', 240),
+      ...existing,
+    }),
+    feedbackStore: store,
+  };
+}
+
+async function saveFeedbackRecord(env, loaded, message) {
+  if (!loaded.feedbackStore) return saveDedication(env, loaded, message);
+  loaded.feedbackStore.data.feedback[loaded.dedication.id] = loaded.dedication;
+  await saveJsonPath(env, loaded.feedbackStore, message);
+  return loaded.dedication;
+}
+
 function nowIsoRomeApprox() {
   return new Date().toISOString();
 }
@@ -473,16 +508,18 @@ async function dispatchVoteEmail(env, feedback) {
 }
 
 async function getFeedback(env, dedicationId) {
-  const loaded = await loadDedicationById(env, dedicationId);
+  const loaded = await loadFeedbackRecord(env, dedicationId);
   return feedbackPayload(loaded.dedication);
 }
 
 async function getAllFeedback(env) {
-  const files = await listDedicationFiles(env);
+  const store = await loadJsonPath(env, FEEDBACK_STORE_PATH, { feedback: {} });
   const feedback = {};
-  for (const file of files) {
-    const loaded = await loadDedicationPath(env, `${file.path}?ref=${encodeURIComponent(githubBranch(env))}`);
-    const payload = feedbackPayload(loaded.dedication);
+  const records = store.data?.feedback && typeof store.data.feedback === 'object'
+    ? Object.values(store.data.feedback)
+    : [];
+  for (const record of records) {
+    const payload = feedbackPayload(record);
     if (payload.id) feedback[payload.id] = payload;
   }
   return feedback;
@@ -496,7 +533,7 @@ async function saveVote(env, payload) {
     throw new Error('Il voto deve essere un numero intero da 1 a 10.');
   }
 
-  const loaded = await loadDedicationById(env, dedicationId);
+  const loaded = await loadFeedbackRecord(env, dedicationId, payload);
   const now = nowIsoRomeApprox();
   const votes = normalizeVotes(loaded.dedication.votes);
   const existingVote = votes.find(item => item.userKey === user.userKey);
@@ -527,7 +564,7 @@ async function saveVote(env, payload) {
   loaded.dedication.thoughts = thoughts;
   loaded.dedication.updated_at = now;
   syncDerivedFeedbackFields(loaded.dedication);
-  await saveDedication(env, loaded, `Salva voto Pilli ${dedicationId}`);
+  await saveFeedbackRecord(env, loaded, `Salva voto Pilli ${dedicationId}`);
   const feedback = feedbackPayload(loaded.dedication);
   feedback.currentVote = vote;
   feedback.currentThought = thoughtText;
@@ -559,7 +596,7 @@ async function saveReaction(env, payload) {
     throw new Error('reaction o previousReaction obbligatoria.');
   }
 
-  const loaded = await loadDedicationById(env, dedicationId);
+  const loaded = await loadFeedbackRecord(env, dedicationId, payload);
   const now = nowIsoRomeApprox();
   let reactionEntries = normalizeReactionEntries(loaded.dedication.reactionEntries);
   const existing = reactionEntries.find(item => item.userKey === user.userKey);
@@ -577,7 +614,7 @@ async function saveReaction(env, payload) {
   loaded.dedication.reactionEntries = reactionEntries;
   loaded.dedication.updated_at = now;
   syncDerivedFeedbackFields(loaded.dedication);
-  await saveDedication(env, loaded, `Salva reazione Pilli ${dedicationId}`);
+  await saveFeedbackRecord(env, loaded, `Salva reazione Pilli ${dedicationId}`);
   return feedbackPayload(loaded.dedication);
 }
 
