@@ -6,7 +6,7 @@
       "song_title": "Miserere - Italian Album Version With Poem",
       "artist": "Zucchero, Luciano Pavarotti, Franco Liguori",
       "voteAverage": 10,
-      "thoughtsText": "[Massimiliano Ferrando] Misero me",
+      "thoughtsText": "[Massimiliano Ferrando] Misero me\n\n[Paola Faggioni] Mi sembra adatta 😂..sono contenta di andare a Varigotti domani",
       "reactions": {
         "down": 0,
         "like": 0,
@@ -21,6 +21,14 @@
           "value": 10,
           "createdAt": "2026-08-22T16:25:23.313Z",
           "updatedAt": "2026-08-22T16:25:23.313Z"
+        },
+        {
+          "userId": "c64bc9fa-75c6-42d0-bb63-dac41be3f4e3",
+          "userKey": "paola-faggioni",
+          "userName": "Paola Faggioni",
+          "value": 10,
+          "createdAt": "2026-08-22T16:30:03.185Z",
+          "updatedAt": "2026-08-22T16:30:03.185Z"
         }
       ],
       "thoughts": [
@@ -31,6 +39,14 @@
           "text": "Misero me",
           "createdAt": "2026-08-22T16:25:23.313Z",
           "updatedAt": "2026-08-22T16:25:23.313Z"
+        },
+        {
+          "userId": "c64bc9fa-75c6-42d0-bb63-dac41be3f4e3",
+          "userKey": "paola-faggioni",
+          "userName": "Paola Faggioni",
+          "text": "Mi sembra adatta 😂..sono contenta di andare a Varigotti domani",
+          "createdAt": "2026-08-22T16:30:03.185Z",
+          "updatedAt": "2026-08-22T16:30:03.185Z"
         }
       ],
       "reactionEntries": [
@@ -43,7 +59,7 @@
           "updatedAt": "2026-08-22T16:29:33.163Z"
         }
       ],
-      "updated_at": "2026-08-22T16:29:33.163Z"
+      "updated_at": "2026-08-22T16:30:03.185Z"
     }
   }
 }
