@@ -1,0 +1,56 @@
+{
+  "id": "2026-07-17-la-stella-piu-fragile-dell-universo-ultimo",
+  "date": "2026-07-17",
+  "day_name": "venerdì",
+  "status": "published",
+  "song_title": "La stella più fragile dell'universo",
+  "artist": "Ultimo",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "Comunque amore, comunque. Comunque è ovunque. Tu al mio fianco♥️",
+  "audio": {
+    "url": "https://open.spotify.com/track/4Sa3F9GrnuQ0Icf8Pe7HIW?si=n4LTshRASpKwKuGrKoy5jQ&utm_source=copy-link",
+    "type": "spotify"
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-07-17-la-stella-piu-fragile-dell-universo-ultimo.webp",
+    "alt": "Dedica musicale La stella più fragile dell'universo di Ultimo",
+    "mode": "raw",
+    "source": "public/images/upload/2026-07-17-la-stella-piu-fragile-dell-universo-ultimo.webp"
+  },
+  "short_phrase": "Comunque🎵❤️",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "La stella più fragile dell'universo - Ultimo | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"La stella più fragile dell'universo\" di Ultimo."
+  },
+  "created_at": "2026-07-17T15:58:45.883308+02:00",
+  "updated_at": "2026-07-18T15:26:12.968Z",
+  "voteAverage": null,
+  "thoughtsText": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 1,
+    "sun": 0
+  },
+  "votes": [],
+  "thoughts": [],
+  "reactionEntries": [
+    {
+      "userId": "c64bc9fa-75c6-42d0-bb63-dac41be3f4e3",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "value": "heart",
+      "createdAt": "2026-07-18T15:26:12.968Z",
+      "updatedAt": "2026-07-18T15:26:12.968Z"
+    }
+  ],
+  "date_it": "17 luglio 2026"
+}

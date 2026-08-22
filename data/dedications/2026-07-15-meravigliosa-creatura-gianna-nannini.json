@@ -1,0 +1,47 @@
+{
+  "id": "2026-07-15-meravigliosa-creatura-gianna-nannini",
+  "date": "2026-07-15",
+  "day_name": "mercoledì",
+  "status": "published",
+  "song_title": "Meravigliosa Creatura",
+  "artist": "Gianna Nannini",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "Amore mio. Sei la mia meravigliosa creatura e io mostrerei feroce terminati, scalerei montagne altissime. E centerei l'impossibile anche di volare per raggiungerti la summer dal cielo e cogliere un tuo raggio.♥️",
+  "audio": {
+    "url": "https://open.spotify.com/track/0xYlLcTvwe9Odc2R7Ftdkk?si=HNrci5iVRG2GezsQyrkRpA&utm_source=copy-link",
+    "type": "spotify"
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-07-15-meravigliosa-creatura-gianna-nannini.webp",
+    "alt": "Dedica musicale Meravigliosa Creatura di Gianna Nannini",
+    "mode": "raw",
+    "source": "public/images/upload/2026-07-15-meravigliosa-creatura-gianna-nannini.webp"
+  },
+  "short_phrase": "Meravigliosa Pilli!♥️🌞",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "Meravigliosa Creatura - Gianna Nannini | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"Meravigliosa Creatura\" di Gianna Nannini."
+  },
+  "created_at": "2026-07-15T19:25:32.812070+02:00",
+  "updated_at": "2026-07-15T19:25:33.409440+02:00",
+  "voteAverage": null,
+  "thoughtsText": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 0,
+    "sun": 0
+  },
+  "votes": [],
+  "thoughts": [],
+  "reactionEntries": [],
+  "date_it": "15 luglio 2026"
+}

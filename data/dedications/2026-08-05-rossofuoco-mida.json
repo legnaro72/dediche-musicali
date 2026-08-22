@@ -1,0 +1,47 @@
+{
+  "id": "2026-08-05-rossofuoco-mida",
+  "date": "2026-08-05",
+  "day_name": "mercoledì",
+  "status": "published",
+  "song_title": "ROSSOFUOCO",
+  "artist": "Mida",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "Evergreen x te amore!♥️",
+  "audio": {
+    "url": "https://open.spotify.com/track/48I2h2HnPqS1CMSlz7bZ7E?si=jDb0YB-DRB2lIDs8B4VBvw&utm_source=copy-link&sci=spotify%3Acard-config%3A3D4XiwrV9HCORMmfxynUQN",
+    "type": "spotify"
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-08-05-rossofuoco-mida.webp",
+    "alt": "Dedica musicale ROSSOFUOCO di Mida",
+    "mode": "raw",
+    "source": "public/images/upload/2026-08-05-rossofuoco-mida.webp"
+  },
+  "short_phrase": "RossoPilli❤️🌹🎵",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "ROSSOFUOCO - Mida | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"ROSSOFUOCO\" di Mida."
+  },
+  "created_at": "2026-08-05T07:07:42.940285+02:00",
+  "updated_at": "2026-08-05T07:07:43.446805+02:00",
+  "voteAverage": null,
+  "thoughtsText": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 0,
+    "sun": 0
+  },
+  "votes": [],
+  "thoughts": [],
+  "reactionEntries": [],
+  "date_it": "5 agosto 2026"
+}
