@@ -131,8 +131,30 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/ public/images/dedications/ || true
-          git diff --cached --quiet || git commit -m "Dedica del giorno - $(date +'%Y-%m-%d') [skip ci]"
-          git push || true
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica da salvare."
+            exit 0
+          fi
+
+          git commit -m "Dedica del giorno - $(date +'%Y-%m-%d') [skip ci]"
+
+          # I contatori di visite/feedback possono aggiornare main mentre questo
+          # job e' in esecuzione. Riallinea e ritenta senza nascondere gli errori.
+          for attempt in 1 2 3 4 5 6; do
+            echo "Tentativo push $attempt/6"
+            if ! git pull --rebase origin main; then
+              git rebase --abort || true
+              echo "Rebase fallito: pubblicazione interrotta."
+              exit 1
+            fi
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep 3
+          done
+
+          echo "Push fallito dopo 6 tentativi."
+          exit 1
 
       - name: Upload artifact Pages
         if: ${{ inputs.dry_run != 'true' && steps.publish_daily.outputs.published == 'true' }}
