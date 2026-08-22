@@ -123,6 +123,10 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
       }
     }
 
+    function localVoteFeedback() {
+      return readObject('ddgpilli-plus-votes');
+    }
+
     function setText(selector, value) {
       const node = document.querySelector(selector);
       if (node) node.textContent = String(value);
@@ -183,6 +187,7 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
       const reactionStore = {};
       const runtimeDedications = dedications.map(item => ({
         ...item,
+        ...(localVoteFeedback()[item.id] || {}),
         ...(apiFeedback[item.id] || {}),
         id: item.id,
         date: item.date,
@@ -249,24 +254,25 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
       });
     }
 
+    renderStats();
     async function loadApiFeedback() {
       const baseUrl = feedbackApiUrl();
       if (!baseUrl) return;
       try {
         const response = await fetch(`${baseUrl.replace(/\/$/, '')}/feedback/all`, { cache: 'no-store' });
         const result = await response.json();
-        if (response.ok && result.ok !== false && result.feedback) {
-          apiFeedback = result.feedback;
-        }
+        if (response.ok && result.ok !== false && result.feedback) apiFeedback = result.feedback;
       } catch {
         apiFeedback = {};
       }
       renderStats();
     }
-
-    renderStats();
     loadApiFeedback();
-    window.addEventListener('ddgpilli:stats-updated', loadApiFeedback);
+    window.addEventListener('ddgpilli:stats-updated', (event) => {
+      const detail = event instanceof CustomEvent ? event.detail : null;
+      if (detail?.id && detail.feedback) apiFeedback[detail.id] = detail.feedback;
+      renderStats();
+    });
     window.addEventListener('storage', renderStats);
   </script>
 </BaseLayout>
