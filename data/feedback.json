@@ -1,0 +1,40 @@
+{
+  "feedback": {
+    "2026-08-22-miserere-italian-album-version-with-poem-zucchero-luciano-pavarotti-franco-liguori": {
+      "id": "2026-08-22-miserere-italian-album-version-with-poem-zucchero-luciano-pavarotti-franco-liguori",
+      "date": "2026-08-22",
+      "song_title": "Miserere - Italian Album Version With Poem",
+      "artist": "Zucchero, Luciano Pavarotti, Franco Liguori",
+      "voteAverage": 10,
+      "thoughtsText": "[Massimiliano Ferrando] Misero me",
+      "reactions": {
+        "down": 0,
+        "like": 0,
+        "heart": 0,
+        "sun": 0
+      },
+      "votes": [
+        {
+          "userId": "df9db58a-feed-49fa-8ffe-62664c069200",
+          "userKey": "massimiliano-ferrando",
+          "userName": "Massimiliano Ferrando",
+          "value": 10,
+          "createdAt": "2026-08-22T16:25:23.313Z",
+          "updatedAt": "2026-08-22T16:25:23.313Z"
+        }
+      ],
+      "thoughts": [
+        {
+          "userId": "df9db58a-feed-49fa-8ffe-62664c069200",
+          "userKey": "massimiliano-ferrando",
+          "userName": "Massimiliano Ferrando",
+          "text": "Misero me",
+          "createdAt": "2026-08-22T16:25:23.313Z",
+          "updatedAt": "2026-08-22T16:25:23.313Z"
+        }
+      ],
+      "reactionEntries": [],
+      "updated_at": "2026-08-22T16:25:23.313Z"
+    }
+  }
+}
