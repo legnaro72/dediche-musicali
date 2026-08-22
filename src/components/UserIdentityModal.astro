@@ -369,12 +369,6 @@
     const backdrop    = document.querySelector('[data-uid-backdrop]');
     if (!modal || !form) return;
 
-    // Mostra se non ha ancora il nome
-    if (!hasIdentity()) {
-      // Piccolo delay per permettere al sito di caricarsi visivamente
-      setTimeout(() => showModal(false), 600);
-    }
-
     updateEditTrigger();
 
     // Salva al submit

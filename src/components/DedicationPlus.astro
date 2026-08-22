@@ -135,9 +135,9 @@ const data = {
     }
   }
 
-  function writeObject(key, value) {
+  function writeObject(key, value, detail = {}) {
     localStorage.setItem(key, JSON.stringify(value));
-    window.dispatchEvent(new CustomEvent('ddgpilli:stats-updated'));
+    window.dispatchEvent(new CustomEvent('ddgpilli:stats-updated', { detail }));
   }
 
   function feedbackApiUrl() {
@@ -161,11 +161,12 @@ const data = {
     return result;
   }
 
-  async function fetchFeedback(dedicationId) {
+  async function fetchFeedback(dedicationId, signal) {
     const baseUrl = feedbackApiUrl();
     if (!baseUrl || !dedicationId) return null;
     const response = await fetch(`${baseUrl.replace(/\/$/, '')}/feedback?id=${encodeURIComponent(dedicationId)}`, {
       cache: 'no-store',
+      signal,
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok || result.ok === false) return null;
@@ -190,6 +191,17 @@ const data = {
 
   function feedbackReactions(result) {
     return result?.reactions || result?.feedback?.reactions || null;
+  }
+
+  function feedbackErrorMessage(error) {
+    const message = error instanceof Error ? error.message : '';
+    if (/too many subrequests/i.test(message)) {
+      return 'Il salvataggio è momentaneamente sovraccarico. Il voto non è stato confermato: riprova tra pochi secondi.';
+    }
+    if (/GitHub API (401|403)/i.test(message)) {
+      return 'Il salvataggio non è disponibile al momento. Riprova più tardi.';
+    }
+    return message || 'Salvataggio persistente non riuscito.';
   }
 
   function currentIdentity() {
@@ -286,6 +298,8 @@ const data = {
       const status = root.querySelector('[data-plus-vote-status]');
       const submit = root.querySelector('[data-plus-vote-submit]');
       let serverFeedback = null;
+      let opening = false;
+      let feedbackController = null;
 
       // Precompila il campo nome dalla identity salvata
       const prefillIdentity = () => {
@@ -302,8 +316,11 @@ const data = {
       const fillForm = async () => {
         if (feedbackApiUrl()) {
           try {
-            serverFeedback = await fetchFeedback(data.id);
+            feedbackController?.abort();
+            feedbackController = new AbortController();
+            serverFeedback = await fetchFeedback(data.id, feedbackController.signal);
           } catch (error) {
+            if (error?.name === 'AbortError') return;
             console.warn('Feedback non recuperato:', error);
             serverFeedback = null;
             if (status instanceof HTMLElement) {
@@ -325,22 +342,31 @@ const data = {
       };
 
       const hide = () => {
+        feedbackController?.abort();
+        feedbackController = null;
+        opening = false;
         if (modal instanceof HTMLElement) modal.hidden = true;
         document.body.classList.remove('plus-vote-is-open');
       };
 
       open?.addEventListener('click', async () => {
+        if (opening) return;
         // Se nome/cognome non presenti, chiede prima l'identità
         if (window.__DDGPILLI?.hasIdentity && !window.__DDGPILLI.hasIdentity()) {
           window.__DDGPILLI.showIdentityModal?.();
           return;
         }
+        opening = true;
         prefillIdentity();
         if (status instanceof HTMLElement) status.textContent = feedbackApiUrl() ? 'Caricamento voto salvato...' : '';
-        await fillForm();
         if (modal instanceof HTMLElement) modal.hidden = false;
         document.body.classList.add('plus-vote-is-open');
         if (score instanceof HTMLInputElement) score.focus();
+        try {
+          await fillForm();
+        } finally {
+          opening = false;
+        }
       });
       close?.addEventListener('click', hide);
       cancel?.addEventListener('click', hide);
@@ -382,7 +408,7 @@ const data = {
         } catch (error) {
           console.error('Salvataggio voto fallito:', error);
           if (status instanceof HTMLElement) {
-            status.textContent = error instanceof Error ? error.message : 'Salvataggio persistente non riuscito.';
+            status.textContent = feedbackErrorMessage(error);
           }
           if (submit instanceof HTMLButtonElement) submit.disabled = false;
           return;
@@ -390,7 +416,7 @@ const data = {
 
         const voteStore = readObject(voteStoreKey);
         voteStore[data.id] = apiResultToLocalVote(data, votePayload);
-        writeObject(voteStoreKey, voteStore);
+        writeObject(voteStoreKey, voteStore, { id: data.id, feedback: apiResult });
         if (status instanceof HTMLElement) {
           status.textContent = 'Voto salvato nel dataset.';
         }

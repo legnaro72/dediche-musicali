@@ -128,7 +128,7 @@ section {
   position: relative;
   z-index: 360;
   flex: 0 0 auto;
-  min-height: 38px;
+  min-height: 44px;
   padding: 0 0.9rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-full);

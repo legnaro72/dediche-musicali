@@ -392,13 +392,14 @@ async function loadDedicationById(env, dedicationId) {
   const directPath = `data/dedications/${dedicationId}.json`;
   try {
     return await loadDedicationPath(env, `${directPath}?ref=${encodeURIComponent(githubBranch(env))}`);
-  } catch {
-    // Compatibilita' con file legacy chiamati per data ma con id interno completo.
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.includes('GitHub API 404')) throw error;
   }
 
-  const files = await listDedicationFiles(env);
-  for (const file of files) {
-    const loaded = await loadDedicationPath(env, `${file.path}?ref=${encodeURIComponent(githubBranch(env))}`);
+  // I primi file storici usavano soltanto la data come nome file.
+  const legacyDate = dedicationId.match(/^\d{4}-\d{2}-\d{2}/)?.[0];
+  if (legacyDate) {
+    const loaded = await loadDedicationPath(env, `data/dedications/${legacyDate}.json?ref=${encodeURIComponent(githubBranch(env))}`);
     if (loaded.dedication.id === dedicationId) return loaded;
   }
 
