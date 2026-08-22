@@ -10,7 +10,7 @@
       "reactions": {
         "down": 0,
         "like": 0,
-        "heart": 0,
+        "heart": 1,
         "sun": 1
       },
       "votes": [
@@ -57,9 +57,17 @@
           "value": "sun",
           "createdAt": "2026-08-22T16:29:33.163Z",
           "updatedAt": "2026-08-22T16:29:33.163Z"
+        },
+        {
+          "userId": "df9db58a-feed-49fa-8ffe-62664c069200",
+          "userKey": "massimiliano-ferrando",
+          "userName": "Massimiliano Ferrando",
+          "value": "heart",
+          "createdAt": "2026-08-22T16:32:37.655Z",
+          "updatedAt": "2026-08-22T16:32:37.655Z"
         }
       ],
-      "updated_at": "2026-08-22T16:30:03.185Z"
+      "updated_at": "2026-08-22T16:32:37.655Z"
     }
   }
 }
