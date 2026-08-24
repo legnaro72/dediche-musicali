@@ -31,13 +31,13 @@
     "description": "Dedica musicale del giorno con \"Miserere - Italian Album Version With Poem\" di Zucchero, Luciano Pavarotti, Franco Liguori."
   },
   "created_at": "2026-08-22T18:48:31.650184+02:00",
-  "updated_at": "2026-08-24T23:56:33.270Z",
+  "updated_at": "2026-08-24T23:56:34.985Z",
   "voteAverage": null,
   "thoughtsText": "",
   "reactions": {
     "down": 0,
     "like": 0,
-    "heart": 1,
+    "heart": 2,
     "sun": 0
   },
   "votes": [],
@@ -50,6 +50,14 @@
       "value": "heart",
       "createdAt": "2026-08-22T16:55:14.057Z",
       "updatedAt": "2026-08-22T16:55:14.057Z"
+    },
+    {
+      "userId": "c64bc9fa-75c6-42d0-bb63-dac41be3f4e3",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "value": "heart",
+      "createdAt": "2026-08-24T23:56:34.985Z",
+      "updatedAt": "2026-08-24T23:56:34.985Z"
     }
   ],
   "date_it": "22 agosto 2026"
