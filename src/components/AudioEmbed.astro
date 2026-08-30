@@ -70,6 +70,8 @@ const fallbackMime = audioMime || ({ mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: '
         controls
         preload="metadata"
         data-dedication-audio
+        data-audio-download-url={url}
+        data-audio-filename={originalFilename || 'audio.mp3'}
         style="width:100%; accent-color:var(--purple-1);"
       >
         <source src={url} type={fallbackMime} />
@@ -89,14 +91,34 @@ const fallbackMime = audioMime || ({ mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: '
 </div>
 
 <script>
+  async function downloadAudioFile(url: string, filename: string) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Download audio fallito: HTTP ${response.status}`);
+
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const downloadLink = document.createElement('a');
+    downloadLink.href = blobUrl;
+    downloadLink.download = filename || 'audio.mp3';
+    downloadLink.hidden = true;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+    window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+  }
+
   function bindAudioPlayButtons() {
     document.querySelectorAll('[data-audio-play]').forEach((button) => {
-      if (!(button instanceof HTMLElement) || button.dataset.audioPlayBound === 'true') return;
+      if (!(button instanceof HTMLAnchorElement) || button.dataset.audioPlayBound === 'true') return;
 
       button.dataset.audioPlayBound = 'true';
-      button.addEventListener('click', () => {
+      button.addEventListener('click', (event) => {
         const player = document.querySelector('[data-dedication-audio]');
         if (!(player instanceof HTMLAudioElement)) return;
+
+        const downloadUrl = player.dataset.audioDownloadUrl || button.href;
+        const filename = player.dataset.audioFilename || 'audio.mp3';
+        event.preventDefault();
 
         const playback = player.play();
         if (playback) {
@@ -104,6 +126,15 @@ const fallbackMime = audioMime || ({ mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: '
             console.warn('Riproduzione audio non avviata:', error);
           });
         }
+
+        downloadAudioFile(downloadUrl, filename).catch((error) => {
+          console.warn('Download audio non avviato:', error);
+          const fallbackLink = document.createElement('a');
+          fallbackLink.href = downloadUrl;
+          fallbackLink.target = '_blank';
+          fallbackLink.rel = 'noopener noreferrer';
+          fallbackLink.click();
+        });
       });
     });
   }
