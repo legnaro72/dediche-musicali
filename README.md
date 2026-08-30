@@ -527,25 +527,16 @@ recupera titolo e artista. Il frontend incorpora Spotify per le sorgenti Spotify
 usa `<audio controls>` per file caricati e URL riconosciuti come audio; negli altri
 casi mostra un pulsante per aprire la sorgente.
 
-Per l'upload locale l'admin usa un bucket Cloudflare R2 con dominio pubblico. Aggiungi
-questi secrets all'ambiente Streamlit (non committarli):
+Per l'upload locale l'admin salva il file direttamente nel repository GitHub, dentro
+`public/audio/`, e registra l'URL pubblico `raw.githubusercontent.com`. Non servono
+bucket, servizi Cloudflare o nuovi secrets: è sufficiente il `GITHUB_PAT` già usato
+dall'admin per immagini e pubblicazione. Il token deve avere permesso **Contents: Read
+and write**. Il limite predefinito per file è 25 MB (`MAX_AUDIO_UPLOAD_BYTES` è
+configurabile); per audio più grandi è preferibile un object storage dedicato.
 
-```toml
-R2_ACCOUNT_ID = "..."
-R2_ACCESS_KEY_ID = "..."
-R2_SECRET_ACCESS_KEY = "..."
-R2_BUCKET_NAME = "dediche-audio"
-R2_PUBLIC_BASE_URL = "https://audio.tuo-dominio.it"
-MAX_AUDIO_UPLOAD_BYTES = "104857600" # opzionale, 100 MB di default
-```
-
-Configura `R2_PUBLIC_BASE_URL` come custom domain del bucket e servi gli oggetti con
-`Content-Type` audio corretto. R2 è persistente, supporta richieste Range e consente
-in seguito di sostituire o eliminare oggetti tramite la loro chiave. Il token usato
-dall'admin deve avere soltanto permessi Object Read & Write sul bucket. Se il dominio
-pubblico è diverso da quello del sito, autorizza in CORS almeno il dominio GitHub Pages
-per `GET` e `HEAD` (e `Range` tra gli header consentiti/esposti). Non usare URL R2
-presigned per le dediche pubbliche: scadono; usa il custom domain pubblico.
+Ogni upload crea un commit nel repository, quindi il file è persistente e può essere
+sostituito o rimosso in futuro dal repository. GitHub Pages includerà il file in
+`/audio/` al successivo deploy; l'URL raw funziona già subito dopo l'upload.
 
 La prima apertura dell'admin aggiunge in coda le nuove intestazioni al Google Sheet:
 la migrazione non altera né riscrive le righe esistenti. Le righe Spotify storiche

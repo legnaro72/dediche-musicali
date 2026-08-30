@@ -8,7 +8,6 @@ import hashlib
 import mimetypes
 import os
 import re
-import uuid
 from pathlib import Path
 from urllib.parse import quote, urlparse, urlunparse
 
@@ -127,7 +126,8 @@ VALID_STATUSES = ("draft", "scheduled", "published", "disabled")
 VALID_VIDEO_TYPES = ("", "youtube", "mp4", "external")
 VALID_AUDIO_SOURCE_TYPES = ("spotify", "external_url", "uploaded_audio")
 SUPPORTED_AUDIO_EXTENSIONS = {".mp3", ".m4a", ".aac", ".ogg", ".opus", ".wav", ".webm", ".flac"}
-MAX_AUDIO_UPLOAD_BYTES = int(os.environ.get("MAX_AUDIO_UPLOAD_BYTES", str(100 * 1024 * 1024)))
+# L'API Contents di GitHub è adatta a file piccoli: teniamo un margine prudenziale.
+MAX_AUDIO_UPLOAD_BYTES = int(os.environ.get("MAX_AUDIO_UPLOAD_BYTES", str(25 * 1024 * 1024)))
 UPLOAD_IMAGE_MAX_SIDE = int(os.environ.get("UPLOAD_IMAGE_MAX_SIDE", "1400"))
 UPLOAD_IMAGE_WEBP_QUALITY = int(os.environ.get("UPLOAD_IMAGE_WEBP_QUALITY", "78"))
 UPLOAD_IMAGE_TARGET_BYTES = int(os.environ.get("UPLOAD_IMAGE_TARGET_BYTES", str(450 * 1024)))
@@ -469,26 +469,8 @@ def extract_uploaded_audio_metadata(data: bytes, filename: str) -> dict:
     return metadata
 
 
-def r2_config() -> dict:
-    """Configurazione S3 per R2. R2_PUBLIC_BASE_URL deve puntare al custom domain pubblico."""
-    config = {
-        "account_id": get_secret_or_env("R2_ACCOUNT_ID"),
-        "access_key": get_secret_or_env("R2_ACCESS_KEY_ID"),
-        "secret_key": get_secret_or_env("R2_SECRET_ACCESS_KEY"),
-        "bucket": get_secret_or_env("R2_BUCKET_NAME"),
-        "public_base_url": get_secret_or_env("R2_PUBLIC_BASE_URL").rstrip("/"),
-    }
-    missing = [name for name, value in config.items() if not value]
-    if missing:
-        raise ValueError(
-            "Storage audio non configurato. Imposta nei secrets: R2_ACCOUNT_ID, "
-            "R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME e R2_PUBLIC_BASE_URL."
-        )
-    return config
-
-
-def upload_audio_to_r2(data: bytes, filename: str, mime_type: str) -> dict:
-    """Carica solo in object storage persistente, mai nel filesystem Streamlit."""
+def upload_audio_to_github(data: bytes, filename: str, mime_type: str) -> dict:
+    """Salva l'audio nel repository già pubblicato da GitHub Pages."""
     if not data:
         raise ValueError("Il file audio è vuoto.")
     if len(data) > MAX_AUDIO_UPLOAD_BYTES:
@@ -499,34 +481,26 @@ def upload_audio_to_r2(data: bytes, filename: str, mime_type: str) -> dict:
     content_type = mime_type if mime_type.startswith("audio/") else (mimetypes.guess_type(filename)[0] or "application/octet-stream")
     if not content_type.startswith("audio/"):
         raise ValueError("Il file selezionato non ha un Content-Type audio valido.")
-    try:
-        import boto3
-    except ImportError as exc:
-        raise ValueError("Dipendenza boto3 mancante: esegui l'installazione dei requirements aggiornati.") from exc
-
-    config = r2_config()
     safe_stem = slugify(Path(filename).stem) or "audio"
     digest = hashlib.sha256(data).hexdigest()[:12]
-    key = f"audio/{datetime.datetime.now(datetime.timezone.utc):%Y/%m}/{safe_stem}-{digest}-{uuid.uuid4().hex[:8]}{extension}"
-    client = boto3.client(
-        "s3",
-        endpoint_url=f"https://{config['account_id']}.r2.cloudflarestorage.com",
-        aws_access_key_id=config["access_key"],
-        aws_secret_access_key=config["secret_key"],
-        region_name="auto",
-    )
-    try:
-        client.put_object(
-            Bucket=config["bucket"],
-            Key=key,
-            Body=data,
-            ContentType=content_type,
-            ContentDisposition=f'inline; filename="{Path(filename).name.replace(chr(34), "")}"',
-            CacheControl="public, max-age=31536000, immutable",
-        )
-    except Exception as exc:
-        raise ValueError(f"Upload R2 non riuscito: {exc}") from exc
-    return {"url": f"{config['public_base_url']}/{key}", "mime_type": content_type, "key": key}
+    repo_path = f"public/audio/{datetime.datetime.now(datetime.timezone.utc):%Y/%m}/{safe_stem}-{digest}{extension}"
+    api_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{repo_path}"
+    headers = github_headers()
+    existing = requests.get(api_url, headers=headers, params={"ref": GITHUB_BRANCH}, timeout=20)
+    sha = existing.json().get("sha") if existing.status_code == 200 else None
+    if existing.status_code not in (200, 404):
+        raise ValueError(f"Verifica file audio GitHub fallita: {existing.text}")
+    payload = {
+        "message": f"Carica audio dedica {Path(filename).name}",
+        "content": base64.b64encode(data).decode("ascii"),
+        "branch": GITHUB_BRANCH,
+    }
+    if sha:
+        payload["sha"] = sha
+    response = requests.put(api_url, headers=headers, json=payload, timeout=120)
+    if response.status_code not in (200, 201):
+        raise ValueError(f"Upload audio GitHub fallito: {response.text}")
+    return {"url": github_raw_url(repo_path), "mime_type": content_type, "path": repo_path}
 
 
 def upload_selected_audio(prefix: str, uploaded_file) -> None:
@@ -536,7 +510,7 @@ def upload_selected_audio(prefix: str, uploaded_file) -> None:
     fingerprint = hashlib.sha256(data).hexdigest()
     if st.session_state.get(f"{prefix}_audio_upload_fingerprint") == fingerprint:
         return
-    result = upload_audio_to_r2(data, uploaded_file.name or "audio", uploaded_file.type or "")
+    result = upload_audio_to_github(data, uploaded_file.name or "audio", uploaded_file.type or "")
     extracted = extract_uploaded_audio_metadata(data, uploaded_file.name or "")
     st.session_state[f"{prefix}_audio_url"] = result["url"]
     st.session_state[f"{prefix}_mime_type"] = result["mime_type"]
@@ -547,7 +521,7 @@ def upload_selected_audio(prefix: str, uploaded_file) -> None:
         st.session_state[f"{prefix}_song_title"] = extracted["song_title"]
     if extracted["artist"]:
         st.session_state[f"{prefix}_artist"] = extracted["artist"]
-    st.session_state[f"{prefix}_audio_upload_status"] = "File caricato nello storage permanente."
+    st.session_state[f"{prefix}_audio_upload_status"] = "File caricato nel repository GitHub e disponibile pubblicamente."
 
 
 def default_dedication_text(song_title: str, artist: str) -> str:
@@ -1479,7 +1453,7 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
             "File audio",
             type=[extension.lstrip(".") for extension in sorted(SUPPORTED_AUDIO_EXTENSIONS)],
             key=f"{prefix}_uploaded_audio",
-            help=f"Massimo {format_bytes(MAX_AUDIO_UPLOAD_BYTES)}. Il file viene inviato a R2, non al filesystem Streamlit.",
+            help=f"Massimo {format_bytes(MAX_AUDIO_UPLOAD_BYTES)}. Il file viene salvato in GitHub, non nel filesystem Streamlit.",
         )
         if uploaded_audio is not None:
             try:
