@@ -168,7 +168,7 @@ npm run preview
 2. Nella prima riga inserisci **esattamente** queste intestazioni (case-sensitive):
 
 ```
-id | date | status | song_title | artist | dedication_title | dedication_text | audio_url | audio_type | vote_url | image_mode | image_source | short_phrase | tags | seo_title | seo_description | image_alt
+id | date | status | song_title | artist | dedication_title | dedication_text | audio_url | audio_type | source_type | original_filename | mime_type | vote_url | image_mode | image_source | short_phrase | tags | seo_title | seo_description | image_alt
 ```
 
 ### Crea Service Account
@@ -497,7 +497,10 @@ git push origin main
 | `dedication_title` | ✅ | Titolo della dedica (es. "La dedica del giorno") |
 | `dedication_text` | ✅ | Testo completo. Supporta multilinea, emoji, accenti. |
 | `audio_url` | ✅ | Link audio (Spotify, YouTube, SoundCloud, MP3, ecc.). Deve iniziare con `https://` |
-| `audio_type` | ✅ | `spotify` / `youtube` / `soundcloud` / `mp3` / `cloud` / `other` |
+| `audio_type` | ⚪ | Campo storico, mantenuto per compatibilità. L'admin lo calcola automaticamente. |
+| `source_type` | ✅ | `spotify`, `external_url` oppure `uploaded_audio`. Le righe vecchie senza questo campo restano valide. |
+| `original_filename` | ⚪ | Nome del file prima dell'upload, utile per amministrazione. |
+| `mime_type` | ⚪ | Content-Type del file, es. `audio/mpeg`. Necessario per gli upload. |
 | `vote_url` | ⚪ | Link Google Form. Se vuoto, usa `DEFAULT_VOTE_URL` dai secrets. |
 | `image_mode` | ⚪ | `auto` (genera) / `upload` (manuale) / `none` (placeholder). Default: `auto` |
 | `image_source` | ⚪ | Percorso immagine manuale. Solo se `image_mode = upload` |
@@ -516,6 +519,37 @@ git push origin main
 - Verifica che tutti i campi obbligatori siano compilati nel Google Sheet
 - Assicurati che `audio_url` inizi con `https://`
 - Verifica che non ci siano due dediche con la stessa data
+
+### Audio esterno o file caricato
+
+Il modello comune è `source_type` + `audio_url`: Spotify è soltanto un adapter che
+recupera titolo e artista. Il frontend incorpora Spotify per le sorgenti Spotify e
+usa `<audio controls>` per file caricati e URL riconosciuti come audio; negli altri
+casi mostra un pulsante per aprire la sorgente.
+
+Per l'upload locale l'admin usa un bucket Cloudflare R2 con dominio pubblico. Aggiungi
+questi secrets all'ambiente Streamlit (non committarli):
+
+```toml
+R2_ACCOUNT_ID = "..."
+R2_ACCESS_KEY_ID = "..."
+R2_SECRET_ACCESS_KEY = "..."
+R2_BUCKET_NAME = "dediche-audio"
+R2_PUBLIC_BASE_URL = "https://audio.tuo-dominio.it"
+MAX_AUDIO_UPLOAD_BYTES = "104857600" # opzionale, 100 MB di default
+```
+
+Configura `R2_PUBLIC_BASE_URL` come custom domain del bucket e servi gli oggetti con
+`Content-Type` audio corretto. R2 è persistente, supporta richieste Range e consente
+in seguito di sostituire o eliminare oggetti tramite la loro chiave. Il token usato
+dall'admin deve avere soltanto permessi Object Read & Write sul bucket. Se il dominio
+pubblico è diverso da quello del sito, autorizza in CORS almeno il dominio GitHub Pages
+per `GET` e `HEAD` (e `Range` tra gli header consentiti/esposti). Non usare URL R2
+presigned per le dediche pubbliche: scadono; usa il custom domain pubblico.
+
+La prima apertura dell'admin aggiunge in coda le nuove intestazioni al Google Sheet:
+la migrazione non altera né riscrive le righe esistenti. Le righe Spotify storiche
+sono lette come `source_type=spotify`; le altre come `external_url`.
 
 ### Il sito non si aggiorna
 - Controlla che `status = scheduled` (non `draft`)

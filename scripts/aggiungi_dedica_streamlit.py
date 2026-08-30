@@ -4,8 +4,11 @@ import datetime
 import html
 import io
 import json
+import hashlib
+import mimetypes
 import os
 import re
+import uuid
 from pathlib import Path
 from urllib.parse import quote, urlparse, urlunparse
 
@@ -21,6 +24,11 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 from google.oauth2.service_account import Credentials
+
+try:
+    from mutagen import File as MutagenFile
+except Exception:
+    MutagenFile = None
 
 try:
     from dotenv import load_dotenv
@@ -117,6 +125,9 @@ VALID_IMAGE_MODES = ("raw", "auto", "upload", "none")
 VALID_IMAGE_EXTS = {".jpg", ".jpeg", ".jfif", ".png", ".webp", ".gif", ".heic", ".heif", ""}
 VALID_STATUSES = ("draft", "scheduled", "published", "disabled")
 VALID_VIDEO_TYPES = ("", "youtube", "mp4", "external")
+VALID_AUDIO_SOURCE_TYPES = ("spotify", "external_url", "uploaded_audio")
+SUPPORTED_AUDIO_EXTENSIONS = {".mp3", ".m4a", ".aac", ".ogg", ".opus", ".wav", ".webm", ".flac"}
+MAX_AUDIO_UPLOAD_BYTES = int(os.environ.get("MAX_AUDIO_UPLOAD_BYTES", str(100 * 1024 * 1024)))
 UPLOAD_IMAGE_MAX_SIDE = int(os.environ.get("UPLOAD_IMAGE_MAX_SIDE", "1400"))
 UPLOAD_IMAGE_WEBP_QUALITY = int(os.environ.get("UPLOAD_IMAGE_WEBP_QUALITY", "78"))
 UPLOAD_IMAGE_TARGET_BYTES = int(os.environ.get("UPLOAD_IMAGE_TARGET_BYTES", str(450 * 1024)))
@@ -145,6 +156,9 @@ SHEET_COLUMNS = [
     "dedication_text",
     "audio_url",
     "audio_type",
+    "source_type",
+    "original_filename",
+    "mime_type",
     "vote_url",
     "image_mode",
     "image_source",
@@ -217,11 +231,11 @@ def inject_streamlit_pwa_tags() -> None:
 def slugify(text: str) -> str:
     text = text.lower().strip()
     replacements = {
-        "‡": "a", "·": "a", "‚": "a", "„": "a", "‰": "a",
-        "Ë": "e", "È": "e", "Í": "e", "Î": "e",
-        "Ï": "i", "Ì": "i", "Ó": "i", "Ô": "i",
-        "Ú": "o", "Û": "o", "Ù": "o", "ı": "o", "ˆ": "o",
-        "˘": "u", "˙": "u", "˚": "u", "¸": "u",
+        "√†": "a", "√°": "a", "√¢": "a", "√£": "a", "√§": "a",
+        "√®": "e", "√©": "e", "√™": "e", "√´": "e",
+        "√¨": "i", "√≠": "i", "√Æ": "i", "√Ø": "i",
+        "√≤": "o", "√≥": "o", "√¥": "o", "√µ": "o", "√∂": "o",
+        "√π": "u", "√∫": "u", "√ª": "u", "√º": "u",
     }
     for src, dst in replacements.items():
         text = text.replace(src, dst)
@@ -357,14 +371,14 @@ def fetch_spotify_open_graph(url: str) -> tuple[str, str]:
     description = html.unescape(description_match.group(1).strip()) if description_match else ""
     artist = ""
 
-    description_parts = [part.strip() for part in description.split("∑") if part.strip()]
+    description_parts = [part.strip() for part in description.split("¬∑") if part.strip()]
     if len(description_parts) >= 3 and description_parts[-2].lower() in {"brano", "song"}:
         artist = description_parts[0]
     else:
         patterns = [
-            r"Listen to .+? on Spotify\.\s*Song\s*∑\s*(.+?)\s*∑\s*\d{4}",
-            r"Song\s*∑\s*(.+?)\s*∑\s*\d{4}",
-            r"Brano\s*∑\s*(.+?)\s*∑\s*\d{4}",
+            r"Listen to .+? on Spotify\.\s*Song\s*¬∑\s*(.+?)\s*¬∑\s*\d{4}",
+            r"Song\s*¬∑\s*(.+?)\s*¬∑\s*\d{4}",
+            r"Brano\s*¬∑\s*(.+?)\s*¬∑\s*\d{4}",
         ]
         for pattern in patterns:
             match = re.search(pattern, description, flags=re.IGNORECASE)
@@ -421,6 +435,119 @@ def autofill_spotify_metadata(prefix: str) -> None:
         f"Dati recuperati da Spotify: {metadata['song_title']} - {metadata['artist']}."
     )
     st.session_state[last_key] = url
+
+
+def audio_type_for_source(source_type: str, url: str = "", mime_type: str = "") -> str:
+    """Mantiene audio_type per i JSON e le dediche create prima di source_type."""
+    if source_type == "spotify":
+        return "spotify"
+    if mime_type.lower().startswith("audio/") or Path(urlparse(url).path).suffix.lower() in SUPPORTED_AUDIO_EXTENSIONS:
+        return "mp3"
+    return "other"
+
+
+def validate_https_url(value: str, field_name: str) -> str:
+    url = str(value or "").strip()
+    parsed = urlparse(url)
+    if parsed.scheme != "https" or not parsed.netloc:
+        raise ValueError(f"{field_name} deve essere un URL https valido.")
+    return url
+
+
+def extract_uploaded_audio_metadata(data: bytes, filename: str) -> dict:
+    """Legge ID3/Vorbis quando mutagen √® disponibile; il risultato resta modificabile."""
+    metadata = {"song_title": "", "artist": ""}
+    if MutagenFile is None or not data:
+        return metadata
+    try:
+        audio = MutagenFile(io.BytesIO(data), easy=True)
+        tags = getattr(audio, "tags", None) or {}
+        metadata["song_title"] = str((tags.get("title") or [""])[0]).strip()
+        metadata["artist"] = str((tags.get("artist") or [""])[0]).strip()
+    except Exception:
+        pass
+    return metadata
+
+
+def r2_config() -> dict:
+    """Configurazione S3 per R2. R2_PUBLIC_BASE_URL deve puntare al custom domain pubblico."""
+    config = {
+        "account_id": get_secret_or_env("R2_ACCOUNT_ID"),
+        "access_key": get_secret_or_env("R2_ACCESS_KEY_ID"),
+        "secret_key": get_secret_or_env("R2_SECRET_ACCESS_KEY"),
+        "bucket": get_secret_or_env("R2_BUCKET_NAME"),
+        "public_base_url": get_secret_or_env("R2_PUBLIC_BASE_URL").rstrip("/"),
+    }
+    missing = [name for name, value in config.items() if not value]
+    if missing:
+        raise ValueError(
+            "Storage audio non configurato. Imposta nei secrets: R2_ACCOUNT_ID, "
+            "R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME e R2_PUBLIC_BASE_URL."
+        )
+    return config
+
+
+def upload_audio_to_r2(data: bytes, filename: str, mime_type: str) -> dict:
+    """Carica solo in object storage persistente, mai nel filesystem Streamlit."""
+    if not data:
+        raise ValueError("Il file audio √® vuoto.")
+    if len(data) > MAX_AUDIO_UPLOAD_BYTES:
+        raise ValueError(f"Il file supera il limite di {format_bytes(MAX_AUDIO_UPLOAD_BYTES)}.")
+    extension = Path(filename).suffix.lower()
+    if extension not in SUPPORTED_AUDIO_EXTENSIONS:
+        raise ValueError("Formato audio non supportato.")
+    content_type = mime_type if mime_type.startswith("audio/") else (mimetypes.guess_type(filename)[0] or "application/octet-stream")
+    if not content_type.startswith("audio/"):
+        raise ValueError("Il file selezionato non ha un Content-Type audio valido.")
+    try:
+        import boto3
+    except ImportError as exc:
+        raise ValueError("Dipendenza boto3 mancante: esegui l'installazione dei requirements aggiornati.") from exc
+
+    config = r2_config()
+    safe_stem = slugify(Path(filename).stem) or "audio"
+    digest = hashlib.sha256(data).hexdigest()[:12]
+    key = f"audio/{datetime.datetime.now(datetime.timezone.utc):%Y/%m}/{safe_stem}-{digest}-{uuid.uuid4().hex[:8]}{extension}"
+    client = boto3.client(
+        "s3",
+        endpoint_url=f"https://{config['account_id']}.r2.cloudflarestorage.com",
+        aws_access_key_id=config["access_key"],
+        aws_secret_access_key=config["secret_key"],
+        region_name="auto",
+    )
+    try:
+        client.put_object(
+            Bucket=config["bucket"],
+            Key=key,
+            Body=data,
+            ContentType=content_type,
+            ContentDisposition=f'inline; filename="{Path(filename).name.replace(chr(34), "")}"',
+            CacheControl="public, max-age=31536000, immutable",
+        )
+    except Exception as exc:
+        raise ValueError(f"Upload R2 non riuscito: {exc}") from exc
+    return {"url": f"{config['public_base_url']}/{key}", "mime_type": content_type, "key": key}
+
+
+def upload_selected_audio(prefix: str, uploaded_file) -> None:
+    if uploaded_file is None:
+        return
+    data = uploaded_file.getvalue()
+    fingerprint = hashlib.sha256(data).hexdigest()
+    if st.session_state.get(f"{prefix}_audio_upload_fingerprint") == fingerprint:
+        return
+    result = upload_audio_to_r2(data, uploaded_file.name or "audio", uploaded_file.type or "")
+    extracted = extract_uploaded_audio_metadata(data, uploaded_file.name or "")
+    st.session_state[f"{prefix}_audio_url"] = result["url"]
+    st.session_state[f"{prefix}_mime_type"] = result["mime_type"]
+    st.session_state[f"{prefix}_original_filename"] = uploaded_file.name or ""
+    st.session_state[f"{prefix}_audio_type"] = "mp3"
+    st.session_state[f"{prefix}_audio_upload_fingerprint"] = fingerprint
+    if extracted["song_title"]:
+        st.session_state[f"{prefix}_song_title"] = extracted["song_title"]
+    if extracted["artist"]:
+        st.session_state[f"{prefix}_artist"] = extracted["artist"]
+    st.session_state[f"{prefix}_audio_upload_status"] = "File caricato nello storage permanente."
 
 
 def default_dedication_text(song_title: str, artist: str) -> str:
@@ -1038,6 +1165,9 @@ def default_form_values() -> dict:
         "dedication_text": "",
         "audio_url": "",
         "audio_type": "spotify",
+        "source_type": "spotify",
+        "original_filename": "",
+        "mime_type": "",
         "vote_url": DEFAULT_VOTE_URL,
         "image_mode": "raw",
         "image_source": "",
@@ -1066,8 +1196,18 @@ def prepare_values(values: dict) -> dict:
         raise ValueError("Inserisci il titolo della canzone.")
     if not cleaned["artist"]:
         raise ValueError("Inserisci l'artista.")
-    if not cleaned["audio_url"].startswith("https://open.spotify.com/"):
-        raise ValueError("Inserisci un URL Spotify valido.")
+    source_type = cleaned["source_type"] or "spotify"
+    if source_type not in VALID_AUDIO_SOURCE_TYPES:
+        raise ValueError("Tipo sorgente audio non valido.")
+    cleaned["source_type"] = source_type
+    cleaned["audio_url"] = validate_https_url(cleaned["audio_url"], "audio_url")
+    if source_type == "spotify":
+        normalized_spotify = spotify_track_url(cleaned["audio_url"])
+        if not normalized_spotify:
+            raise ValueError("Inserisci un URL di un brano Spotify valido.")
+        cleaned["audio_url"] = normalized_spotify
+    elif source_type == "uploaded_audio" and not cleaned["mime_type"].startswith("audio/"):
+        raise ValueError("Per un file caricato manca il MIME type audio restituito dallo storage.")
     # dedication_text e short_phrase sono facoltativi: si possono lasciare vuoti e compilare dopo
     if cleaned["status"] not in VALID_STATUSES:
         raise ValueError(f"Status non valido. Usa uno tra: {', '.join(VALID_STATUSES)}")
@@ -1095,8 +1235,10 @@ def prepare_values(values: dict) -> dict:
         cleaned["id"] = make_default_id(cleaned["date"], cleaned["song_title"], cleaned["artist"])
     if not cleaned["dedication_title"]:
         cleaned["dedication_title"] = "La dedica del giorno"
-    if not cleaned["audio_type"]:
-        cleaned["audio_type"] = "spotify"
+    # audio_type √® conservato solo per retrocompatibilit√† dei dati esistenti.
+    cleaned["audio_type"] = audio_type_for_source(
+        cleaned["source_type"], cleaned["audio_url"], cleaned["mime_type"]
+    )
     if not cleaned["vote_url"]:
         cleaned["vote_url"] = DEFAULT_VOTE_URL
     if not cleaned["tags"]:
@@ -1116,13 +1258,21 @@ def prepare_values(values: dict) -> dict:
 
 def append_to_google_sheet(row: list[str]) -> None:
     sheet = get_sheet()
-    sheet.append_row(row, value_input_option="USER_ENTERED")
+    sheet.append_row(align_row_to_sheet_headers(sheet, row), value_input_option="USER_ENTERED")
 
 
 def update_google_sheet_row(row_number: int, row: list[str]) -> None:
     sheet = get_sheet()
-    end_col = column_letter(len(SHEET_COLUMNS))
-    sheet.update(f"A{row_number}:{end_col}{row_number}", [row], value_input_option="USER_ENTERED")
+    aligned_row = align_row_to_sheet_headers(sheet, row)
+    end_col = column_letter(len(aligned_row))
+    sheet.update(f"A{row_number}:{end_col}{row_number}", [aligned_row], value_input_option="USER_ENTERED")
+
+
+def align_row_to_sheet_headers(sheet, row: list[str]) -> list[str]:
+    """Le colonne nuove vengono aggiunte in coda: non affidarsi all'ordine canonico."""
+    headers = [str(value or "").strip() for value in sheet.row_values(1)]
+    values_by_column = dict(zip(SHEET_COLUMNS, row))
+    return [values_by_column.get(header, "") for header in headers]
 
 
 def find_sheet_rows_by_id(dedication_id: str) -> list[int]:
@@ -1197,23 +1347,30 @@ def generate_preview(prefix: str) -> None:
 def set_form_state(prefix: str, values: dict) -> None:
     defaults = default_form_values()
     defaults.update({col: values.get(col, "") for col in SHEET_COLUMNS})
+    if not defaults["source_type"]:
+        defaults["source_type"] = "spotify" if defaults.get("audio_type") == "spotify" else "external_url"
     for col in SHEET_COLUMNS:
         st.session_state[f"{prefix}_{col}"] = defaults[col]
     st.session_state[f"{prefix}_date_picker_value"] = parse_date_value(defaults["date"])
     st.session_state.pop(f"{prefix}_date_picker", None)
     st.session_state[f"{prefix}_spotify_status"] = ""
     st.session_state[f"{prefix}_spotify_last_url"] = str(defaults.get("audio_url", "") or "").strip()
+    st.session_state[f"{prefix}_audio_upload_status"] = ""
+    st.session_state.pop(f"{prefix}_audio_upload_fingerprint", None)
 
 
 def init_form_state(prefix: str, values: dict | None = None) -> None:
     defaults = default_form_values()
     if values:
         defaults.update({col: values.get(col, "") for col in SHEET_COLUMNS})
+    if not defaults["source_type"]:
+        defaults["source_type"] = "spotify" if defaults.get("audio_type") == "spotify" else "external_url"
     for col, value in defaults.items():
         st.session_state.setdefault(f"{prefix}_{col}", value)
     st.session_state.setdefault(f"{prefix}_date_picker_value", parse_date_value(defaults["date"]))
     st.session_state.setdefault(f"{prefix}_spotify_status", "")
     st.session_state.setdefault(f"{prefix}_spotify_last_url", "")
+    st.session_state.setdefault(f"{prefix}_audio_upload_status", "")
     st.session_state.setdefault(f"{prefix}_active_text_target", "dedication_text")
 
 
@@ -1284,22 +1441,56 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
         if st.session_state.get(f"{prefix}_status", "scheduled") in VALID_STATUSES else 1,
         key=f"{prefix}_status",
     )
-    st.text_input(
-        "URL Spotify",
-        key=f"{prefix}_audio_url",
-        on_change=autofill_spotify_metadata,
-        args=(prefix,),
-        placeholder="https://open.spotify.com/track/...",
+    source_type = st.radio(
+        "Sorgente audio",
+        options=VALID_AUDIO_SOURCE_TYPES,
+        format_func=lambda value: {
+            "spotify": "Spotify",
+            "external_url": "URL esterno",
+            "uploaded_audio": "Carica file",
+        }[value],
+        horizontal=True,
+        key=f"{prefix}_source_type",
     )
-    spotify_status = st.session_state.get(f"{prefix}_spotify_status", "")
-    if spotify_status:
-        if spotify_status.startswith("Dati recuperati"):
-            st.success(spotify_status)
-        else:
-            st.warning(spotify_status)
-    if st.button("Recupera dati da Spotify", use_container_width=True, key=f"{prefix}_fetch_spotify"):
-        st.session_state[f"{prefix}_spotify_last_url"] = ""
-        autofill_spotify_metadata(prefix)
+    if source_type == "spotify":
+        st.text_input(
+            "URL Spotify",
+            key=f"{prefix}_audio_url",
+            on_change=autofill_spotify_metadata,
+            args=(prefix,),
+            placeholder="https://open.spotify.com/track/...",
+        )
+        spotify_status = st.session_state.get(f"{prefix}_spotify_status", "")
+        if spotify_status:
+            (st.success if spotify_status.startswith("Dati recuperati") else st.warning)(spotify_status)
+        if st.button("Recupera dati da Spotify", use_container_width=True, key=f"{prefix}_fetch_spotify"):
+            st.session_state[f"{prefix}_spotify_last_url"] = ""
+            autofill_spotify_metadata(prefix)
+    elif source_type == "external_url":
+        st.text_input(
+            "URL audio esterno",
+            key=f"{prefix}_audio_url",
+            placeholder="https://cdn.example.com/brano.mp3",
+            help="Per la riproduzione diretta il server deve esporre un file audio con Content-Type audio/* e supporto HTTP Range.",
+        )
+        st.text_input("MIME type (facoltativo)", key=f"{prefix}_mime_type", placeholder="audio/mpeg")
+    else:
+        uploaded_audio = st.file_uploader(
+            "File audio",
+            type=[extension.lstrip(".") for extension in sorted(SUPPORTED_AUDIO_EXTENSIONS)],
+            key=f"{prefix}_uploaded_audio",
+            help=f"Massimo {format_bytes(MAX_AUDIO_UPLOAD_BYTES)}. Il file viene inviato a R2, non al filesystem Streamlit.",
+        )
+        if uploaded_audio is not None:
+            try:
+                upload_selected_audio(prefix, uploaded_audio)
+            except Exception as exc:
+                st.error(str(exc))
+        upload_status = st.session_state.get(f"{prefix}_audio_upload_status", "")
+        if upload_status:
+            st.success(upload_status)
+        if st.session_state.get(f"{prefix}_audio_url"):
+            st.caption(f"URL pubblico: {st.session_state[f'{prefix}_audio_url']}")
     st.text_input("Titolo canzone", key=f"{prefix}_song_title")
     st.text_input("Artista", key=f"{prefix}_artist")
     st.text_input("Titolo dedica", key=f"{prefix}_dedication_title")
@@ -1386,7 +1577,8 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
     st.text_input("tags", key=f"{prefix}_tags")
 
     with st.expander("SEO e opzioni avanzate"):
-        st.text_input("audio_type", key=f"{prefix}_audio_type")
+        st.caption("audio_type viene derivato automaticamente dalla sorgente per compatibilit√† con le dediche esistenti.")
+        st.text_input("Nome file originale", key=f"{prefix}_original_filename")
         st.text_input("vote_url", key=f"{prefix}_vote_url")
         st.text_input("seo_title", key=f"{prefix}_seo_title")
         st.text_area("seo_description", key=f"{prefix}_seo_description", height=80)
@@ -2368,7 +2560,7 @@ def render_site_configuration() -> None:
                 dispatch_deploy_pages()
                 st.success(
                     "\u2705 Workflow deploy.yml avviato. "
-                    "Il sito verr‡ aggiornato appena GitHub Actions termina il build "
+                    "Il sito verr√† aggiornato appena GitHub Actions termina il build "
                     f"(solitamente 2-3 minuti). "
                     f"Monitora lo stato su: https://github.com/{GITHUB_REPO}/actions"
                 )

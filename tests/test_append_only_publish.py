@@ -186,11 +186,13 @@ class AppendOnlyPublishTest(unittest.TestCase):
             'Pensiero salvato',
         )
 
-        self.assertEqual(updated['votoPilly'], 8)
-        self.assertEqual(updated['pensieroPilly'], 'Pensiero salvato')
+        self.assertEqual(updated['voteAverage'], 8.0)
+        self.assertEqual(updated['thoughtsText'], '[Utente] Pensiero salvato')
+        self.assertEqual(updated['votes'][0]['value'], 8)
+        self.assertEqual(updated['thoughts'][0]['text'], 'Pensiero salvato')
         saved = json.loads(path.read_text(encoding='utf-8'))
-        self.assertEqual(saved['votoPilly'], 8)
-        self.assertEqual(saved['pensieroPilly'], 'Pensiero salvato')
+        self.assertEqual(saved['voteAverage'], 8.0)
+        self.assertEqual(saved['thoughtsText'], '[Utente] Pensiero salvato')
         self.assertEqual(saved['reactions'], {'down': 0, 'like': 0, 'heart': 0, 'sun': 0})
 
     def test_update_reaction_can_switch_and_remove_browser_choice(self):
@@ -216,8 +218,8 @@ class AppendOnlyPublishTest(unittest.TestCase):
         self.write_dedication('2026-05-17', 'scheduled')
         path = self.data_dir / '2026-05-17.json'
         before = json.loads(path.read_text(encoding='utf-8'))
-        before['votoPilly'] = 9
-        before['pensieroPilly'] = 'Da non perdere'
+        before['voteAverage'] = 9
+        before['thoughtsText'] = '[Utente] Da non perdere'
         before['reactions'] = {'down': 0, 'like': 2, 'heart': 4, 'sun': 1}
         path.write_text(json.dumps(before), encoding='utf-8')
 
@@ -232,8 +234,8 @@ class AppendOnlyPublishTest(unittest.TestCase):
         self.assertTrue(sync_ok)
         after = json.loads(path.read_text(encoding='utf-8'))
         self.assertEqual(after['song_title'], 'Changed in sheet')
-        self.assertEqual(after['votoPilly'], 9)
-        self.assertEqual(after['pensieroPilly'], 'Da non perdere')
+        self.assertEqual(after['voteAverage'], 9.0)
+        self.assertEqual(after['thoughtsText'], '[Storico] [Utente] Da non perdere')
         self.assertEqual(after['reactions'], {'down': 0, 'like': 2, 'heart': 4, 'sun': 1})
 
 
