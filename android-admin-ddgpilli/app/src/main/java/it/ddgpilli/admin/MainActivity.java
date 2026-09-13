@@ -10,9 +10,11 @@ import android.os.Bundle;
 import android.webkit.CookieManager;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
     private static final String STREAMLIT_URL = "https://ddgpilli.streamlit.app/";
@@ -41,7 +43,17 @@ public class MainActivity extends Activity {
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
-        webView.setWebViewClient(new WebViewClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return request.isForMainFrame() && openWhatsApp(request.getUrl());
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return openWhatsApp(Uri.parse(url));
+            }
+        });
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onShowFileChooser(
@@ -66,6 +78,25 @@ public class MainActivity extends Activity {
             }
         });
         webView.loadUrl(STREAMLIT_URL);
+    }
+
+    private boolean openWhatsApp(Uri uri) {
+        String scheme = uri.getScheme();
+        String host = uri.getHost();
+        boolean whatsappScheme = "whatsapp".equalsIgnoreCase(scheme);
+        boolean whatsappLink = ("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme))
+                && ("wa.me".equalsIgnoreCase(host) || "api.whatsapp.com".equalsIgnoreCase(host)
+                || "web.whatsapp.com".equalsIgnoreCase(host));
+        if (!whatsappScheme && !whatsappLink) {
+            return false;
+        }
+
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, uri).addCategory(Intent.CATEGORY_BROWSABLE));
+        } catch (ActivityNotFoundException error) {
+            Toast.makeText(this, "Nessuna app disponibile per aprire WhatsApp.", Toast.LENGTH_LONG).show();
+        }
+        return true;
     }
 
     @Override
