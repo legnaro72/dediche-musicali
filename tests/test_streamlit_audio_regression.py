@@ -1,6 +1,7 @@
 import sys
 import types
 import unittest
+from unittest.mock import Mock, patch
 
 
 def install_streamlit_stub():
@@ -20,10 +21,28 @@ def install_streamlit_stub():
 
 install_streamlit_stub()
 
-from scripts.aggiungi_dedica_streamlit import default_form_values, prepare_values
+from scripts.aggiungi_dedica_streamlit import default_form_values, prepare_values, fetch_spotify_track_metadata
 
 
 class StreamlitAudioRegressionTest(unittest.TestCase):
+    def test_spotify_artist_from_description_when_oembed_has_only_title(self):
+        for description in (
+            "Ivano Fossati \u00b7 La Mia Banda Suona Il Rock \u00b7 Brano \u00b7 1979",
+            "Listen to La mia banda suona il rock on Spotify. Song \u00b7 Ivano Fossati \u00b7 1979",
+        ):
+            with self.subTest(description=description):
+                oembed = Mock(status_code=200)
+                oembed.json.return_value = {"title": "La mia banda suona il rock"}
+                page = Mock(status_code=200, text=(
+                    '<meta property="og:title" content="La mia banda suona il rock"/>'
+                    f'<meta property="og:description" content="{description}"/>'
+                ))
+                with patch("scripts.aggiungi_dedica_streamlit.requests.get", side_effect=[oembed, page]):
+                    result = fetch_spotify_track_metadata(
+                        "https://open.spotify.com/track/6fB3Wy1x9EdhfFwqy8lJcZ?si=test"
+                    )
+                self.assertEqual(result, {"song_title": "La mia banda suona il rock", "artist": "Ivano Fossati"})
+
     def test_spotify_url_wins_over_stale_uploaded_audio_state(self):
         values = default_form_values()
         values.update(
