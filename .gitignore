@@ -29,3 +29,10 @@ google_credentials.json
 .DS_Store
 Thumbs.db
 preview-4331.err.log
+
+# Android admin WebView app
+android-admin-ddgpilli/.gradle/
+android-admin-ddgpilli/build/
+android-admin-ddgpilli/app/build/
+android-admin-ddgpilli/local.properties
+android-admin-ddgpilli/**/*.apk
