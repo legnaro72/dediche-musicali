@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-14-i-still-haven-t-found-what-i-m-looking-for-u2",
-  "date": "2026-09-14",
-  "day_name": "lunedì",
+  "id": "2026-09-15-la-bella-e-la-bestia-duetto-gino-paoli-amanda-sandrelli",
+  "date": "2026-09-15",
+  "day_name": "martedì",
   "status": "published",
-  "song_title": "I Still Haven't Found What I'm Looking For",
-  "artist": "U2",
+  "song_title": "La Bella e la Bestia (Duetto)",
+  "artist": "Gino Paoli, Amanda Sandrelli",
   "dedication_title": "La dedica del giorno",
-  "dedication_text": "Eccoci qua amore. È vero che siamo diversi.\nMa non utilizzerei la chiave di lettura che tu spesso dai. Noi insieme siamo un'autostrada bellissima e come devi dicevo l'altra sera siamo. L'autostrada del sole. Quella che unisce. La pioggia al Sole. Le pianure al mare cristallino. Batte, forte, Sempre❤️❤️",
+  "dedication_text": "Sii misericordiosa e clement con una bestia brutta ma buona....",
   "audio": {
-    "url": "https://open.spotify.com/track/6wpGqhRvJGNNXwWlPmkMyO",
+    "url": "https://open.spotify.com/track/3FbVKcIa3mftsk6EjP7GQG",
     "type": "spotify",
     "source_type": "spotify",
     "original_filename": "",
@@ -18,23 +18,23 @@
     "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
   },
   "image": {
-    "path": "/images/dedications/2026-09-14-i-still-haven-t-found-what-i-m-looking-for-u2.webp",
-    "alt": "Dedica musicale I Still Haven't Found What I'm Looking For di U2",
+    "path": "/images/dedications/2026-09-15-la-bella-e-la-bestia-duetto-gino-paoli-amanda-sandrelli.webp",
+    "alt": "Dedica musicale La Bella e la Bestia (Duetto) di Gino Paoli, Amanda Sandrelli",
     "mode": "raw",
-    "source": "public/images/upload/2026-09-14-i-still-haven-t-found-what-i-m-looking-for-u2.webp"
+    "source": "public/images/upload/2026-09-15-la-bella-e-la-bestia-duetto-gino-paoli-amanda-sandrelli.webp"
   },
-  "short_phrase": "Siamo l'autostrada più lunga e bella del mondo, amore mio. 🌹",
+  "short_phrase": "La mia Belle sei tu Pilli🎵",
   "tags": [
     "musica",
     "emozioni",
     "dedica"
   ],
   "seo": {
-    "title": "I Still Haven't Found What I'm Looking For - U2 | DDGPilliSite",
-    "description": "Dedica musicale del giorno con \"I Still Haven't Found What I'm Looking For\" di U2."
+    "title": "La Bella e la Bestia (Duetto) - Gino Paoli, Amanda Sandrelli | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"La Bella e la Bestia (Duetto)\" di Gino Paoli, Amanda Sandrelli."
   },
-  "created_at": "2026-09-14T13:15:26.338327+02:00",
-  "updated_at": "2026-09-15T00:19:52.268032+02:00",
+  "created_at": "2026-09-15T00:03:32.448768+02:00",
+  "updated_at": "2026-09-15T00:26:37.692799+02:00",
   "voteAverage": null,
   "thoughtsText": "",
   "reactions": {
@@ -46,5 +46,5 @@
   "votes": [],
   "thoughts": [],
   "reactionEntries": [],
-  "date_it": "14 settembre 2026"
+  "date_it": "15 settembre 2026"
 }
