@@ -34,26 +34,17 @@
     "description": "Dedica musicale del giorno con \"La Bella e la Bestia (Duetto)\" di Gino Paoli, Amanda Sandrelli."
   },
   "created_at": "2026-09-15T00:03:32.448768+02:00",
-  "updated_at": "2026-09-15T06:13:30.519Z",
+  "updated_at": "2026-09-15T06:13:32.707Z",
   "voteAverage": null,
   "thoughtsText": "",
   "reactions": {
     "down": 0,
-    "like": 1,
+    "like": 0,
     "heart": 0,
     "sun": 0
   },
   "votes": [],
   "thoughts": [],
-  "reactionEntries": [
-    {
-      "userId": "c64bc9fa-75c6-42d0-bb63-dac41be3f4e3",
-      "userKey": "paola-faggioni",
-      "userName": "Paola Faggioni",
-      "value": "like",
-      "createdAt": "2026-09-15T06:13:30.519Z",
-      "updatedAt": "2026-09-15T06:13:30.519Z"
-    }
-  ],
+  "reactionEntries": [],
   "date_it": "15 settembre 2026"
 }
