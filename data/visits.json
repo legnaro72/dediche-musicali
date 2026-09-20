@@ -5741,6 +5741,17 @@
       "source": "site",
       "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Mobile Safari/537.36",
       "createdAt": "2026-09-20T16:09:19.139Z"
+    },
+    {
+      "visitId": "d1cce1ea-2a63-409b-a565-8420f3f5c6de",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "visitedAt": "2026-09-20T16:09:23.335Z",
+      "visitDate": "2026-09-20",
+      "page": "/statistiche/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Mobile Safari/537.36",
+      "createdAt": "2026-09-20T16:09:23.335Z"
     }
   ]
 }
