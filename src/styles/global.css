@@ -1712,8 +1712,15 @@ button.video-poster {
     width: 100%;
   }
 
+}
+
+/* Keep the compact navigation on phones also when rotated. */
+@media (max-width: 768px), (max-width: 1024px) and (pointer: coarse) {
   .navbar-inner {
     position: relative;
+    gap: 0.5rem;
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
   }
 
   .navbar-menu-toggle {
@@ -1738,6 +1745,9 @@ button.video-poster {
     background: rgba(8, 7, 15, 0.96);
     box-shadow: var(--shadow-card);
     backdrop-filter: blur(18px);
+    max-height: calc(100dvh - 7rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .navbar-nav.is-open {
@@ -1760,7 +1770,9 @@ button.video-poster {
   .navbar-nav a:hover {
     background: rgba(255, 255, 255, 0.06);
   }
+}
 
+@media(max-width:768px) {
   .plus-vote-dialog {
     width: 100%;
     max-height: calc(100dvh - 1rem);
