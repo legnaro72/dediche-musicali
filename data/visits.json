@@ -5730,6 +5730,17 @@
       "source": "site",
       "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1",
       "createdAt": "2026-09-20T15:46:00.348Z"
+    },
+    {
+      "visitId": "e75ed87b-5278-41af-89e0-846c2ddeafa9",
+      "userKey": "test-navigazione",
+      "userName": "Test Navigazione",
+      "visitedAt": "2026-09-20T15:46:03.786Z",
+      "visitDate": "2026-09-20",
+      "page": "/dediche/2026-09-20-genova-e-napoli-alfa-gigi-d-alessio/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1",
+      "createdAt": "2026-09-20T15:46:03.786Z"
     }
   ]
 }
