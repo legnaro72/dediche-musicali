@@ -6324,6 +6324,17 @@
       "source": "site",
       "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1",
       "createdAt": "2026-09-20T15:53:14.504Z"
+    },
+    {
+      "visitId": "1da454bb-f37a-45c3-8be6-f88673dcb555",
+      "userKey": "test-navigazione",
+      "userName": "Test Navigazione",
+      "visitedAt": "2026-09-20T15:53:16.352Z",
+      "visitDate": "2026-09-20",
+      "page": "/archive/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1",
+      "createdAt": "2026-09-20T15:53:16.352Z"
     }
   ]
 }
