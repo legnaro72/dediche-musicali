@@ -34,17 +34,26 @@
     "description": "Dedica musicale del giorno con \"Genova e Napoli\" di Alfa, Gigi D'Alessio."
   },
   "created_at": "2026-09-20T12:48:28.271385+02:00",
-  "updated_at": "2026-09-20T12:48:28.862149+02:00",
+  "updated_at": "2026-09-20T19:34:40.247Z",
   "voteAverage": null,
   "thoughtsText": "",
   "reactions": {
     "down": 0,
     "like": 0,
-    "heart": 0,
+    "heart": 1,
     "sun": 0
   },
   "votes": [],
   "thoughts": [],
-  "reactionEntries": [],
+  "reactionEntries": [
+    {
+      "userId": "df9db58a-feed-49fa-8ffe-62664c069200",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "value": "heart",
+      "createdAt": "2026-09-20T19:34:40.247Z",
+      "updatedAt": "2026-09-20T19:34:40.247Z"
+    }
+  ],
   "date_it": "20 settembre 2026"
 }
