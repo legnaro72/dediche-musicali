@@ -5939,6 +5939,17 @@
       "source": "site",
       "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1",
       "createdAt": "2026-09-20T15:47:23.869Z"
+    },
+    {
+      "visitId": "4a74c106-8b4c-40ef-ae5b-693c3f7917f3",
+      "userKey": "test-navigazione",
+      "userName": "Test Navigazione",
+      "visitedAt": "2026-09-20T15:47:27.582Z",
+      "visitDate": "2026-09-20",
+      "page": "/link-utili/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1",
+      "createdAt": "2026-09-20T15:47:27.582Z"
     }
   ]
 }
