@@ -6654,6 +6654,17 @@
       "source": "site",
       "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Mobile Safari/537.36",
       "createdAt": "2026-09-27T17:09:29.196Z"
+    },
+    {
+      "visitId": "e0c3eaf3-c0ae-461c-b72a-7ce2b97c6e4e",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "visitedAt": "2026-09-27T17:09:35.495Z",
+      "visitDate": "2026-09-27",
+      "page": "/archive/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Mobile Safari/537.36",
+      "createdAt": "2026-09-27T17:09:35.495Z"
     }
   ]
 }
