@@ -1,0 +1,50 @@
+{
+  "id": "2026-09-21-serenamente-juli-bresh",
+  "date": "2026-09-21",
+  "day_name": "lunedì",
+  "status": "published",
+  "song_title": "Serenamente",
+  "artist": "Juli, Bresh",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "Alza lo sguardo e apri gli occhi. Il cielo è rosso e rosa. Perfavore leggi bene la mail. Leggila",
+  "audio": {
+    "url": "https://open.spotify.com/track/5ZliWdrEfiHceXVGnGzlxA",
+    "type": "spotify",
+    "source_type": "spotify",
+    "original_filename": "",
+    "mime_type": ""
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-09-21-serenamente-juli-bresh.webp",
+    "alt": "Dedica musicale Serenamente di Juli, Bresh",
+    "mode": "raw",
+    "source": "public/images/upload/2026-09-21-serenamente-juli-bresh.webp"
+  },
+  "short_phrase": "Rosso di sera❤️",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "Serenamente - Juli, Bresh | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"Serenamente\" di Juli, Bresh."
+  },
+  "created_at": "2026-09-21T14:26:37.574793+02:00",
+  "updated_at": "2026-09-21T14:26:38.210414+02:00",
+  "voteAverage": null,
+  "thoughtsText": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 0,
+    "sun": 0
+  },
+  "votes": [],
+  "thoughts": [],
+  "reactionEntries": [],
+  "date_it": "21 settembre 2026"
+}

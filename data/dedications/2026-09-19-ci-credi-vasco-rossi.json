@@ -1,0 +1,50 @@
+{
+  "id": "2026-09-19-ci-credi-vasco-rossi",
+  "date": "2026-09-19",
+  "day_name": "sabato",
+  "status": "published",
+  "song_title": "Ci Credi",
+  "artist": "Vasco Rossi",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "♥️",
+  "audio": {
+    "url": "https://open.spotify.com/track/63R9CkDro0syJk7G6EzqaQ",
+    "type": "spotify",
+    "source_type": "spotify",
+    "original_filename": "",
+    "mime_type": ""
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-09-19-ci-credi-vasco-rossi.webp",
+    "alt": "Dedica musicale Ci Credi di Vasco Rossi",
+    "mode": "raw",
+    "source": "public/images/upload/2026-09-19-ci-credi-vasco-rossi.webp"
+  },
+  "short_phrase": "Ti amo",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "Ci Credi - Vasco Rossi | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"Ci Credi\" di Vasco Rossi."
+  },
+  "created_at": "2026-09-19T18:34:24.196383+02:00",
+  "updated_at": "2026-09-19T18:34:24.878094+02:00",
+  "voteAverage": null,
+  "thoughtsText": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 0,
+    "sun": 0
+  },
+  "votes": [],
+  "thoughts": [],
+  "reactionEntries": [],
+  "date_it": "19 settembre 2026"
+}

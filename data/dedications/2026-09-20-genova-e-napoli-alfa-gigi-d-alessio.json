@@ -1,0 +1,59 @@
+{
+  "id": "2026-09-20-genova-e-napoli-alfa-gigi-d-alessio",
+  "date": "2026-09-20",
+  "day_name": "domenica",
+  "status": "published",
+  "song_title": "Genova e Napoli",
+  "artist": "Alfa, Gigi D'Alessio",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "Amore con tuo papà sei meravigliosa!",
+  "audio": {
+    "url": "https://open.spotify.com/track/4IPvLJHeW1wwPDz0mYvxzZ",
+    "type": "spotify",
+    "source_type": "spotify",
+    "original_filename": "",
+    "mime_type": ""
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-09-20-genova-e-napoli-alfa-gigi-d-alessio.webp",
+    "alt": "Dedica musicale Genova e Napoli di Alfa, Gigi D'Alessio",
+    "mode": "raw",
+    "source": "public/images/upload/2026-09-20-genova-e-napoli-alfa-gigi-d-alessio.webp"
+  },
+  "short_phrase": "♥️",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "Genova e Napoli - Alfa, Gigi D'Alessio | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"Genova e Napoli\" di Alfa, Gigi D'Alessio."
+  },
+  "created_at": "2026-09-20T12:48:28.271385+02:00",
+  "updated_at": "2026-09-20T19:34:40.247Z",
+  "voteAverage": null,
+  "thoughtsText": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 1,
+    "sun": 0
+  },
+  "votes": [],
+  "thoughts": [],
+  "reactionEntries": [
+    {
+      "userId": "df9db58a-feed-49fa-8ffe-62664c069200",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "value": "heart",
+      "createdAt": "2026-09-20T19:34:40.247Z",
+      "updatedAt": "2026-09-20T19:34:40.247Z"
+    }
+  ],
+  "date_it": "20 settembre 2026"
+}
