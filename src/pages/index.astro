@@ -68,6 +68,9 @@ function fmtDate(dateStr: string, dayName?: string) {
 >
 
   <section class="music-hero">
+    <div class="cinematic-light cinematic-light-one" aria-hidden="true"></div>
+    <div class="cinematic-light cinematic-light-two" aria-hidden="true"></div>
+    <div class="film-grain" aria-hidden="true"></div>
     <div class="container">
       <div class="hero-topline">
         <p class="journal-label">La nostra vita, in musica</p>
@@ -77,7 +80,7 @@ function fmtDate(dateStr: string, dayName?: string) {
         <div class="music-stage">
           <div class="music-story">
             <p class="hero-date">{fmtDate(dedication.date, dedication.day_name)}</p>
-            <h1 class="music-title">{dedication.song_title}</h1>
+            <h1 class="music-title" transition:name={`dedication-title-${dedication.id}`}>{dedication.song_title}</h1>
             <p class="music-artist">{dedication.artist}</p>
             <div class="music-message">
               <p class="hero-ded-label">{dedication.dedication_title}</p>
@@ -100,8 +103,8 @@ function fmtDate(dateStr: string, dayName?: string) {
           <div class="music-art">
             <div class="art-stamp" aria-hidden="true">UNA CANZONE<strong>per te</strong>OGNI GIORNO</div>
             {dedication.image?.path ? (
-              <div class="hero-image-frame" id="hero-image-frame">
-                <img src={base + dedication.image.path.replace(/^\//, '')} alt={dedication.image.alt ?? ''} class="hero-image" width="600" height="650" loading="eager" fetchpriority="high" />
+              <div class="hero-image-frame" id="hero-image-frame" transition:name={`dedication-art-${dedication.id}`}>
+                <img src={base + dedication.image.path.replace(/^\//, '')} alt={dedication.image.alt ?? ''} class="hero-image" width="600" height="650" loading="eager" decoding="async" fetchpriority="high" />
                 {dedication.short_phrase && <div class="art-caption"><span>Le parole che restano</span><p>{dedication.short_phrase}</p></div>}
               </div>
             ) : <div class="img-placeholder" aria-label="Dedica musicale">♫</div>}

@@ -214,7 +214,7 @@ def process_raw(ded: dict, fonts: dict,
             v = smart_vertical_crop(img, 1080, 1350)
 
         logger.info('    Generating vertical WebP...')
-        v.save(str(vertical_path), 'WEBP', quality=92)
+        v.save(str(vertical_path), 'WEBP', quality=84, method=6)
         logger.info(f'    ✓ {vertical_path.name}')
 
         # OpenGraph — sempre smart_og_crop
@@ -226,7 +226,7 @@ def process_raw(ded: dict, fonts: dict,
             og_final = og_base
         else:
             og_final = _og_with_minimal_branding(og_base, ded, fonts)
-        og_final.save(str(og_path), 'WEBP', quality=92)
+        og_final.save(str(og_path), 'WEBP', quality=84, method=6)
         logger.info(f'    ✓ {og_path.name}')
         logger.info('    Completed successfully')
         return True

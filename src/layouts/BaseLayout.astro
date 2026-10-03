@@ -5,7 +5,7 @@ import '../styles/landscape-pan.css';
 import '../styles/experience.css';
 import GlobalSiteEffect from '../components/GlobalSiteEffect.astro';
 import UserIdentityModal from '../components/UserIdentityModal.astro';
-import { ViewTransitions } from 'astro:transitions';
+import { ClientRouter } from 'astro:transitions';
 export interface Props {
   title: string;
   description?: string;
@@ -85,7 +85,7 @@ const fullOgImage = ogImage
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href={`${base}favicon/favicon.svg`} />
   <link rel="icon" type="image/png" sizes="192x192" href={`${base}icons/icon-192.png`} />
-  <ViewTransitions />
+  <ClientRouter fallback="swap" />
 
   <!-- Preconnect Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />

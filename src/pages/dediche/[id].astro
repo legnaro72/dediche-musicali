@@ -73,7 +73,7 @@ const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
     </div>
 
     <!-- Song title -->
-    <h1 class="hero-song anim-1" style="font-family:var(--font-serif);font-size:clamp(2rem,4vw,3rem);margin-bottom:0.4rem;">
+    <h1 class="hero-song anim-1" transition:name={`dedication-title-${dedication.id}`} style="font-family:var(--font-serif);font-size:clamp(2rem,4vw,3rem);margin-bottom:0.4rem;">
       {dedication.song_title}
     </h1>
     <p class="hero-artist anim-2">{dedication.artist}</p>
@@ -82,7 +82,7 @@ const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
 
     <!-- Image -->
     {imgSrc && (
-      <div style="margin:2rem 0;" class="anim-2">
+      <div style="margin:2rem 0;" class="anim-2 detail-art" transition:name={`dedication-art-${dedication.id}`}>
         <DedicationImage
           src={imgSrc}
           alt={dedication.image?.alt ?? ''}
@@ -120,7 +120,7 @@ const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
     )}
 
     <!-- Dedication text -->
-    <div class="card anim-3" style="padding:2rem;margin-bottom:2rem;">
+    <div class="card anim-3 dedication-letter" style="padding:2rem;margin-bottom:2rem;">
       <p style="font-size:0.8rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;">
         {dedication.dedication_title}
       </p>

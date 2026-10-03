@@ -165,11 +165,11 @@ def _save_images(bg, ded, fonts, palette,
     try:
         logger.info('  Applico template premium...')
         v_img = apply_premium_template_vertical(bg, ded, fonts, palette)
-        v_img.save(str(vertical_path), 'WEBP', quality=90)
+        v_img.save(str(vertical_path), 'WEBP', quality=84, method=6)
         logger.info(f'  ✓ {vertical_path.name}')
 
         og_img = apply_premium_template_og(bg, ded, fonts, palette)
-        og_img.save(str(og_path), 'WEBP', quality=90)
+        og_img.save(str(og_path), 'WEBP', quality=84, method=6)
         logger.info(f'  ✓ {og_path.name}')
 
         if attribution:
@@ -183,9 +183,9 @@ def _save_images(bg, ded, fonts, palette,
             from scripts.mood_engine import MOOD_PALETTE
             palette_fb = MOOD_PALETTE['default']
             v_img = apply_premium_template_vertical(None, ded, fonts, palette_fb)
-            v_img.save(str(vertical_path), 'WEBP', quality=90)
+            v_img.save(str(vertical_path), 'WEBP', quality=84, method=6)
             og_img = apply_premium_template_og(None, ded, fonts, palette_fb)
-            og_img.save(str(og_path), 'WEBP', quality=90)
+            og_img.save(str(og_path), 'WEBP', quality=84, method=6)
             logger.info('  ✓ Fallback locale generato')
             return True
         except Exception as e2:

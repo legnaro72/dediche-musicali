@@ -54,7 +54,7 @@ const monthValue = date.substring(0, 7);
   data-month={monthValue}
   data-search={searchText}
 >
-  <div class="dedication-card-img-wrap">
+  <div class="dedication-card-img-wrap" transition:name={`dedication-art-${id}`}>
     {imgSrc ? (
       <DedicationImage
         src={imgSrc}
@@ -74,7 +74,7 @@ const monthValue = date.substring(0, 7);
     <div class="dedication-card-date">
       {day_name ? `${day_name} - ` : ''}{dateLabel}
     </div>
-    <div class="dedication-card-song">{song_title}</div>
+    <div class="dedication-card-song" transition:name={`dedication-title-${id}`}>{song_title}</div>
     <div class="dedication-card-artist">{artist}</div>
     {short_phrase && (
       <p class="dedication-card-phrase">{short_phrase}</p>
