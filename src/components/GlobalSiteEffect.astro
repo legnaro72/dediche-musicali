@@ -1,4 +1,4 @@
-<div class="global-site-effect" id="global-site-effect" aria-hidden="true"></div>
+<div class="global-site-effect" id="global-site-effect" aria-hidden="true" transition:persist="site-effects"></div>
 
 <script>
   import { tsParticles } from '@tsparticles/engine';
@@ -85,7 +85,9 @@
     options: {
       fullScreen: { enable: false },
       detectRetina: true,
-      fpsLimit: intensity === 'high' ? 50 : 42,
+      fpsLimit: window.matchMedia('(pointer: coarse)').matches ? 30 : intensity === 'high' ? 50 : 42,
+      pauseOnBlur: true,
+      pauseOnOutsideViewport: true,
       background: { color: { value: 'transparent' } },
       interactivity: { events: { resize: true } },
       particles: {

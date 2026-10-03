@@ -115,6 +115,7 @@ const data = {
 </style>
 
 <script>
+  import { notify } from '../scripts/experience.js';
   const voteStoreKey = 'ddgpilli-plus-votes';
   const reactionCountKey = 'ddgpilli-reaction-counts';
   const reactionChoiceKey = 'ddgpilli-reaction-choice';
@@ -300,6 +301,8 @@ const data = {
       let serverFeedback = null;
       let opening = false;
       let feedbackController = null;
+      let formEdited = false;
+      form?.addEventListener('input', () => { formEdited = true; });
 
       // Precompila il campo nome dalla identity salvata
       const prefillIdentity = () => {
@@ -318,7 +321,9 @@ const data = {
           try {
             feedbackController?.abort();
             feedbackController = new AbortController();
-            serverFeedback = await fetchFeedback(data.id, feedbackController.signal);
+            const controller = feedbackController;
+            serverFeedback = await fetchFeedback(data.id, controller.signal);
+            if (controller.signal.aborted) return;
           } catch (error) {
             if (error?.name === 'AbortError') return;
             console.warn('Feedback non recuperato:', error);
@@ -334,8 +339,12 @@ const data = {
         const source = serverFeedback || data;
         const savedVote = currentUserVote(source, identity);
         const savedThought = currentUserThought(source, identity);
-        if (score instanceof HTMLInputElement) score.value = savedVote?.value ? String(savedVote.value) : '';
-        if (thought instanceof HTMLTextAreaElement) thought.value = savedThought?.text || '';
+        // A late response must never erase a vote or thought already being typed.
+        if (!formEdited) {
+          if (score instanceof HTMLInputElement) score.value = savedVote?.value ? String(savedVote.value) : '';
+          if (thought instanceof HTMLTextAreaElement) thought.value = savedThought?.text || '';
+        }
+        if (status instanceof HTMLElement && status.textContent === 'Caricamento voto salvato...') status.textContent = '';
         if (status instanceof HTMLElement && savedVote?.value) {
           status.textContent = 'Puoi modificare il tuo voto gia salvato.';
         }
@@ -357,6 +366,7 @@ const data = {
           return;
         }
         opening = true;
+        formEdited = false;
         prefillIdentity();
         if (status instanceof HTMLElement) status.textContent = feedbackApiUrl() ? 'Caricamento voto salvato...' : '';
         if (modal instanceof HTMLElement) modal.hidden = false;
@@ -376,6 +386,9 @@ const data = {
 
       form?.addEventListener('submit', async (event) => {
         event.preventDefault();
+        if (submit instanceof HTMLButtonElement && submit.disabled) return;
+        feedbackController?.abort();
+        feedbackController = null;
         const value = Number(score?.value || 0);
         if (!Number.isInteger(value) || value < 1 || value > 10) {
           if (status instanceof HTMLElement) status.textContent = 'Inserisci un voto intero da 1 a 10.';
@@ -434,6 +447,7 @@ const data = {
       const data = parseData(root);
       const initialCounts = normalizeCounts(data.reactions);
       let serverFeedback = null;
+      let reactionPending = false;
       let detailButton = root.querySelector('[data-reaction-detail-toggle]');
       let detailPopover = root.querySelector('[data-reaction-detail-popover]');
       let detailList = root.querySelector('[data-reaction-detail-list]');
@@ -526,7 +540,7 @@ const data = {
       root.querySelectorAll('[data-reaction]').forEach((button) => {
         button.addEventListener('click', async () => {
           const next = button.getAttribute('data-reaction');
-          if (!reactionKeys.includes(next)) return;
+          if (!reactionKeys.includes(next) || reactionPending) return;
           if (window.__DDGPILLI?.hasIdentity && !window.__DDGPILLI.hasIdentity()) {
             window.__DDGPILLI.showIdentityModal?.();
             return;
@@ -553,6 +567,7 @@ const data = {
             choices[choiceId] = next;
           }
 
+          reactionPending = true;
           // Aggiornamento ottimistico immediato
           store[data.id] = counts;
           writeObject(reactionCountKey, store);
@@ -585,6 +600,7 @@ const data = {
             renderDetails();
           } catch (error) {
             console.warn('Salvataggio reaction fallito, rollback locale.', error);
+            notify('Reazione non salvata. Controlla la connessione e riprova.');
             // In caso di errore: ripristino conteggi e scelta precedente
             const latestStore = readObject(reactionCountKey);
             latestStore[data.id] = previousCounts;
@@ -597,6 +613,7 @@ const data = {
             }
             writeObject(reactionChoiceKey, latestChoices);
           } finally {
+            reactionPending = false;
             if (button instanceof HTMLButtonElement) button.disabled = false;
             render();
           }
@@ -616,4 +633,3 @@ const data = {
   initDedicationPlus();
   document.addEventListener('astro:page-load', initDedicationPlus);
 </script>
-

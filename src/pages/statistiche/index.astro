@@ -103,6 +103,10 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
 
   <script type="application/json" id="stats-dedications" set:html={statsJson}></script>
   <script>
+    function initStats() {
+    const statsRoot = document.getElementById('stats-dedications');
+    if (!statsRoot || statsRoot.dataset.bound) return;
+    statsRoot.dataset.bound = 'true';
     const dedications = JSON.parse(document.getElementById('stats-dedications')?.textContent || '[]');
     const reactionKeys = ['down', 'like', 'heart', 'sun'];
     let apiFeedback = {};
@@ -268,11 +272,19 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
       renderStats();
     }
     loadApiFeedback();
-    window.addEventListener('ddgpilli:stats-updated', (event) => {
+    const updateStats = (event) => {
       const detail = event instanceof CustomEvent ? event.detail : null;
       if (detail?.id && detail.feedback) apiFeedback[detail.id] = detail.feedback;
       renderStats();
-    });
+    };
+    window.addEventListener('ddgpilli:stats-updated', updateStats);
     window.addEventListener('storage', renderStats);
+    document.addEventListener('astro:before-swap', () => {
+      window.removeEventListener('ddgpilli:stats-updated', updateStats);
+      window.removeEventListener('storage', renderStats);
+    }, { once: true });
+    }
+    initStats();
+    document.addEventListener('astro:page-load', initStats);
   </script>
 </BaseLayout>

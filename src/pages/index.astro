@@ -7,6 +7,8 @@ import AudioEmbed from '../components/AudioEmbed.astro';
 import DedicationCard from '../components/DedicationCard.astro';
 import DedicationPlus from '../components/DedicationPlus.astro';
 import VideoEmbed from '../components/VideoEmbed.astro';
+import DedicationTools from '../components/DedicationTools.astro';
+import Icon from '../components/Icon.astro';
 
 const dataDir = join(process.cwd(), 'data', 'dedications');
 const todayPath = join(process.cwd(), 'data', 'today.json');
@@ -36,7 +38,7 @@ const published = all
     return String(a.id ?? '').localeCompare(String(b.id ?? ''));
   });
 
-const dedication = promotedToday?.status === 'published'
+const dedication = promotedToday?.status === 'published' && promotedToday.date <= today
   ? promotedToday
   : published[0] ?? null;
 
@@ -65,123 +67,62 @@ function fmtDate(dateStr: string, dayName?: string) {
   enableBackgroundMusic={true}
 >
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-bg"></div>
-    <!-- Ambient orbs -->
-    <div class="hero-orb" style="width:500px;height:500px;top:-100px;left:-150px;background:radial-gradient(circle,rgba(124,58,237,0.35) 0%,transparent 70%)"></div>
-    <div class="hero-orb" style="width:400px;height:400px;bottom:-80px;right:-100px;background:radial-gradient(circle,rgba(236,72,153,0.25) 0%,transparent 70%)"></div>
-
-    <div class="container hero-content">
-      <!-- Immagine -->
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;" class="anim-1">
-        {dedication?.image?.path ? (
-          <>
-          <div class="hero-image-frame" id="hero-image-frame">
-            <img
-              src={base + (dedication.image.path).replace(/^\//, '')}
-              alt={dedication.image.alt ?? ''}
-              class="hero-image"
-              width="420"
-              height="525"
-              loading="eager"
-            />
-          </div>
-          <DedicationPlus dedication={dedication} mode="reactions" />
-          </>
-        ) : (
-          <div class="img-placeholder">&#9834;</div>
-        )}
+  <section class="music-hero">
+    <div class="container">
+      <div class="hero-topline">
+        <p class="journal-label">La nostra vita, in musica</p>
+        <span class="journal-count">{published.length} canzoni. Infinite emozioni.</span>
       </div>
-
-      <!-- Testo -->
-      <div>
-        {dedication ? (
-          <>
-            <div class="hero-date anim-1">
-              {fmtDate(dedication.date, dedication.day_name)}
+      {dedication ? (
+        <div class="music-stage">
+          <div class="music-story">
+            <p class="hero-date">{fmtDate(dedication.date, dedication.day_name)}</p>
+            <h1 class="music-title">{dedication.song_title}</h1>
+            <p class="music-artist">{dedication.artist}</p>
+            <div class="music-message">
+              <p class="hero-ded-label">{dedication.dedication_title}</p>
+              <p class="hero-text">{dedication.dedication_text}</p>
             </div>
-            <h1 class="hero-song anim-2">{dedication.song_title}</h1>
-            <p class="hero-artist anim-2">{dedication.artist}</p>
-            <p class="hero-ded-label anim-3">{dedication.dedication_title}</p>
-
-            <p class="hero-text anim-3">{dedication.dedication_text}</p>
-
-            <div class="hero-actions anim-4">
-              <a
-                href={dedication.audio?.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn btn-primary btn-lg"
-                data-audio-play
-              >
-                &#9654; Ascolta
-              </a>
-              <a
-                href={dedication.vote?.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn btn-secondary btn-lg"
-                data-site-config-target="googleVote"
-              >
-                &#9733; Votami
-              </a>
+            <div class="stage-actions">
+              <a href={dedication.audio.url} target="_blank" rel="noopener noreferrer" class="btn btn-primary" data-audio-play><Icon name="play" /> Ascolta</a>
               <DedicationPlus dedication={dedication} mode="button" />
-              <a href={`${base}dediche/${dedication.id}/`} class="btn btn-secondary btn-lg">
-                Leggi tutto &rarr;
-              </a>
-              <a href={`${base}link-utili/`} class="btn btn-secondary btn-lg">
-                Link utili
-              </a>
+              <a href={dedication.vote?.url} target="_blank" rel="noopener noreferrer" class="btn btn-secondary" data-site-config-target="googleVote">&#9733; Votami</a>
             </div>
-
-            <div class="hero-contact anim-4">
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn btn-whatsapp btn-lg"
-                aria-label="Contattami su WhatsApp"
-              >
-                <svg class="btn-icon" viewBox="0 0 32 32" aria-hidden="true">
-                  <path fill="currentColor" d="M16 3C9.1 3 3.5 8.6 3.5 15.5c0 2.4.7 4.7 2 6.7L4 29l7-1.8c1.6.9 3.3 1.3 5 1.3 6.9 0 12.5-5.6 12.5-12.5S22.9 3 16 3Zm0 23c-1.5 0-3-.4-4.3-1.2l-.4-.2-4.1 1.1 1.1-4-.3-.4c-1.1-1.6-1.7-3.5-1.7-5.5C6.3 10.4 10.7 6 16 6s9.7 4.4 9.7 9.7S21.3 26 16 26Zm5.5-7.2c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.6c.2-.2.2-.3.3-.5.1-.2.1-.4 0-.6-.1-.2-.7-1.7-.9-2.3-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.6s1.1 3 1.2 3.2c.2.2 2.2 3.4 5.3 4.7.7.3 1.3.5 1.8.6.8.2 1.4.2 2 .1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4 0-.1-.2-.2-.5-.4Z"/>
-                </svg>
-                Contattami su WhatsApp
-              </a>
+            <div class="stage-extras">
+              <DedicationTools dedication={dedication} />
+              <a href={`${base}dediche/${dedication.id}/`} class="text-link">Leggi tutto <Icon name="arrow" size={16} /></a>
             </div>
-
-            {dedication.tags && dedication.tags.length > 0 && (
-              <div style="margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:0.5rem;" class="anim-4">
-                {dedication.tags.map((tag: string) => (
-                  <span class="tag">{tag}</span>
-                ))}
-              </div>
-            )}
-          </>
-        ) : (
-          <div>
-            <h1 class="hero-song anim-1" style="font-family:var(--font-serif)">Nessuna dedica oggi &#9834;</h1>
-            <p class="hero-text anim-2">Torna domani per la prossima dedica musicale!</p>
-            <a href={`${base}archive/`} class="btn btn-primary btn-lg anim-3">Vedi archivio</a>
+            <div class="stage-extras">
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">Contattami su WhatsApp ↗</a>
+              <a href={`${base}link-utili/`}>Link utili ↗</a>
+            </div>
           </div>
-        )}
-      </div>
+          <div class="music-art">
+            <div class="art-stamp" aria-hidden="true">UNA CANZONE<strong>per te</strong>OGNI GIORNO</div>
+            {dedication.image?.path ? (
+              <div class="hero-image-frame" id="hero-image-frame">
+                <img src={base + dedication.image.path.replace(/^\//, '')} alt={dedication.image.alt ?? ''} class="hero-image" width="600" height="650" loading="eager" fetchpriority="high" />
+                {dedication.short_phrase && <div class="art-caption"><span>Le parole che restano</span><p>{dedication.short_phrase}</p></div>}
+              </div>
+            ) : <div class="img-placeholder" aria-label="Dedica musicale">♫</div>}
+            <DedicationPlus dedication={dedication} mode="reactions" />
+          </div>
+        </div>
+      ) : (
+        <div class="music-story"><h1 class="music-title">La prossima emozione<br />sta arrivando.</h1><p class="music-artist">Nel frattempo, ritrova una canzone nell'archivio.</p><a href={`${base}archive/`} class="btn btn-primary">Esplora le dediche</a></div>
+      )}
     </div>
   </section>
-
-  <!-- AUDIO EMBED -->
   {dedication && (
-    <section style="padding:2rem 0;background:var(--bg-surface);">
-      <div class="container-narrow reveal">
-        <AudioEmbed
-          url={dedication.audio.url}
-          type={dedication.audio.type}
-          sourceType={dedication.audio.source_type}
-          mimeType={dedication.audio.mime_type}
-          originalFilename={dedication.audio.original_filename}
-        />
-      </div>
-    </section>
+    <>
+      <section class="listening-room" id="ascolto">
+        <div class="container">
+          <div><span class="journal-label">Premi play. Resta qui.</span><h2>Il resto può aspettare.</h2><p>Una canzone, le nostre parole, questo momento.</p></div>
+          <AudioEmbed url={dedication.audio.url} type={dedication.audio.type} sourceType={dedication.audio.source_type} mimeType={dedication.audio.mime_type} originalFilename={dedication.audio.original_filename} />
+        </div>
+      </section>
+      <DedicationTools dedication={dedication} dock />
+    </>
   )}
 
   {dedication?.video && (
@@ -200,12 +141,11 @@ function fmtDate(dateStr: string, dayName?: string) {
 
   <!-- RECENT DEDICHE -->
   {recent.length > 0 && (
-    <section style="padding:5rem 0;">
+    <section class="collection-section">
       <div class="container">
-        <div style="text-align:center;margin-bottom:3rem;" class="reveal">
-          <span class="section-label">Archivio</span>
-          <h2 class="section-title">Dediche recenti</h2>
-          <div class="divider"></div>
+        <div class="collection-heading reveal">
+          <div><span class="journal-label">La nostra colonna sonora</span><h2>Ogni canzone,<br />un pezzo di noi.</h2></div>
+          <a href={`${base}archive/`} class="text-link">Esplora tutte le dediche <Icon name="arrow" /></a>
         </div>
         <div class="archive-grid reveal">
           {recent.map((d: any) => (

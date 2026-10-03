@@ -1,0 +1,11 @@
+---
+import Icon from './Icon.astro';
+const { dedication, dock = false } = Astro.props;
+const base = (import.meta.env.BASE_URL ?? '/').replace(/([^/])$/, '$1/');
+const url = new URL(`${base}dediche/${dedication.id}/`, Astro.site).href;
+---
+<div class:list={['dedication-tools', { 'listening-dock': dock }]} aria-label="La tua dedica">
+  {dock && <a href={dedication.audio.url} target="_blank" rel="noopener noreferrer" class="dock-play" data-audio-play><Icon name="play" /><span>Ascolta</span></a>}
+  <button type="button" class="tool-button" data-favorite={dedication.id} aria-pressed="false" aria-label="Salva nei preferiti"><Icon name="heart" /><span data-favorite-label>Salva</span></button>
+  <button type="button" class="tool-button" data-share-url={url} data-share-title={`${dedication.song_title} · ${dedication.artist}`}><Icon name="share" /><span>Condividi</span></button>
+</div>

@@ -5,4 +5,5 @@ export default defineConfig({
   site: 'https://legnaro72.github.io',
   base: '/dediche-musicali',
   output: 'static',
+  devToolbar: { enabled: false },
 });

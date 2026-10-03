@@ -1,5 +1,6 @@
 ---
 // src/components/AudioEmbed.astro
+import Icon from './Icon.astro';
 export interface Props {
   url: string;
   type?: string; // campo storico: spotify | youtube | soundcloud | mp3 | cloud | other
@@ -80,6 +81,8 @@ const fallbackMime = audioMime || ({ mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: '
         <source src={url} type={fallbackMime} />
         Il tuo browser non supporta l'audio HTML5.
       </audio>
+      <button type="button" class="tool-button" data-audio-download style="margin-top:.75rem;"><Icon name="download" size={16} /> Scarica audio</button>
+      <p data-audio-status role="status" aria-live="polite" style="font-size:.85rem;margin-top:.5rem;"></p>
     </div>
   ) : null}
 
@@ -94,6 +97,7 @@ const fallbackMime = audioMime || ({ mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: '
 </div>
 
 <script>
+  import { notify } from '../scripts/experience.js';
   async function downloadAudioFile(url: string, filename: string) {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Download audio fallito: HTTP ${response.status}`);
@@ -119,29 +123,45 @@ const fallbackMime = audioMime || ({ mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: '
         const player = document.querySelector('[data-dedication-audio]');
         if (!(player instanceof HTMLAudioElement)) return;
 
-        const downloadUrl = player.dataset.audioDownloadUrl || button.href;
-        const filename = player.dataset.audioFilename || 'audio.mp3';
         event.preventDefault();
-
+        document.dispatchEvent(new Event('ddgpilli:foreground-audio'));
+        if (!player.paused) { player.pause(); return; }
         const playback = player.play();
         if (playback) {
-          playback.catch((error) => {
-            console.warn('Riproduzione audio non avviata:', error);
+          playback.catch(() => {
+            notify('Audio non avviato. Prova i controlli del player o verifica la connessione.');
+            player.scrollIntoView({ behavior: 'smooth', block: 'center' });
           });
         }
-
-        downloadAudioFile(downloadUrl, filename).catch((error) => {
-          console.warn('Download audio non avviato:', error);
-          const fallbackLink = document.createElement('a');
-          fallbackLink.href = downloadUrl;
-          fallbackLink.target = '_blank';
-          fallbackLink.rel = 'noopener noreferrer';
-          fallbackLink.click();
-        });
       });
     });
   }
 
   bindAudioPlayButtons();
   document.addEventListener('astro:page-load', bindAudioPlayButtons);
+  document.addEventListener('click', async (event) => {
+    if (!(event.target instanceof Element)) return;
+    if (event.target.closest('[data-audio-play]')) document.dispatchEvent(new Event('ddgpilli:foreground-audio'));
+    const button = event.target.closest('[data-audio-download]');
+    if (!(button instanceof HTMLButtonElement) || button.disabled) return;
+    const player = button.closest('.audio-embed')?.querySelector('audio');
+    const status = button.parentElement?.querySelector('[data-audio-status]');
+    if (!player?.dataset.audioDownloadUrl) return;
+    button.disabled = true;
+    if (status) status.textContent = 'Preparazione del download…';
+    try {
+      await downloadAudioFile(player.dataset.audioDownloadUrl, player.dataset.audioFilename || 'audio.mp3');
+      if (status) status.textContent = 'Download avviato.';
+    } catch {
+      if (status) status.textContent = 'Download non disponibile. Riprova quando la connessione è attiva.';
+    } finally { button.disabled = false; }
+  });
+  document.addEventListener('play', (event) => {
+    if (event.target instanceof HTMLMediaElement) document.dispatchEvent(new Event('ddgpilli:foreground-audio'));
+  }, true);
+  document.addEventListener('astro:before-swap', () => {
+    document.querySelectorAll('[data-dedication-audio]').forEach(player => {
+      if (player instanceof HTMLAudioElement) player.pause();
+    });
+  });
 </script>
