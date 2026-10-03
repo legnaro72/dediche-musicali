@@ -11,6 +11,9 @@
     "worker:dev": "npx wrangler dev --config workers/feedback-worker/wrangler.toml",
     "build": "astro build",
     "preview": "astro preview",
+    "test:unit": "node --test tests/mobile_photo.test.cjs",
+    "test:browser": "node tests/navigation.browser.cjs && node tests/experience.browser.cjs",
+    "test:offline": "node tests/offline.browser.cjs",
     "astro": "astro"
   },
   "dependencies": {
@@ -18,5 +21,8 @@
     "@tsparticles/engine": "^4.1.3",
     "@tsparticles/slim": "^4.1.3",
     "astro": "^4.7.0"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
   }
 }

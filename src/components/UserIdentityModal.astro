@@ -367,7 +367,8 @@
     const modal       = document.querySelector('[data-uid-modal]');
     const form        = document.getElementById('uid-form');
     const backdrop    = document.querySelector('[data-uid-backdrop]');
-    if (!modal || !form) return;
+    if (!modal || !form || form.dataset.bound) return;
+    form.dataset.bound = 'true';
 
     updateEditTrigger();
 

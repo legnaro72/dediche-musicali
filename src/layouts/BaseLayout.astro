@@ -2,6 +2,7 @@
 // src/layouts/BaseLayout.astro
 import '../styles/global.css';
 import '../styles/landscape-pan.css';
+import '../styles/experience.css';
 import GlobalSiteEffect from '../components/GlobalSiteEffect.astro';
 import UserIdentityModal from '../components/UserIdentityModal.astro';
 import { ViewTransitions } from 'astro:transitions';
@@ -91,6 +92,7 @@ const fullOgImage = ogImage
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Vai alla dedica</a>
   <GlobalSiteEffect />
 
   <section class="site-lock" data-site-lock hidden aria-live="polite">
@@ -116,7 +118,7 @@ const fullOgImage = ogImage
   <nav class="navbar" id="navbar">
     <div class="container navbar-inner">
       <a class="navbar-brand" href={base}>&#9834; DDGPilli</a>
-      
+
       <button
         class="navbar-menu-toggle"
         type="button"
@@ -154,12 +156,23 @@ const fullOgImage = ogImage
     </div>
   </nav>
 
+  <p class="offline-notice" data-offline-notice role="status" hidden>Sei offline. Puoi rileggere le pagine già visitate; audio e voti richiedono una connessione.</p>
+  <p class="experience-toast" data-experience-toast role="status" aria-live="polite" hidden></p>
+  <dialog class="share-dialog" data-share-dialog aria-labelledby="share-title">
+    <h2 id="share-title">Un'emozione da condividere.</h2>
+    <label>Invia questa dedica a chi vuoi.<input type="url" readonly aria-label="Link della dedica" /></label>
+    <div class="share-dialog-actions"><button type="button" class="btn btn-primary" data-copy-link>Copia link</button><button type="button" class="btn btn-secondary" data-share-close>Chiudi</button></div>
+  </dialog>
+  <script>
+    import '../scripts/experience.js';
+  </script>
+
   <!-- Main content -->
-  <main>
+  <main id="main-content" tabindex="-1">
     <slot />
   </main>
 
-  <div class="app-install" data-app-install hidden>
+  <div class="app-install" data-app-install hidden transition:persist="install-invite">
     <div class="app-install-copy">
       <strong>DDGPilli come app</strong>
       <span data-app-install-text>Installa sulla Home per aprirla a schermo intero.</span>
@@ -170,7 +183,7 @@ const fullOgImage = ogImage
     </div>
   </div>
 
-  <div class="app-install-modal" data-app-install-modal hidden>
+  <div class="app-install-modal" data-app-install-modal hidden transition:persist="install-guide">
     <div class="app-install-dialog" role="dialog" aria-modal="true" aria-labelledby="install-title">
       <button class="app-install-dialog-close" type="button" aria-label="Chiudi" data-app-install-modal-close>&times;</button>
       <h2 id="install-title">Aggiungi alla Home</h2>
@@ -182,7 +195,7 @@ const fullOgImage = ogImage
 
   {enableBackgroundMusic && (
     <>
-      <div class="app-intro" data-audio-intro hidden>
+      <div class="app-intro" data-audio-intro hidden transition:persist="audio-intro">
         <div class="app-intro-panel">
           <p class="app-intro-kicker">DDGPilli</p>
           <h2>Dedica del giorno</h2>
@@ -219,7 +232,7 @@ const fullOgImage = ogImage
   </footer>
 
   <!-- Navbar scroll effect + reveal animation -->
-  <script is:inline>
+  <script>
     const appBase = document.querySelector('meta[name="ddgpilli-base"]')?.getAttribute('content') ?? '/';
     window.__DDGPILLI_BASE = appBase;
 
@@ -239,7 +252,7 @@ const fullOgImage = ogImage
 
     const applyFeedbackApiUrl = (settings) => {
       const configuredUrl = String(settings?.feedbackApiUrl || settings?.feedback?.apiUrl || '').trim();
-      if (!configuredUrl) return;
+      if (isLocalPreview || !configuredUrl) return;
       const meta = document.querySelector('meta[name="ddgpilli-feedback-api"]');
       if (meta) meta.setAttribute('content', configuredUrl);
       window.__DDGPILLI_FEEDBACK_API_URL = configuredUrl;
@@ -379,7 +392,7 @@ const fullOgImage = ogImage
     };
 
     const loadSiteSettings = async () => {
-      if (!siteConfigUrl) return;
+      if (!siteConfigUrl || !navigator.onLine) return;
       try {
         const separator = siteConfigUrl.includes('?') ? '&' : '?';
         const response = await fetch(`${siteConfigUrl}${separator}t=${Date.now()}`, { cache: 'no-store' });
@@ -475,21 +488,19 @@ const fullOgImage = ogImage
       if (panel instanceof HTMLElement) panel.setAttribute('data-site-lock-phase', 'second');
     });
 
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register(`${appBase}sw.js`, { scope: appBase }).catch((error) => {
-          console.warn('Service worker non registrato:', error);
-        });
-      }, { once: true });
+    if ('serviceWorker' in navigator && !import.meta.env.DEV) {
+      const warmOfflinePage = () => {
+        if (!navigator.onLine || !navigator.serviceWorker.controller) return;
+        const urls = [location.href, ...performance.getEntriesByType('resource').map(entry => entry.name)];
+        navigator.serviceWorker.controller.postMessage({ type: 'CACHE_VISITED_PAGE', urls: [...new Set(urls)].filter(url => new URL(url).origin === location.origin).slice(0, 70) });
+      };
+      const registerOffline = () => navigator.serviceWorker.register(`${appBase}sw.js`, { scope: appBase })
+        .then(() => navigator.serviceWorker.ready).then(warmOfflinePage).catch(() => {});
+      if (document.readyState === 'complete') registerOffline();
+      else window.addEventListener('load', registerOffline, { once: true });
+      navigator.serviceWorker.addEventListener('controllerchange', warmOfflinePage);
+      document.addEventListener('astro:page-load', warmOfflinePage);
     }
-
-    // Scroll reveal
-    const reveals = document.querySelectorAll('.reveal');
-    const observer = new IntersectionObserver(
-      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
-      { threshold: 0.1 }
-    );
-    reveals.forEach(el => observer.observe(el));
   </script>
 
   <!-- Navigation survives Astro page swaps. -->
@@ -532,6 +543,7 @@ const fullOgImage = ogImage
       initLandscapePan();
     }
 
+    document.addEventListener('astro:page-load', initLandscapePan);
     window.addEventListener('resize', () => {
       document.querySelectorAll('.landscape-frame').forEach((frame) => {
         requestAnimationFrame(() => {
@@ -836,6 +848,8 @@ const fullOgImage = ogImage
             registerUnlock();
           }
         };
+
+        document.addEventListener('ddgpilli:foreground-audio', () => stopAudio());
 
         const stopAudio = () => {
           if (audio && Number.isFinite(audio.currentTime)) localStorage.setItem(timeKey, String(audio.currentTime));

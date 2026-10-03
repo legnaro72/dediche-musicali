@@ -1,0 +1,74 @@
+DDGPilli — consegna versione mobile, 3 ottobre 2026
+
+STATO
+Versione funzionale verificata in locale, non pubblicata.
+Base allineata a origin/main e verificata con GitHub API:
+e96a92e4695668cfd59d1a7bbcc5c2689d94294b.
+Il riallineamento ha acquisito 10 commit contenenti solo data/visits.json.
+Non è possibile certificare lo stato dei file non sincronizzati sull'altro PC.
+Prima di lavorare da un secondo PC trasferire questo ramo tramite Git; evitare
+di sincronizzare contemporaneamente .git e node_modules tramite Google Drive.
+
+REALIZZATO
+- Home ridisegnata con fotografia protagonista, tipografia e animazioni responsive.
+- Barra mobile ascolta/salva/condividi, preferiti persistenti con ripiego in memoria.
+- Condivisione nativa con fallback manuale e annullamento gestito.
+- Archivio: ricerca, artista, mese, preferiti, sorpresa, reset e filtri nella URL.
+- Audio: ascolto separato dal download esplicito, coordinamento col sottofondo.
+- Navigazione Astro: inizializzazione e pulizia dei listener, statistiche e modali.
+- Voti/reazioni: protezione dai doppi invii, rollback e risposte asincrone obsolete.
+- Accessibilità: focus, etichette, movimento ridotto, aree sicure e piccoli schermi.
+- Offline: cache limitata alle risorse pubbliche, pagine visitate e fallback dedicato;
+  feedback, configurazione remota e audio esclusi dalla cache.
+- Aggiornamenti compatibili delle dipendenze e test browser riproducibili.
+
+VALIDAZIONE
+- npm run build: superato, 68 pagine statiche.
+- npm run test:unit: 5 test superati.
+- python -m unittest discover -s tests -p 'test_*.py': 16 test superati.
+- tests/navigation.browser.cjs: Android/Chrome e iPhone/WebKit superati.
+- tests/experience.browser.cjs: Android/Chrome e iPhone/WebKit superati.
+- npm run test:offline: entrambi i motori superati sulla build finale.
+- Controllo visivo desktop/mobile e git diff --check superati.
+I test simulano servizi esterni: nessun voto o reazione di prova inviato al sito.
+Le cancellazioni previste di transizioni visive Chromium sono escluse dagli errori
+del test; completamento navigazione e funzionalità restano verificati.
+Per WebKit il test offline interrompe il server locale: l'emulazione offline del
+browser interferisce con i service worker (https://github.com/microsoft/playwright/issues/42775).
+
+RIPRODUZIONE SU QUESTO PC (PowerShell)
+npm ci
+npm run build
+npm run preview -- --host 127.0.0.1 --port 4332
+In un secondo terminale:
+$env:NAV_TEST_URL='http://127.0.0.1:4332/dediche-musicali/'
+$env:PLAYWRIGHT_BROWSERS_PATH='D:\dediche-musicali\.cache\playwright'
+npx playwright install webkit
+npm run test:unit
+npm run test:browser
+npm run test:offline
+Il profilo Android richiede Chrome installato. Il test offline avvia un server proprio.
+
+LIMITI E ATTIVITÀ SUCCESSIVE
+1. Prova su Android e iPhone fisici: installazione PWA, condivisione nativa e player
+   esterni reali. I profili browser non equivalgono a una certificazione hardware.
+2. Migrazione Astro da 4 a una versione mantenuta. npm audit fix --ignore-scripts
+   ha eliminato 7 segnalazioni; ne restano 10 (1 moderata, 8 alte, 1 critica).
+   Il suggerimento automatico richiede Astro 7.3.5: non è stato applicato --force.
+   Il deploy è statico su GitHub Pages, senza runtime SSR, ma questo non azzera
+   il rischio delle dipendenze di sviluppo/build. Audit sicurezza NON pulito.
+3. Pubblicazione: non eseguita, rispettando il punto di consegna richiesto.
+   Prima del push controllare i nuovi commit remoti e integrare eventuali dati
+   aggiornati senza reset distruttivi. Verificare workflow e sito dopo il deploy.
+
+PROMPT RIUTILIZZABILE
+Riprendi D:\dediche-musicali leggendo docs/RELEASE_HANDOFF.txt e lo stato Git.
+Conserva il redesign e tutte le funzioni già verificate. Controlla l'allineamento
+con GitHub prima di modificare file: uso due PC e non voglio perdere dati.
+Completa la migrazione delle dipendenze Astro per risolvere le segnalazioni npm
+audit, esamina le breaking change e adatta il progetto senza modificare dataset,
+contratti API o credenziali. Esegui build, test unitari/Python, navigazione,
+funzionalità e offline su Chromium e WebKit. Distingui test simulati da prove su
+dispositivi fisici. Correggi le regressioni e consegna un punto di rilascio con
+risultati e limiti concreti. Non pubblicare automaticamente: prepara il rilascio
+e riporta esattamente cosa resta da fare.

@@ -7,6 +7,7 @@ import AudioEmbed from '../../components/AudioEmbed.astro';
 import DedicationImage from '../../components/DedicationImage.astro';
 import DedicationPlus from '../../components/DedicationPlus.astro';
 import VideoEmbed from '../../components/VideoEmbed.astro';
+import DedicationTools from '../../components/DedicationTools.astro';
 
 export async function getStaticPaths() {
   const dataDir = join(process.cwd(), 'data', 'dedications');
@@ -15,7 +16,7 @@ export async function getStaticPaths() {
   const files = readdirSync(dataDir).filter(f => f.endsWith('.json')).sort();
   const dedications = files.map(f => JSON.parse(readFileSync(join(dataDir, f), 'utf-8')));
   const published = dedications
-    .filter(d => d.status === 'published')
+    .filter(d => d.status === 'published' && d.date <= new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' }))
     .sort((a, b) => {
       const byDate = b.date.localeCompare(a.date);
       if (byDate !== 0) return byDate;
@@ -77,6 +78,8 @@ const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
     </h1>
     <p class="hero-artist anim-2">{dedication.artist}</p>
 
+    <div class="detail-tools"><DedicationTools dedication={dedication} /></div>
+
     <!-- Image -->
     {imgSrc && (
       <div style="margin:2rem 0;" class="anim-2">
@@ -117,7 +120,7 @@ const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
     )}
 
     <!-- Dedication text -->
-    <div class="card" style="padding:2rem;margin-bottom:2rem;" class="anim-3">
+    <div class="card anim-3" style="padding:2rem;margin-bottom:2rem;">
       <p style="font-size:0.8rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;">
         {dedication.dedication_title}
       </p>
@@ -165,5 +168,6 @@ const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
 
   </div>
 </article>
+<DedicationTools dedication={dedication} dock />
 
 </BaseLayout>
