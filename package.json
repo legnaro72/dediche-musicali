@@ -18,6 +18,7 @@
     "test:unit": "node --test tests/mobile_photo.test.cjs",
     "test:browser": "node tests/navigation.browser.cjs && node tests/experience.browser.cjs",
     "test:offline": "node tests/offline.browser.cjs",
+    "test:cinema": "node tests/cinema.browser.cjs",
     "astro": "astro"
   },
   "dependencies": {

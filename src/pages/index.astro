@@ -9,6 +9,7 @@ import DedicationPlus from '../components/DedicationPlus.astro';
 import VideoEmbed from '../components/VideoEmbed.astro';
 import DedicationTools from '../components/DedicationTools.astro';
 import Icon from '../components/Icon.astro';
+import DedicationLetter from '../components/DedicationLetter.astro';
 
 const dataDir = join(process.cwd(), 'data', 'dedications');
 const todayPath = join(process.cwd(), 'data', 'today.json');
@@ -79,13 +80,13 @@ function fmtDate(dateStr: string, dayName?: string) {
       {dedication ? (
         <div class="music-stage">
           <div class="music-story">
+            <div class="story-heading" data-cinema-enter>
             <p class="hero-date">{fmtDate(dedication.date, dedication.day_name)}</p>
             <h1 class="music-title" transition:name={`dedication-title-${dedication.id}`}>{dedication.song_title}</h1>
             <p class="music-artist">{dedication.artist}</p>
-            <div class="music-message">
-              <p class="hero-ded-label">{dedication.dedication_title}</p>
-              <p class="hero-text">{dedication.dedication_text}</p>
             </div>
+            <div class="story-body">
+            <DedicationLetter title={dedication.dedication_title} text={dedication.dedication_text} phrase={dedication.short_phrase} />
             <div class="stage-actions">
               <a href={dedication.audio.url} target="_blank" rel="noopener noreferrer" class="btn btn-primary" data-audio-play><Icon name="play" /> Ascolta</a>
               <DedicationPlus dedication={dedication} mode="button" />
@@ -99,12 +100,14 @@ function fmtDate(dateStr: string, dayName?: string) {
               <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">Contattami su WhatsApp ↗</a>
               <a href={`${base}link-utili/`}>Link utili ↗</a>
             </div>
+            </div>
           </div>
-          <div class="music-art">
+          <div class="music-art" data-cinema-enter>
             <div class="art-stamp" aria-hidden="true">UNA CANZONE<strong>per te</strong>OGNI GIORNO</div>
             {dedication.image?.path ? (
               <div class="hero-image-frame" id="hero-image-frame" transition:name={`dedication-art-${dedication.id}`}>
                 <img src={base + dedication.image.path.replace(/^\//, '')} alt={dedication.image.alt ?? ''} class="hero-image" width="600" height="650" loading="eager" decoding="async" fetchpriority="high" />
+                <span class="photo-sheen" aria-hidden="true"></span>
                 {dedication.short_phrase && <div class="art-caption"><span>Le parole che restano</span><p>{dedication.short_phrase}</p></div>}
               </div>
             ) : <div class="img-placeholder" aria-label="Dedica musicale">♫</div>}

@@ -39,6 +39,7 @@
   let engineReady = false;
   let activeContainer = null;
   let activeKey = '';
+  let effectGeneration = 0;
 
   const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -376,6 +377,7 @@
   };
 
   const applyGlobalSiteEffect = async (settings) => {
+    const generation = ++effectGeneration;
     const effect = normalizeEffect(settings?.siteEffect);
     const legacyIntensity = normalizeIntensity(settings?.effectIntensity);
     const backdropIntensity = normalizeFeatureIntensity(settings?.effectBackdropIntensity, legacyIntensity);
@@ -418,6 +420,8 @@
         engineReady = true;
       }
 
+      if (generation !== effectGeneration || reducedMotion()) return;
+
       const built = buildOptions(effect, backdropIntensity);
       if (activeKey === built.key) return;
       if (activeContainer) {
@@ -426,7 +430,12 @@
       }
       clearCustomEffect();
       activeKey = built.key;
-      activeContainer = await tsParticles.load({ id: effectRootId, element: root, options: built.options });
+      const loaded = await tsParticles.load({ id: effectRootId, element: root, options: built.options });
+      if (generation !== effectGeneration || reducedMotion()) {
+        loaded?.destroy();
+        return;
+      }
+      activeContainer = loaded;
     } catch (error) {
       console.warn('Effetto speciale non avviato con tsParticles:', error);
     }

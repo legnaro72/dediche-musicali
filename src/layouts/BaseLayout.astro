@@ -85,7 +85,7 @@ const fullOgImage = ogImage
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href={`${base}favicon/favicon.svg`} />
   <link rel="icon" type="image/png" sizes="192x192" href={`${base}icons/icon-192.png`} />
-  <ClientRouter fallback="swap" />
+  <ClientRouter fallback="animate" />
 
   <!-- Preconnect Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -168,7 +168,7 @@ const fullOgImage = ogImage
   </script>
 
   <!-- Main content -->
-  <main id="main-content" tabindex="-1">
+  <main id="main-content" tabindex="-1" transition:animate="slide">
     <slot />
   </main>
 
@@ -710,6 +710,7 @@ const fullOgImage = ogImage
 
         const hideIntro = () => {
           if (intro instanceof HTMLElement) intro.hidden = true;
+          document.dispatchEvent(new Event('ddgpilli:intro-dismissed'));
           if (progressTimer) window.clearInterval(progressTimer);
           sessionStorage.setItem(introKey, 'true');
         };

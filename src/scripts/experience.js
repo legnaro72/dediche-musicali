@@ -1,4 +1,5 @@
 import { readFavorites, toggleFavorite, favoritesKey } from './favorites.js';
+import './cinema.js';
 
 let toastTimer;
 export function notify(message) {
@@ -102,6 +103,7 @@ window.addEventListener('storage', event => {
   if (event.key === favoritesKey || event.key === null) window.dispatchEvent(new Event('ddgpilli:favorites-changed'));
 });
 document.addEventListener('astro:page-load', initExperience);
+matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', initExperience);
 document.addEventListener('astro:before-swap', () => {
   revealObserver?.disconnect();
   document.querySelector('[data-share-dialog]')?.close();

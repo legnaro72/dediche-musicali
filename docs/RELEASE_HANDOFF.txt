@@ -1,5 +1,27 @@
 DDGPilli — consegna versione mobile, 3 ottobre 2026
 
+CORREZIONE VISIVA DOPO LA PARTE 2
+Verificato sul sito pubblico a 390 px: la luce superiore terminava circa 193 px
+sopra lo schermo e quella inferiore era quasi interamente fuori dal bordo sinistro.
+La presenza delle regole CSS non dimostrava quindi che l'effetto fosse visibile.
+L'apertura del testo partiva al caricamento; il fallback del router era "swap".
+
+Correzioni: luci riposizionate in proporzione allo schermo e più visibili,
+riflesso sulla fotografia, movimento continuo compatibile con le foto orizzontali,
+titolo prima della foto su mobile, lettera apribile da tocco/tastiera in home e
+dettaglio. Le entrate ripartono dopo l'intro audio e quando gli elementi entrano
+nello schermo. Il router usa il fallback animato e slide sul contenuto principale.
+Movimento ridotto: niente animazioni CSS, cancellazione delle reazioni già avviate,
+scorrimento del player immediato e protezione da caricamenti tardivi di particelle.
+
+Nuova verifica: npm run test:cinema passa su Android/Chrome e iPhone/WebKit.
+Controlla area visibile delle luci, variazione temporale della foto, barra realmente
+raggiungibile al tocco, apertura della lettera, tastiera, riduzione movimento a caldo
+e al caricamento, ingresso dopo l'intro e navigazione senza API native di transizione.
+Build 68 pagine, test navigazione/esperienza e offline superati su entrambi i motori.
+Controllo visivo della composizione desktop e mobile eseguito sull'anteprima.
+Questo non equivale a misure prestazionali né a prove su telefoni fisici.
+
 STATO
 Versione funzionale verificata in locale. Pubblicazione su main autorizzata
 dall'utente il 3 ottobre 2026 con messaggio "restailing parte 1".

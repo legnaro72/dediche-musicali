@@ -8,6 +8,7 @@ import DedicationImage from '../../components/DedicationImage.astro';
 import DedicationPlus from '../../components/DedicationPlus.astro';
 import VideoEmbed from '../../components/VideoEmbed.astro';
 import DedicationTools from '../../components/DedicationTools.astro';
+import DedicationLetter from '../../components/DedicationLetter.astro';
 
 export async function getStaticPaths() {
   const dataDir = join(process.cwd(), 'data', 'dedications');
@@ -82,7 +83,8 @@ const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
 
     <!-- Image -->
     {imgSrc && (
-      <div style="margin:2rem 0;" class="anim-2 detail-art" transition:name={`dedication-art-${dedication.id}`}>
+      <div style="margin:2rem 0;" class="detail-art" data-cinema-enter>
+        <div transition:name={`dedication-art-${dedication.id}`}>
         <DedicationImage
           src={imgSrc}
           alt={dedication.image?.alt ?? ''}
@@ -92,6 +94,7 @@ const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
           style="border-radius:var(--radius-lg);"
           loading="eager"
         />
+        </div>
         <DedicationPlus dedication={dedication} mode="reactions" />
       </div>
     )}
@@ -120,14 +123,7 @@ const ogImg  = dedication.image?.path?.replace('.webp', '-og.webp');
     )}
 
     <!-- Dedication text -->
-    <div class="card anim-3 dedication-letter" style="padding:2rem;margin-bottom:2rem;">
-      <p style="font-size:0.8rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;">
-        {dedication.dedication_title}
-      </p>
-      <p style="color:var(--text-dim);font-size:1.05rem;line-height:1.9;white-space:pre-line;">
-        {dedication.dedication_text}
-      </p>
-    </div>
+    <DedicationLetter title={dedication.dedication_title} text={dedication.dedication_text} phrase={dedication.short_phrase} />
 
     <!-- CTA buttons -->
     <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2.5rem;" class="anim-4">

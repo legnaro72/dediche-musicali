@@ -1,0 +1,11 @@
+---
+const { title, text, phrase } = Astro.props;
+---
+<details class="dedication-letter" data-letter>
+  <summary>
+    <span class="letter-seal" aria-hidden="true">♡</span>
+    <span class="letter-heading"><span class="letter-eyebrow">{title || 'Una dedica per te'}</span><span class="letter-invitation">{phrase || 'Ci sono parole solo per te.'}</span><span class="letter-hint"><span class="letter-open-label">Apri le mie parole</span><span class="letter-close-label">Richiudi la dedica</span></span></span>
+    <span class="letter-arrow" aria-hidden="true">↗</span>
+  </summary>
+  <div class="letter-content"><p class="hero-text">{text}</p><span class="letter-signature" aria-hidden="true">con amore, ogni giorno ♡</span></div>
+</details>

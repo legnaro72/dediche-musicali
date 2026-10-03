@@ -130,7 +130,7 @@ const fallbackMime = audioMime || ({ mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: '
         if (playback) {
           playback.catch(() => {
             notify('Audio non avviato. Prova i controlli del player o verifica la connessione.');
-            player.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            player.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'center' });
           });
         }
       });
