@@ -1720,7 +1720,7 @@ def render_dedication_form(prefix: str, existing_image_source: str = ""):
         st.text_input(
             "video_poster",
             key=f"{prefix}_video_poster",
-            help="Immagine anteprima. Se vuota il sito usa il placeholder standard.",
+            help="Per YouTube il sito usa automaticamente la miniatura del video. Per gli altri video inserisci un URL o un percorso immagine; se vuoto viene usata l'immagine standard.",
         )
         st.text_input("video_title", key=f"{prefix}_video_title")
         st.text_area("video_description", key=f"{prefix}_video_description", height=80)

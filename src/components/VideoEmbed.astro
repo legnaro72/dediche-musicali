@@ -26,14 +26,27 @@ function assetUrl(value: string) {
 }
 
 function getYoutubeId(value: string): string {
-  const match = value.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
-  return match?.[1] ?? '';
+  try {
+    const parsed = new URL(value);
+    const host = parsed.hostname.replace(/^(www\.|m\.)/, '');
+    const id = host === 'youtu.be' ? parsed.pathname.split('/')[1]
+      : ['youtube.com', 'youtube-nocookie.com'].includes(host)
+        ? parsed.searchParams.get('v') || parsed.pathname.match(/^\/(?:embed|shorts|live)\/([^/]+)/)?.[1]
+        : '';
+    return /^[a-zA-Z0-9_-]{11}$/.test(id || '') ? id! : '';
+  } catch {
+    return '';
+  }
 }
 
 const normalizedType = type.toLowerCase();
-const posterSrc = assetUrl(poster);
 const videoUrl = assetUrl(url);
 const youtubeId = normalizedType === 'youtube' ? getYoutubeId(url) : '';
+const defaultPoster = assetUrl('');
+const posterSrc = youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg` : assetUrl(poster);
+const posterFallbacks = JSON.stringify(youtubeId
+  ? [`https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`, defaultPoster]
+  : posterSrc === defaultPoster ? [] : [defaultPoster]);
 const canRender = Boolean(normalizedType && url);
 ---
 
@@ -52,7 +65,7 @@ const canRender = Boolean(normalizedType && url);
         rel="noopener noreferrer"
         aria-label={`Apri video esterno: ${title}`}
       >
-        <img src={posterSrc} alt={title} loading="lazy" width="960" height="540" />
+        <img src={posterSrc} data-video-poster data-fallbacks={posterFallbacks} alt={title} loading="lazy" width="960" height="540" />
         <span class="video-play" aria-hidden="true">Play</span>
       </a>
     ) : (
@@ -65,7 +78,7 @@ const canRender = Boolean(normalizedType && url);
         data-video-title={title}
         aria-label={`Carica video: ${title}`}
       >
-        <img src={posterSrc} alt={title} loading="lazy" width="960" height="540" />
+        <img src={posterSrc} data-video-poster data-fallbacks={posterFallbacks} alt={title} loading="lazy" width="960" height="540" />
         <span class="video-play" aria-hidden="true">Play</span>
       </button>
     )}
@@ -73,6 +86,28 @@ const canRender = Boolean(normalizedType && url);
 )}
 
 <script>
+  function checkPoster(img: HTMLImageElement) {
+    if (!img.complete) return;
+    // YouTube can return a 120px placeholder with HTTP 200 for missing sizes.
+    const missingYoutubeImage = img.src.startsWith('https://i.ytimg.com/') && img.naturalWidth <= 120;
+    if (img.naturalWidth > 0 && !missingYoutubeImage) return;
+    const fallbacks: string[] = JSON.parse(img.dataset.fallbacks || '[]');
+    const next = fallbacks.shift();
+    img.dataset.fallbacks = JSON.stringify(fallbacks);
+    if (next) img.src = next;
+    else img.style.visibility = 'hidden';
+  }
+  for (const eventName of ['load', 'error']) {
+    document.addEventListener(eventName, (event) => {
+      if (event.target instanceof HTMLImageElement && event.target.hasAttribute('data-video-poster')) checkPoster(event.target);
+    }, true);
+  }
+  function checkPosters() {
+    document.querySelectorAll<HTMLImageElement>('[data-video-poster]').forEach(checkPoster);
+  }
+  checkPosters();
+  document.addEventListener('astro:page-load', checkPosters);
+
   function mountVideo(button) {
     const type = button.dataset.videoType;
     const url = button.dataset.videoUrl;
@@ -106,6 +141,7 @@ const canRender = Boolean(normalizedType && url);
   }
 
   document.addEventListener('click', (event) => {
+    if (!(event.target instanceof Element)) return;
     const button = event.target.closest('[data-video-loader]');
     if (!button) return;
     mountVideo(button);
