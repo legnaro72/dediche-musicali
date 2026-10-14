@@ -34,9 +34,9 @@
     "description": "Dedica musicale del giorno con \"Dimmi\" di Le Vibrazioni."
   },
   "created_at": "2026-10-14T00:59:37.099947+02:00",
-  "updated_at": "2026-10-14T12:18:10.812Z",
-  "voteAverage": 9,
-  "thoughtsText": "[Paola Faggioni] 😆🍊",
+  "updated_at": "2026-10-14T12:19:18.605Z",
+  "voteAverage": 9.5,
+  "thoughtsText": "[Paola Faggioni] 😆🍊\n\n[Massimiliano Ferrando] Certo che posso votare! Siamo in Italia e vige la Costituzione di cui tu sei la casa!",
   "reactions": {
     "down": 0,
     "like": 1,
@@ -51,6 +51,14 @@
       "value": 9,
       "createdAt": "2026-10-14T06:22:22.234Z",
       "updatedAt": "2026-10-14T06:22:22.234Z"
+    },
+    {
+      "userId": "df9db58a-feed-49fa-8ffe-62664c069200",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "value": 10,
+      "createdAt": "2026-10-14T12:19:18.605Z",
+      "updatedAt": "2026-10-14T12:19:18.605Z"
     }
   ],
   "thoughts": [
@@ -61,6 +69,14 @@
       "text": "😆🍊",
       "createdAt": "2026-10-14T06:22:22.234Z",
       "updatedAt": "2026-10-14T06:22:22.234Z"
+    },
+    {
+      "userId": "df9db58a-feed-49fa-8ffe-62664c069200",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "text": "Certo che posso votare! Siamo in Italia e vige la Costituzione di cui tu sei la casa!",
+      "createdAt": "2026-10-14T12:19:18.605Z",
+      "updatedAt": "2026-10-14T12:19:18.605Z"
     }
   ],
   "reactionEntries": [
