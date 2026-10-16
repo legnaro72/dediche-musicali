@@ -1,0 +1,50 @@
+{
+  "id": "2026-10-16-superclassico-ernia",
+  "date": "2026-10-16",
+  "day_name": "venerdì",
+  "status": "published",
+  "song_title": "Superclassico",
+  "artist": "Ernia",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "Sei più buona del bombolone alla crema di bianchi. Tu sei per me come un superclassico. Io il Barcellona e tu il Madrid.❤️",
+  "audio": {
+    "url": "https://open.spotify.com/track/6Ahg1hncxUdK0ICqU03BCu",
+    "type": "spotify",
+    "source_type": "spotify",
+    "original_filename": "",
+    "mime_type": ""
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-10-16-superclassico-ernia.webp",
+    "alt": "Dedica musicale Superclassico di Ernia",
+    "mode": "raw",
+    "source": "public/images/upload/2026-10-16-superclassico-ernia.webp"
+  },
+  "short_phrase": "Bombolone alla crema un superclassico✨️",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "Superclassico - Ernia | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"Superclassico\" di Ernia."
+  },
+  "created_at": "2026-10-16T16:25:23.448606+02:00",
+  "updated_at": "2026-10-16T16:25:24.154756+02:00",
+  "voteAverage": null,
+  "thoughtsText": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 0,
+    "sun": 0
+  },
+  "votes": [],
+  "thoughts": [],
+  "reactionEntries": [],
+  "date_it": "16 ottobre 2026"
+}
