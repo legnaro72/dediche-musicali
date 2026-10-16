@@ -46,6 +46,7 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
 
       <div class="stats-grid anim-2" data-stats-summary>
         <div class="stat-box"><span>Totale voti</span><strong data-stat="totalVotes">0</strong></div>
+        <div class="stat-box"><span>Totale pensieri</span><strong data-stat="totalThoughts">0</strong></div>
         <div class="stat-box"><span>Voto medio</span><strong data-stat="averageVote">-</strong></div>
         <div class="stat-box"><span>Voto piu alto</span><strong data-stat="highestVote">-</strong></div>
         <div class="stat-box"><span>Voto piu basso</span><strong data-stat="lowestVote">-</strong></div>
@@ -83,18 +84,19 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
       </div>
 
       <div class="stats-table-wrap anim-4">
+        <h2>Voti e pensieri di tutti</h2>
         <table class="stats-table">
           <thead>
             <tr>
               <th>Data</th>
               <th>Titolo</th>
               <th>Artista</th>
-              <th>Voto di Pilly</th>
-              <th>Pensiero di Pilly</th>
+              <th>Utente e voto</th>
+              <th>Pensiero</th>
             </tr>
           </thead>
           <tbody data-voted-table>
-            <tr><td colspan="5">Nessun voto Plus salvato in questo browser.</td></tr>
+            <tr><td colspan="5">Nessun voto o pensiero disponibile.</td></tr>
           </tbody>
         </table>
       </div>
@@ -103,6 +105,7 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
 
   <script type="application/json" id="stats-dedications" set:html={statsJson}></script>
   <script>
+    import { mergeFeedback, feedbackUserKey } from '../../scripts/feedback-data.js';
     function initStats() {
     const statsRoot = document.getElementById('stats-dedications');
     if (!statsRoot || statsRoot.dataset.bound) return;
@@ -155,6 +158,7 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
         .map(v => ({
           ...item,
           userId: v.userId || '',
+          userKey: feedbackUserKey(v),
           userName: v.userName || 'Utente',
           voteValue: Number(v.value),
         }));
@@ -165,7 +169,7 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
     }
 
     function thoughtForVote(item) {
-      const thought = thoughtsFor(item).find(t => t.userId && t.userId === item.userId);
+      const thought = thoughtsFor(item).find(t => feedbackUserKey(t) === item.userKey);
       return thought?.text ? `[${thought.userName || item.userName}] ${thought.text}` : '-';
     }
 
@@ -187,12 +191,10 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
     }
 
     function renderStats() {
-      const voteStore = {};
+      const voteStore = localVoteFeedback();
       const reactionStore = {};
       const runtimeDedications = dedications.map(item => ({
-        ...item,
-        ...(localVoteFeedback()[item.id] || {}),
-        ...(apiFeedback[item.id] || {}),
+        ...mergeFeedback(item, voteStore[item.id] || {}, apiFeedback[item.id] || {}),
         id: item.id,
         date: item.date,
         title: item.title,
@@ -223,6 +225,7 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
       const likeSong = [...withReactions].sort((a, b) => b.counts.like - a.counts.like)[0];
 
       setText('[data-stat="totalVotes"]', votes.length);
+      setText('[data-stat="totalThoughts"]', runtimeDedications.reduce((count, item) => count + thoughtsFor(item).filter(thought => thought.text).length, 0));
       setText('[data-stat="averageVote"]', votes.length ? (sum / votes.length).toFixed(1) : '-');
       setText('[data-stat="highestVote"]', sortedVotes[0]?.voteValue ?? '-');
       setText('[data-stat="lowestVote"]', lowVotes[0]?.voteValue ?? '-');
@@ -234,22 +237,26 @@ const statsJson = JSON.stringify(statsData).replace(/</g, '\\u003c');
       setText('[data-stat="likeSong"]', likeSong?.counts.like ? songLabel(likeSong) : '-');
       reactionKeys.forEach((key) => setText(`[data-reaction-total="${key}"]`, reactionTotals[key]));
 
-      renderRanking('[data-ranking="votes"]', sortedVotes, item => `${item.voteValue}/10 - ${songLabel(item)}`);
+      renderRanking('[data-ranking="votes"]', sortedVotes, item => `${item.voteValue}/10 - ${songLabel(item)} (${item.userName})`);
       renderRanking('[data-ranking="heart"]', withReactions.filter(i => i.counts.heart > 0).sort((a, b) => b.counts.heart - a.counts.heart), item => `${item.counts.heart} ❤️ - ${songLabel(item)}`);
       renderRanking('[data-ranking="sun"]', withReactions.filter(i => i.counts.sun > 0).sort((a, b) => b.counts.sun - a.counts.sun), item => `${item.counts.sun} ☀️ - ${songLabel(item)}`);
 
       const body = document.querySelector('[data-voted-table]');
       if (!body) return;
       body.innerHTML = '';
-      if (votes.length === 0) {
+      const commentsWithoutVote = runtimeDedications.flatMap(item => thoughtsFor(item)
+        .filter(thought => thought.text && !votes.some(vote => vote.id === item.id && vote.userKey === feedbackUserKey(thought)))
+        .map(thought => ({ ...item, userKey: feedbackUserKey(thought), userName: thought.userName || 'Utente', voteValue: null })));
+      const rows = [...votes, ...commentsWithoutVote];
+      if (rows.length === 0) {
         const row = document.createElement('tr');
-        row.innerHTML = '<td colspan="5">Nessun voto Plus salvato in questo browser.</td>';
+        row.innerHTML = '<td colspan="5">Nessun voto o pensiero disponibile.</td>';
         body.append(row);
         return;
       }
-      votes.sort((a, b) => b.date.localeCompare(a.date) || String(a.userName).localeCompare(String(b.userName))).forEach((item) => {
+      rows.sort((a, b) => b.date.localeCompare(a.date) || String(a.userName).localeCompare(String(b.userName))).forEach((item) => {
         const row = document.createElement('tr');
-        [item.date, item.title, item.artist, `[${item.userName}] ${item.voteValue}/10`, thoughtForVote(item)].forEach((value) => {
+        [item.date, item.title, item.artist, `[${item.userName}] ${item.voteValue === null ? '—' : `${item.voteValue}/10`}`, thoughtForVote(item)].forEach((value) => {
           const cell = document.createElement('td');
           cell.textContent = value;
           row.append(cell);

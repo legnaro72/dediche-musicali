@@ -115,6 +115,7 @@ const data = {
 </style>
 
 <script>
+  import { mergeFeedback } from '../scripts/feedback-data.js';
   import { notify } from '../scripts/experience.js';
   const voteStoreKey = 'ddgpilli-plus-votes';
   const reactionCountKey = 'ddgpilli-reaction-counts';
@@ -428,7 +429,11 @@ const data = {
         }
 
         const voteStore = readObject(voteStoreKey);
-        voteStore[data.id] = apiResultToLocalVote(data, votePayload);
+        voteStore[data.id] = mergeFeedback(
+          mergeFeedback(data, voteStore[data.id] || {}),
+          apiResultToLocalVote(data, votePayload),
+          apiResult,
+        );
         writeObject(voteStoreKey, voteStore, { id: data.id, feedback: apiResult });
         if (status instanceof HTMLElement) {
           status.textContent = 'Voto salvato nel dataset.';
