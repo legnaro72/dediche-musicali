@@ -49,10 +49,10 @@ const base = process.env.NAV_TEST_URL || 'http://127.0.0.1:4332/dediche-musicali
       assert.ok(metrics.titleBeforePhoto, 'Title readable before photo on mobile');
       assert.ok(metrics.dockHit, 'Dock is really clickable in the viewport');
       assert.ok(metrics.lights.every(area => area > 50000), 'Both lights overlap the mobile viewport');
-      const sample = () => page.locator('.hero-image').evaluate(el => getComputedStyle(el).transform);
+      const sample = () => page.locator('.full-photo-frame').evaluate(el => getComputedStyle(el).transform);
       const photoBefore = await sample();
       await page.waitForTimeout(700);
-      assert.notEqual(await sample(), photoBefore, 'Photograph moves over time');
+      assert.notEqual(await sample(), photoBefore, 'Photo and frame move together without cropping');
       await page.screenshot({ path: `.cache/cinema/${name}-home.png` });
       await page.locator('[data-letter] summary').click();
       await expect(page.locator('[data-letter]')).toHaveAttribute('open', '');

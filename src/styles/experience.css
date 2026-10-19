@@ -51,6 +51,50 @@ button { touch-action: manipulation; }
 .music-art .hero-image-frame { max-width: none; aspect-ratio: 1/1.08; border-radius: 160px 160px 24px 24px; border: 1px solid #ffdfbb66; box-shadow: 0 30px 80px #0007, 0 0 45px #d5a3ff30; animation: frame-float 7s ease-in-out infinite; }
 .music-art .hero-image-frame:not(.landscape-frame) .hero-image { object-position: center; transform: scale(1.025); animation: portrait-breathe 9s ease-in-out infinite alternate; }
 .music-art .hero-image-frame.landscape-frame .hero-image { animation-duration: 12s; animation-iteration-count: infinite; animation-direction: alternate; }
+/* Animate the entire frame within its reserved space, keeping every photo edge visible. */
+.music-art .hero-image-frame.full-photo-frame {
+  width: calc(100% - 24px);
+  margin: 12px auto;
+  height: auto;
+  aspect-ratio: auto;
+  overflow: visible;
+  padding: clamp(8px, 1.2vw, 14px);
+  border: 1px solid transparent;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #201c2d, #0e101c) padding-box,
+    linear-gradient(135deg, #ffe3bc, #bba0e7 35%, #54405f 65%, #f7a995) border-box;
+  transform-origin: center center;
+  animation: photo-frame-glow 7s ease-in-out infinite alternate, photo-frame-drift 9s ease-in-out infinite alternate;
+}
+.music-art .hero-image-frame.full-photo-frame .hero-image {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: auto;
+  aspect-ratio: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 0;
+  transform: none;
+  animation: none;
+}
+.music-art .full-photo-frame .art-caption {
+  position: relative;
+  inset: auto;
+  padding: 1.1rem .45rem .35rem;
+  background: none;
+}
+.music-art .full-photo-frame .art-caption span { font-size: .6rem; letter-spacing: .18em; }
+.music-art .full-photo-frame .art-caption p { font-size: clamp(1.15rem, 2vw, 1.65rem); }
+@keyframes photo-frame-glow {
+  from { box-shadow: 0 25px 65px #0006, 0 0 30px #bb92eb20; }
+  to { box-shadow: 0 25px 65px #0006, 0 0 50px #efb59735; }
+}
+@keyframes photo-frame-drift {
+  from { transform: translateY(0) scale(1); }
+  to { transform: translateY(-4px) scale(1.025); }
+}
 .photo-sheen { position: absolute; pointer-events: none; inset: -25%; background: linear-gradient(115deg, transparent 28%, #fff2 39%, #ffe4b844 43%, transparent 56%); mix-blend-mode: soft-light; animation: photograph-light 8s ease-in-out infinite alternate; }
 .music-hero:not([data-cinema-active]) .cinematic-light,
 .music-hero:not([data-cinema-active]) .hero-image-frame,
