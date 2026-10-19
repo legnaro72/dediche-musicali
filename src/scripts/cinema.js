@@ -34,6 +34,8 @@ function initCinema() {
   document.querySelectorAll('[data-cinema-enter]:not(.cinema-arrived)').forEach(node => entranceObserver.observe(node));
 }
 
+document.addEventListener('ddgpilli:archive-rendered', initCinema);
+
 motion.addEventListener('change', () => {
   if (motion.matches) {
     // CSS animations are removed by the media query; also stop scripted reactions.

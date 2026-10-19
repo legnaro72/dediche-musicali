@@ -117,7 +117,7 @@ const fullOgImage = ogImage
   <!-- Navbar -->
   <nav class="navbar" id="navbar">
     <div class="container navbar-inner">
-      <a class="navbar-brand" href={base}>&#9834; DDGPilli</a>
+      <a class="navbar-brand" href={base} data-astro-reload>&#9834; DDGPilli</a>
 
       <button
         class="navbar-menu-toggle"
@@ -148,8 +148,8 @@ const fullOgImage = ogImage
       <UserIdentityModal />
 
       <ul class="navbar-nav" id="primary-navigation">
-        <li><a href={base}>Home</a></li>
-        <li><a href={`${base}archive/`}>Archivio</a></li>
+        <li><a href={base} data-astro-reload>Home</a></li>
+        <li><a href={`${base}archive/`} data-astro-reload>Archivio</a></li>
         <li><a href={`${base}statistiche/`}>Statistiche</a></li>
         <li><a href={`${base}link-utili/`}>Link utili</a></li>
       </ul>
@@ -219,7 +219,7 @@ const fullOgImage = ogImage
       <p>
         &#9834; <strong>DDGPilliSite</strong> - Dediche musicali giornaliere
         &nbsp;&middot;&nbsp;
-        <a href={`${base}archive/`}>Archivio</a>
+        <a href={`${base}archive/`} data-astro-reload>Archivio</a>
         &nbsp;&middot;&nbsp;
         <a href={`${base}statistiche/`}>Statistiche</a>
         &nbsp;&middot;&nbsp;

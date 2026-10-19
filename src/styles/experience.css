@@ -153,17 +153,21 @@ button { touch-action: manipulation; }
   border: 1px solid #edc5ff66; border-radius: 18px;
   background: linear-gradient(145deg, #211c30, #10111c);
   transform-origin: center;
-  animation: archive-photo-drift 5s ease-in-out infinite alternate, photo-frame-glow 4s ease-in-out infinite alternate;
+  box-shadow: 0 12px 25px #0005, 0 0 20px #ba86de35;
+  animation: none;
+}
+.dedication-card[data-art-active] .dedication-card-img-wrap {
+  animation: archive-photo-drift 5s ease-in-out infinite alternate;
   animation-delay: var(--art-delay, 0s);
 }
-.dedication-card-img-wrap::before { border-radius: 19px; padding: 2px; animation-delay: var(--art-delay, 0s); }
+.dedication-card-img-wrap::before { border-radius: 19px; padding: 2px; animation: none; }
 .dedication-card-img-wrap::after { display: none; }
-.dedication-card .frame-orbit { inset: -6px; border-radius: 23px; animation-delay: var(--art-delay, 0s); }
+.dedication-card .frame-orbit { inset: -6px; border-radius: 23px; box-shadow: none; animation: none; }
+.dedication-card[data-art-active] .frame-orbit { animation: frame-orbit 6s ease-in-out infinite alternate; animation-delay: var(--art-delay, 0s); }
 .dedication-card .dedication-card-img, .dedication-card:hover .dedication-card-img { height: auto; transform: none; }
 .dedication-card .dedication-card-img img { border-radius: 0; transform: none; transition: none; }
-.dedication-card:not([data-art-active]) .dedication-card-img-wrap,
-.dedication-card:not([data-art-active]) .dedication-card-img-wrap::before,
-.dedication-card:not([data-art-active]) .frame-orbit { animation-play-state: paused; }
+.archive-pagination { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 2rem; }
+.archive-pagination span { color: var(--text-dim); font-size: .85rem; }
 @keyframes archive-photo-drift {
   from { transform: translateY(3px) scale(.98); }
   to { transform: translateY(-5px) scale(1.045); }

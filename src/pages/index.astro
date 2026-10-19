@@ -151,7 +151,7 @@ function fmtDate(dateStr: string, dayName?: string) {
       <div class="container">
         <div class="collection-heading reveal">
           <div><span class="journal-label">La nostra colonna sonora</span><h2>Ogni canzone,<br />un pezzo di noi.</h2></div>
-          <a href={`${base}archive/`} class="text-link">Esplora tutte le dediche <Icon name="arrow" /></a>
+          <a href={`${base}archive/`} class="text-link" data-astro-reload>Esplora tutte le dediche <Icon name="arrow" /></a>
         </div>
         <div class="archive-grid reveal">
           {recent.map((d: any) => (
@@ -169,7 +169,7 @@ function fmtDate(dateStr: string, dayName?: string) {
           ))}
         </div>
         <div style="text-align:center;margin-top:3rem;" class="reveal">
-          <a href={`${base}archive/`} class="btn btn-secondary">
+          <a href={`${base}archive/`} class="btn btn-secondary" data-astro-reload>
             Vedi tutto l'archivio &rarr;
           </a>
         </div>

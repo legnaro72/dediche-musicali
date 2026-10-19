@@ -48,6 +48,7 @@ const monthValue = date.substring(0, 7);
 
 <a
   href={href}
+  data-astro-reload
   class={`dedication-card ${className}`}
   data-dedication-id={id}
   data-artist={artist}
@@ -55,7 +56,7 @@ const monthValue = date.substring(0, 7);
   data-search={searchText}
   style={`--art-delay:-${Number(day) % 6}s`}
 >
-  <div class="dedication-card-img-wrap" transition:name={`dedication-art-${id}`}>
+  <div class="dedication-card-img-wrap">
     <span class="frame-orbit" aria-hidden="true"></span>
     {imgSrc ? (
       <DedicationImage
@@ -75,7 +76,7 @@ const monthValue = date.substring(0, 7);
     <div class="dedication-card-date">
       {day_name ? `${day_name} - ` : ''}{dateLabel}
     </div>
-    <div class="dedication-card-song" transition:name={`dedication-title-${id}`}>{song_title}</div>
+    <div class="dedication-card-song">{song_title}</div>
     <div class="dedication-card-artist">{artist}</div>
     {short_phrase && (
       <p class="dedication-card-phrase">{short_phrase}</p>

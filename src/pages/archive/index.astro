@@ -8,6 +8,8 @@ import Icon from '../../components/Icon.astro';
 
 const dataDir = join(process.cwd(), 'data', 'dedications');
 const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
+const todayPath = join(process.cwd(), 'data', 'today.json');
+const promoted = existsSync(todayPath) ? JSON.parse(readFileSync(todayPath, 'utf-8')) : null;
 
 let all: any[] = [];
 if (existsSync(dataDir)) {
@@ -23,6 +25,9 @@ if (existsSync(dataDir)) {
       return String(a.id ?? '').localeCompare(String(b.id ?? ''));
     });
 }
+
+const homeDedication = promoted?.status === 'published' && promoted.date <= today ? promoted : all[0];
+all = all.filter(d => d.id !== homeDedication?.id);
 
 // Ricava liste per filtri
 const artists = [...new Set(all.map(d => d.artist))].sort();
@@ -59,7 +64,7 @@ const MONTH_NAMES: Record<string, string> = {
     </div>
     <!-- Grid -->
     <div class="archive-grid" id="archive-grid">
-      {all.map((d: any) => (
+      {all.slice(0, 12).map((d: any) => (
         <DedicationCard
           id={d.id}
           date={d.date}
@@ -73,6 +78,14 @@ const MONTH_NAMES: Record<string, string> = {
         />
       ))}
     </div>
+    <template data-archive-cards>
+      {all.map((d: any) => <DedicationCard {...d} />)}
+    </template>
+    <nav class="archive-pagination" aria-label="Pagine dell'archivio" data-archive-pagination>
+      <button class="tool-button" type="button" data-archive-prev disabled>Precedenti</button>
+      <span data-archive-page role="status" aria-live="polite"></span>
+      <button class="tool-button" type="button" data-archive-next>Successive</button>
+    </nav>
 
     <div id="no-result" class="archive-empty" hidden>
       <h2>Nessuna dedica, per ora.</h2>
