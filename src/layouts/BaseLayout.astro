@@ -510,7 +510,7 @@ const fullOgImage = ogImage
   <!-- Landscape pan detection -->
   <script>
     function initLandscapePan() {
-      const imgs = document.querySelectorAll('.hero-image-frame:not(.full-photo-frame) img, .image-frame img');
+      const imgs = document.querySelectorAll('.hero-image-frame:not(.full-photo-frame) img, .image-frame:not(.full-image) img');
       imgs.forEach((el) => {
         const applyLandscape = () => {
           const frame = el.closest('.hero-image-frame') || el.closest('.image-frame');

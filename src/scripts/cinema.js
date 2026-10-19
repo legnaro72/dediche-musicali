@@ -2,12 +2,20 @@
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 let entranceObserver;
 let stageObserver;
+let cardObserver;
 const introVisible = () => !!document.querySelector('[data-audio-intro]:not([hidden])');
 
 function initCinema() {
   entranceObserver?.disconnect();
   stageObserver?.disconnect();
+  cardObserver?.disconnect();
   if (!('IntersectionObserver' in window)) return;
+  cardObserver = new IntersectionObserver(entries => {
+    entries.forEach(({ target, isIntersecting }) => {
+      target.toggleAttribute('data-art-active', isIntersecting && !motion.matches && !introVisible());
+    });
+  });
+  document.querySelectorAll('.dedication-card').forEach(card => cardObserver.observe(card));
   const stage = document.querySelector('.music-hero');
   if (stage) {
     stageObserver = new IntersectionObserver(([entry]) => {
@@ -43,5 +51,6 @@ document.addEventListener('astro:page-load', initCinema);
 document.addEventListener('astro:before-swap', () => {
   entranceObserver?.disconnect();
   stageObserver?.disconnect();
+  cardObserver?.disconnect();
 });
 initCinema();

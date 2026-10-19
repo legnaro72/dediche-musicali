@@ -53,8 +53,10 @@ const monthValue = date.substring(0, 7);
   data-artist={artist}
   data-month={monthValue}
   data-search={searchText}
+  style={`--art-delay:-${Number(day) % 6}s`}
 >
   <div class="dedication-card-img-wrap" transition:name={`dedication-art-${id}`}>
+    <span class="frame-orbit" aria-hidden="true"></span>
     {imgSrc ? (
       <DedicationImage
         src={imgSrc}
@@ -62,7 +64,6 @@ const monthValue = date.substring(0, 7);
         width={540}
         height={675}
         wrapClass="dedication-card-img"
-        wrapStyle="aspect-ratio:4/5;"
       />
     ) : (
       <div class="dedication-card-img" style="background:linear-gradient(135deg,rgba(124,58,237,0.3),rgba(236,72,153,0.15)); display:flex; align-items:center; justify-content:center; font-size:3rem;">

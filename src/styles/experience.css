@@ -67,7 +67,7 @@ button { touch-action: manipulation; }
   transform-origin: center center;
   animation: photo-frame-glow 4s ease-in-out infinite alternate, photo-frame-drift 5s ease-in-out infinite alternate;
 }
-.full-photo-frame::before {
+.full-photo-frame::before, .dedication-card-img-wrap::before {
   content: ''; position: absolute; inset: -3px; border-radius: 22px; padding: 3px;
   pointer-events: none;
   background: linear-gradient(110deg, #ffdd92, #ff81be, #ab8dff, #80e9ff, #ffdd92);
@@ -140,9 +140,37 @@ button { touch-action: manipulation; }
 .collection-heading h2 { font: 400 clamp(2rem, 4vw, 3.2rem)/1.12 var(--font-serif); margin-top: .7rem; letter-spacing: -.04em; }
 .text-link { display: inline-flex; align-items: center; gap: .6rem; min-height: 44px; color: #ffb6a5; font-size: .8rem; }
 .dedication-card { border-radius: 20px; background: linear-gradient(155deg, #ffffff07, #ffffff02); }
-.dedication-card-img-wrap { overflow: hidden; }
-.dedication-card img { transition: transform .7s ease; }
-@media (hover: hover) { .dedication-card:hover img { transform: scale(1.04); } }
+.archive-grid { align-items: start; }
+.image-frame.full-image { height: auto; aspect-ratio: auto; overflow: visible; }
+.image-frame.full-image img {
+  position: relative; inset: auto; display: block; width: 100%; height: auto;
+  max-width: 100%; object-fit: contain; transform: none; animation: none;
+}
+.dedication-card { min-width: 0; }
+.dedication-card .dedication-card-img-wrap {
+  isolation: isolate; overflow: visible; aspect-ratio: auto;
+  width: calc(100% - 40px); margin: 24px auto 12px; padding: 7px;
+  border: 1px solid #edc5ff66; border-radius: 18px;
+  background: linear-gradient(145deg, #211c30, #10111c);
+  transform-origin: center;
+  animation: archive-photo-drift 5s ease-in-out infinite alternate, photo-frame-glow 4s ease-in-out infinite alternate;
+  animation-delay: var(--art-delay, 0s);
+}
+.dedication-card-img-wrap::before { border-radius: 19px; padding: 2px; animation-delay: var(--art-delay, 0s); }
+.dedication-card-img-wrap::after { display: none; }
+.dedication-card .frame-orbit { inset: -6px; border-radius: 23px; animation-delay: var(--art-delay, 0s); }
+.dedication-card .dedication-card-img, .dedication-card:hover .dedication-card-img { height: auto; transform: none; }
+.dedication-card .dedication-card-img img { border-radius: 0; transform: none; transition: none; }
+.dedication-card:not([data-art-active]) .dedication-card-img-wrap,
+.dedication-card:not([data-art-active]) .dedication-card-img-wrap::before,
+.dedication-card:not([data-art-active]) .frame-orbit { animation-play-state: paused; }
+@keyframes archive-photo-drift {
+  from { transform: translateY(3px) scale(.98); }
+  to { transform: translateY(-5px) scale(1.045); }
+}
+@media (max-width: 600px) {
+  .archive-grid { grid-template-columns: minmax(0, 1fr); }
+}
 .dedication-card-song { letter-spacing: -.035em; }
 .dedication-card-date { color: #c9b4d4; }
 .dedication-tools { display: flex; gap: .5rem; align-items: center; }

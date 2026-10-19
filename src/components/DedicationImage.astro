@@ -1,6 +1,6 @@
 ---
 // src/components/DedicationImage.astro
-// Componente immagine con landscape-pan automatico (runtime JS detection).
+// Full photo, preserving its original proportions and all edges.
 export interface Props {
   src: string;
   alt?: string;
@@ -26,9 +26,9 @@ const {
 } = Astro.props;
 ---
 
-<div class={`image-frame ${wrapClass}`} style={wrapStyle}>
+<div class={`image-frame full-image ${wrapClass}`} style={wrapStyle}>
   <img
-    src={src}
+    src={`${src}${src.includes('?') ? '&' : '?'}view=full-archive-20261019`}
     alt={alt}
     width={width}
     height={height}
