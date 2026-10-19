@@ -1,6 +1,6 @@
 """
 raw_image_handler.py — Gestisce image_mode=raw.
-Nessun overlay, nessuna tipografia, solo crop/resize/WebP.
+Nessun overlay, nessuna tipografia, immagine completa ridimensionata in WebP.
 Supporta file locali e URL HTTPS remoti con cache.
 """
 import hashlib
@@ -176,12 +176,11 @@ def process_raw(ded: dict, fonts: dict,
                 vertical_path: 'Path', og_path: 'Path') -> bool:
     """
     Pipeline completa image_mode=raw:
-    - Portrait source: smart crop 1080x1350 + smart OG crop (upper-middle bias)
-    - Landscape source: resize preservando ratio + smart OG crop
+    - Tutti i formati: resize preservando l'immagine intera + smart OG crop
     - Nessun overlay, nessun testo.
     """
     from PIL import Image
-    from scripts.smart_crop import is_landscape, smart_vertical_crop, smart_og_crop
+    from scripts.smart_crop import smart_og_crop
 
     image_obj = ded.get('image', {})
     if isinstance(image_obj, dict):
@@ -198,20 +197,9 @@ def process_raw(ded: dict, fonts: dict,
         return False
 
     try:
-        landscape = is_landscape(img)
-        if landscape:
-            logger.info('    Landscape image detected — landscape pan mode enabled')
-            logger.info('    Full image preserved (no portrait crop)')
-            # Ridimensiona mantenendo il ratio (max 1200px wide)
-            max_w = 1200
-            scale = min(1.0, max_w / img.width)
-            new_w = int(img.width * scale)
-            new_h = int(img.height * scale)
-            v = img.resize((new_w, new_h), Image.LANCZOS)
-        else:
-            logger.info('    Portrait image detected')
-            logger.info('    Applying smart portrait crop')
-            v = smart_vertical_crop(img, 1080, 1350)
+        logger.info('    Full image preserved — no portrait or landscape crop')
+        v = img.copy()
+        v.thumbnail((1200, 1800), Image.LANCZOS)
 
         logger.info('    Generating vertical WebP...')
         v.save(str(vertical_path), 'WEBP', quality=84, method=6)

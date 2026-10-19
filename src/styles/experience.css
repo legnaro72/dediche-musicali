@@ -53,19 +53,42 @@ button { touch-action: manipulation; }
 .music-art .hero-image-frame.landscape-frame .hero-image { animation-duration: 12s; animation-iteration-count: infinite; animation-direction: alternate; }
 /* Animate the entire frame within its reserved space, keeping every photo edge visible. */
 .music-art .hero-image-frame.full-photo-frame {
-  width: calc(100% - 24px);
-  margin: 12px auto;
+  isolation: isolate;
+  width: calc(100% - 48px);
+  margin: 30px auto;
   height: auto;
   aspect-ratio: auto;
   overflow: visible;
   padding: clamp(8px, 1.2vw, 14px);
-  border: 1px solid transparent;
+  border: 2px solid transparent;
   border-radius: 20px;
   background: linear-gradient(145deg, #201c2d, #0e101c) padding-box,
     linear-gradient(135deg, #ffe3bc, #bba0e7 35%, #54405f 65%, #f7a995) border-box;
   transform-origin: center center;
-  animation: photo-frame-glow 7s ease-in-out infinite alternate, photo-frame-drift 9s ease-in-out infinite alternate;
+  animation: photo-frame-glow 4s ease-in-out infinite alternate, photo-frame-drift 5s ease-in-out infinite alternate;
 }
+.full-photo-frame::before {
+  content: ''; position: absolute; inset: -3px; border-radius: 22px; padding: 3px;
+  pointer-events: none;
+  background: linear-gradient(110deg, #ffdd92, #ff81be, #ab8dff, #80e9ff, #ffdd92);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  animation: frame-spectrum 4s linear infinite;
+}
+.frame-orbit {
+  position: absolute; inset: -10px; z-index: -1; pointer-events: none; border-radius: 28px;
+  border: 1px solid #ecc8ff80; box-shadow: 0 0 18px #d58aff55, inset 0 0 12px #d58aff22;
+  animation: frame-orbit 6s ease-in-out infinite alternate;
+}
+.frame-orbit-two {
+  inset: -18px; border-color: #ffce7c60; border-radius: 34px;
+  box-shadow: 0 0 24px #ffac6e40; animation-delay: -3s; animation-direction: alternate-reverse;
+}
+@keyframes frame-spectrum { to { background-position: 150% 150%; } }
+@keyframes frame-orbit { from { transform: rotate(-1deg) scale(.99); opacity: .4; } to { transform: rotate(1deg) scale(1.015); opacity: .95; } }
 .music-art .hero-image-frame.full-photo-frame .hero-image {
   position: relative;
   inset: auto;
@@ -88,12 +111,12 @@ button { touch-action: manipulation; }
 .music-art .full-photo-frame .art-caption span { font-size: .6rem; letter-spacing: .18em; }
 .music-art .full-photo-frame .art-caption p { font-size: clamp(1.15rem, 2vw, 1.65rem); }
 @keyframes photo-frame-glow {
-  from { box-shadow: 0 25px 65px #0006, 0 0 30px #bb92eb20; }
-  to { box-shadow: 0 25px 65px #0006, 0 0 50px #efb59735; }
+  from { box-shadow: 0 25px 65px #0006, 0 0 35px #bb92eb55, 0 0 75px #f17fbd25; }
+  to { box-shadow: 0 35px 75px #0008, 0 0 55px #efb59780, 0 0 100px #a17cff40; }
 }
 @keyframes photo-frame-drift {
-  from { transform: translateY(0) scale(1); }
-  to { transform: translateY(-4px) scale(1.025); }
+  from { transform: translate(-3px, 6px) rotate(-.65deg) scale(.98); }
+  to { transform: translate(3px, -8px) rotate(.65deg) scale(1.065); }
 }
 .photo-sheen { position: absolute; pointer-events: none; inset: -25%; background: linear-gradient(115deg, transparent 28%, #fff2 39%, #ffe4b844 43%, transparent 56%); mix-blend-mode: soft-light; animation: photograph-light 8s ease-in-out infinite alternate; }
 .music-hero:not([data-cinema-active]) .cinematic-light,

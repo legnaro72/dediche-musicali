@@ -41,12 +41,12 @@ const base = process.env.NAV_TEST_URL || 'http://127.0.0.1:4336/dediche-musicali
           }, { width, height });
           await expect.poll(() => photo.evaluate(img => img.complete && img.naturalWidth)).toBe(width);
           await frame.evaluate(el => {
-            el.getAnimations().forEach(animation => { animation.pause(); animation.currentTime = 9000; });
+            el.getAnimations().forEach(animation => { animation.pause(); animation.currentTime = 5000; });
           });
           const geometry = await photo.evaluate(img => {
             const box = img.getBoundingClientRect();
-            const caption = document.querySelector('.art-caption').getBoundingClientRect();
-            return { ratio: box.width / box.height, captionBelow: caption.top >= box.bottom - 1,
+            const caption = document.querySelector('.art-caption');
+            return { ratio: img.offsetWidth / img.offsetHeight, captionBelow: caption.offsetTop >= img.offsetTop + img.offsetHeight - 1,
               fits: box.left >= 0 && box.right <= innerWidth, transform: getComputedStyle(img).transform,
               noPan: !img.parentElement.classList.contains('landscape-frame') };
           });
