@@ -8172,6 +8172,83 @@
       "source": "site",
       "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Mobile Safari/537.36",
       "createdAt": "2026-10-19T21:28:22.232Z"
+    },
+    {
+      "visitId": "e85ea910-68ab-45d0-b352-e31018b44fd2",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "visitedAt": "2026-10-19T21:59:45.561Z",
+      "visitDate": "2026-10-19",
+      "page": "/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7.7 Mobile/15E148 Safari/604.1",
+      "createdAt": "2026-10-19T21:59:45.561Z"
+    },
+    {
+      "visitId": "59933838-738b-4d06-b328-ef085b435c0f",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "visitedAt": "2026-10-20T05:54:09.428Z",
+      "visitDate": "2026-10-20",
+      "page": "/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Mobile Safari/537.36",
+      "createdAt": "2026-10-20T05:54:09.428Z"
+    },
+    {
+      "visitId": "892c8cf3-388c-4d65-ae43-efffe7686b7f",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "visitedAt": "2026-10-20T05:54:24.053Z",
+      "visitDate": "2026-10-20",
+      "page": "/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Mobile Safari/537.36",
+      "createdAt": "2026-10-20T05:54:24.053Z"
+    },
+    {
+      "visitId": "aec4f5f2-a56a-4870-af64-0a3bfd55c5ec",
+      "userKey": "massimiliano-ferrando",
+      "userName": "Massimiliano Ferrando",
+      "visitedAt": "2026-10-20T05:54:28.544Z",
+      "visitDate": "2026-10-20",
+      "page": "/archive/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Mobile Safari/537.36",
+      "createdAt": "2026-10-20T05:54:28.544Z"
+    },
+    {
+      "visitId": "675befc4-83dc-4183-8a24-3edcea3c67bf",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "visitedAt": "2026-10-20T17:12:12.781Z",
+      "visitDate": "2026-10-20",
+      "page": "/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7.7 Mobile/15E148 Safari/604.1",
+      "createdAt": "2026-10-20T17:12:12.781Z"
+    },
+    {
+      "visitId": "f64e3ab1-ac18-44b9-846d-7f9c68b14456",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "visitedAt": "2026-10-20T18:18:27.528Z",
+      "visitDate": "2026-10-20",
+      "page": "/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7.7 Mobile/15E148 Safari/604.1",
+      "createdAt": "2026-10-20T18:18:27.528Z"
+    },
+    {
+      "visitId": "702fa7e8-f78a-449a-a618-3de10d2e8ac1",
+      "userKey": "paola-faggioni",
+      "userName": "Paola Faggioni",
+      "visitedAt": "2026-10-20T19:39:10.317Z",
+      "visitDate": "2026-10-20",
+      "page": "/",
+      "source": "site",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7.7 Mobile/15E148 Safari/604.1",
+      "createdAt": "2026-10-20T19:39:10.317Z"
     }
   ]
 }
