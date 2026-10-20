@@ -42,6 +42,7 @@ Un effetto in corso viene interrotto subito quando viene disattivato. Il testo e
 - Non vengono toccati i transform, lo zoom o le animazioni esistenti; lo stage segue il movimento della cornice. Nessun intervento su `AudioEmbed` o Spotify.
 - Ingresso 0–12%; crescita 12–46%; tensione luminosa 46–55%; disgregazione e dissolvenza 55–100%. Tempi proporzionali alla durata totale.
 - Le posizioni iniziali dei frammenti sono campionate dai pixel alpha delle lettere, con reservoir sampling. Scintille/scie/coriandoli nascono da quelle posizioni, non da un emettitore generico.
+- Scritta bianco-oro con doppio alone; all'esplosione una sola onda morbida di luce illumina la foto e poi svanisce. Frammenti piu grandi, scie estese e scintille con alone precalcolato su un raster di 64×64 pixel. Restano invariati i limiti di particelle; gli aloni sono limitati a 70 sui dispositivi piccoli e 120 sugli altri, senza blur per particella a ogni frame. Nessuno strobo.
 - Canvas 2D, massimo 900.000 pixel e densità 1,5; massimo 420 particelle sui dispositivi piccoli/touch, 760 sugli altri; raster di campionamento massimo 720×1000; scie limitate; 30 fps sui dispositivi piccoli e 60 sugli altri.
 - Attesa non bloccante di foto, dimensioni, visibilità e chiusura dell'intro audio. Attesa font fino a 2 secondi, poi font di sistema stabile: il campionamento delle lettere resta coerente con il font visualizzato. Nessun suono nuovo.
 - Una sola esecuzione per ingresso/ricaricamento, gestita anche con `astro:page-load`, `astro:before-swap` e ritorno dalla back-forward cache. Nessun loop.

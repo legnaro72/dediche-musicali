@@ -1,6 +1,6 @@
 import { normalizeCelebration, fitCelebrationText } from './celebration-config.js';
 
-const palette = ['#fff3cd', '#ffd28b', '#ffacb9', '#c7a8ff', '#9de7f0'];
+const palette = ['#fff9de', '#ffd766', '#ff9fbe', '#d8c4ff', '#90f4ff'];
 const clamp = value => Math.max(0, Math.min(1, value));
 const ease = value => value < .5 ? 4 * value ** 3 : 1 - (-2 * value + 2) ** 3 / 2;
 
@@ -23,6 +23,7 @@ function celebration(root, config, onStart, onFinish) {
   let origin = 0, hiddenAt = null, lastPaint = -Infinity;
   let compact = true;
   let fontFamily = 'system-ui, sans-serif';
+  let glowSprite;
 
   function finish(state = 'finished') {
     if (finished) return;
@@ -34,6 +35,7 @@ function celebration(root, config, onStart, onFinish) {
     timers.clear();
     abort.abort();
     if (canvas) { canvas.width = canvas.height = 1; canvas.remove(); }
+    if (glowSprite) { glowSprite.width = glowSprite.height = 1; glowSprite = null; }
     ctx = null;
     particles = [];
     root.hidden = true;
@@ -106,11 +108,11 @@ function celebration(root, config, onStart, onFinish) {
     }
     mask.width = mask.height = 1;
     return points.map((point, i) => {
-      const angle = Math.atan2(point.y - height / 2, point.x - width / 2) + (Math.random() - .5) * 1.2;
-      const speed = Math.min(width, height) * (.35 + Math.random() * 1.05);
-      return { ...point, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
-        size: .9 + Math.random() * 2.5, spin: (Math.random() - .5) * 14,
-        color: palette[i % palette.length], type: i % 7 === 0 ? 'spark' : i % 3 === 0 ? 'confetti' : 'dust' };
+      const angle = Math.atan2(point.y - height / 2, point.x - width / 2) + (Math.random() - .5) * 2.2;
+      const speed = .24 + Math.random() * .85;
+      return { ...point, vx: Math.cos(angle) * width * speed, vy: Math.sin(angle) * height * speed * .85,
+        size: 2 + Math.random() * 3.8, spin: (Math.random() - .5) * 14,
+        color: palette[i % palette.length], type: i % 5 === 0 ? 'spark' : i % 3 === 0 ? 'confetti' : 'dust' };
     });
   }
 
@@ -126,6 +128,20 @@ function celebration(root, config, onStart, onFinish) {
     ctx.setTransform(density, 0, 0, density, 0, 0);
     layout = fitCelebrationText(ctx, config.text, width, height, fontFamily);
     particles = motion.matches ? [] : seedLetters();
+    if (!motion.matches && !glowSprite) {
+      glowSprite = document.createElement('canvas');
+      glowSprite.width = glowSprite.height = 64;
+      const brush = glowSprite.getContext('2d');
+      if (brush) {
+        const glow = brush.createRadialGradient(32, 32, 0, 32, 32, 32);
+        glow.addColorStop(0, '#fff');
+        glow.addColorStop(.13, '#fff7d9');
+        glow.addColorStop(.35, '#ffd59499');
+        glow.addColorStop(1, '#ffc87800');
+        brush.fillStyle = glow;
+        brush.fillRect(0, 0, 64, 64);
+      }
+    }
     root.dataset.particles = String(particles.length);
     dirty = false;
     return true;
@@ -145,33 +161,58 @@ function celebration(root, config, onStart, onFinish) {
     ctx.shadowColor = '#160b26';
     ctx.shadowBlur = 12;
     const gradient = ctx.createLinearGradient(-width / 2, -height * .15, width / 2, height * .15);
-    gradient.addColorStop(0, '#fff5d5');
-    gradient.addColorStop(.5, '#ffd392');
-    gradient.addColorStop(1, '#ffb9d8');
+    gradient.addColorStop(0, '#fffef3');
+    gradient.addColorStop(.48, '#fff8d7');
+    gradient.addColorStop(1, '#ffe3a6');
     layout.lines.forEach((line, i) => {
       const y = (i - (layout.lines.length - 1) / 2) * layout.lineHeight;
       ctx.strokeText(line, 0, y);
-      ctx.shadowColor = '#ffd6a1';
-      ctx.shadowBlur = 5 + tension * 13;
       ctx.fillStyle = gradient;
+      if (!motion.matches) {
+        ctx.shadowColor = '#ffd477';
+        ctx.shadowBlur = 18 + tension * 20;
+        ctx.fillText(line, 0, y);
+      }
+      ctx.shadowColor = '#fff4c9';
+      ctx.shadowBlur = motion.matches ? 4 : 6 + tension * 8;
       ctx.fillText(line, 0, y);
     });
     ctx.restore();
   }
 
+  function illuminate(strength) {
+    if (strength <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = strength;
+    const light = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.hypot(width, height) * .62);
+    light.addColorStop(0, '#fffbe6');
+    light.addColorStop(.24, '#ffe3a5dd');
+    light.addColorStop(.65, '#ffbdda55');
+    light.addColorStop(1, '#ffc87800');
+    ctx.fillStyle = light;
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
+  }
+
   function debris(progress) {
     const travel = 1 - (1 - progress) ** 2;
-    const gravity = progress * progress * height * .23;
+    const gravity = progress * progress * height * .15;
     ctx.shadowBlur = 0;
     particles.forEach((p, i) => {
       const x = p.x + p.vx * travel;
       const y = p.y + p.vy * travel + gravity;
-      ctx.globalAlpha = (1 - progress) ** 1.7;
+      ctx.globalAlpha = (1 - progress) ** 1.4;
       ctx.fillStyle = ctx.strokeStyle = p.color;
-      if (p.type === 'spark' && i < (compact ? 280 : 560)) {
-        const tail = .018 * (1 - progress);
-        ctx.lineWidth = .8;
+      if (p.type === 'spark' && i < (compact ? 350 : 600)) {
+        const tail = .06 * (1 - progress);
+        ctx.lineWidth = 1.6;
         ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - p.vx * tail, y - p.vy * tail); ctx.stroke();
+        if (glowSprite) {
+          const size = p.size * 8;
+          ctx.globalCompositeOperation = 'screen';
+          ctx.drawImage(glowSprite, x - size / 2, y - size / 2, size, size);
+          ctx.globalCompositeOperation = 'source-over';
+        }
       }
       if (p.type === 'confetti') {
         ctx.save(); ctx.translate(x, y); ctx.rotate(p.spin * progress);
@@ -201,10 +242,13 @@ function celebration(root, config, onStart, onFinish) {
         } else if (t < .55) {
           phase = t < .12 ? 'entrance' : t < .46 ? 'growth' : 'tension';
           const scale = t < .12 ? .16 + .12 * ease(t / .12) : .28 + .72 * ease(clamp((t - .12) / .34));
+          illuminate(.18 * ease(clamp((t - .4) / .15)));
           text(scale, clamp(t / .07), clamp((t - .46) / .09));
         } else {
           const burst = (t - .55) / .45;
           phase = burst < .55 ? 'explosion' : 'dissolve';
+          // A single smooth wave of light, not repeated flashes or strobes.
+          illuminate(.18 * (1 - clamp(burst / .5)) + .4 * Math.sin(Math.PI * clamp(burst / .45)) ** 2);
           if (burst < .1) text(1, 1 - burst / .1, 1);
           debris(burst);
         }
