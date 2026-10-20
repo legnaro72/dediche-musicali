@@ -10,6 +10,7 @@ import VideoEmbed from '../components/VideoEmbed.astro';
 import DedicationTools from '../components/DedicationTools.astro';
 import Icon from '../components/Icon.astro';
 import DedicationLetter from '../components/DedicationLetter.astro';
+import PhotoCelebration from '../components/PhotoCelebration.astro';
 
 const dataDir = join(process.cwd(), 'data', 'dedications');
 const todayPath = join(process.cwd(), 'data', 'today.json');
@@ -107,7 +108,10 @@ function fmtDate(dateStr: string, dayName?: string) {
               <div class="hero-image-frame full-photo-frame" id="hero-image-frame" transition:name={`dedication-art-${dedication.id}`}>
                 <span class="frame-orbit frame-orbit-one" aria-hidden="true"></span>
                 <span class="frame-orbit frame-orbit-two" aria-hidden="true"></span>
-                <img src={base + dedication.image.path.replace(/^\//, '') + '?view=full-20261019'} alt={dedication.image.alt ?? ''} class="hero-image" width="600" height="650" loading="eager" decoding="async" fetchpriority="high" />
+                <div class="photo-celebration-stage">
+                  <img src={base + dedication.image.path.replace(/^\//, '') + '?view=full-20261019'} alt={dedication.image.alt ?? ''} class="hero-image" width="600" height="650" loading="eager" decoding="async" fetchpriority="high" />
+                  <PhotoCelebration />
+                </div>
                 {dedication.short_phrase && <div class="art-caption"><span>Le parole che restano</span><p>{dedication.short_phrase}</p></div>}
               </div>
             ) : <div class="img-placeholder" aria-label="Dedica musicale">♫</div>}

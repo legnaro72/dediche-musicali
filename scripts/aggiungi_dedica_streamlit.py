@@ -8,6 +8,10 @@ import hashlib
 import mimetypes
 import os
 import re
+try:
+    from scripts.celebration_config import CELEBRATION_TEXT_LIMIT, normalize_celebration
+except ModuleNotFoundError:
+    from celebration_config import CELEBRATION_TEXT_LIMIT, normalize_celebration
 from pathlib import Path
 from urllib.parse import quote, urlparse, urlunparse
 
@@ -76,6 +80,7 @@ DEFAULT_SITE_SETTINGS = {
     "effectBackdrop": True,
     "effectFloatingItems": True,
     "effectBackdropText": True,
+    "celebration": {"enabled": False, "text": "", "duration": 10},
     "fakeError": {
         "enabled": False,
         "title": "ERROR 404",
@@ -730,6 +735,7 @@ def normalize_site_settings(settings: dict) -> dict:
         "effectBackdrop": effect_backdrop,
         "effectFloatingItems": effect_floating_items,
         "effectBackdropText": effect_backdrop_text,
+        "celebration": normalize_celebration(settings.get("celebration") if isinstance(settings, dict) else None),
         "fakeError": {
             "enabled": fake_error.get("enabled", False) is True,
             "title": str(fake_error.get("title") or default_fake["title"]),
@@ -744,6 +750,7 @@ def normalize_site_settings(settings: dict) -> dict:
 
 
 def save_site_settings(updated: dict, message: str) -> None:
+    updated["celebration"] = normalize_celebration(updated.get("celebration"))
     _, latest_sha = read_github_json(SITE_SETTINGS_PATH, DEFAULT_SITE_SETTINGS)
     write_github_json(SITE_SETTINGS_PATH, updated, latest_sha, message)
 
@@ -2409,8 +2416,13 @@ def render_site_configuration() -> None:
     config_version = settings.get("updated_at") or "default"
     config_dirty = bool(st.session_state.get("config_site_dirty", False))
     config_first_load = "config_loaded_version" not in st.session_state
+    for field in ("enabled", "text", "duration"):
+        st.session_state.setdefault("config_celebration_" + field, settings["celebration"][field])
     if config_first_load or (st.session_state.get("config_loaded_version") != config_version and not config_dirty):
         st.session_state["config_site_effect"] = settings.get("siteEffect", DEFAULT_SITE_SETTINGS["siteEffect"])
+        st.session_state["config_celebration_enabled"] = settings["celebration"]["enabled"]
+        st.session_state["config_celebration_text"] = settings["celebration"]["text"]
+        st.session_state["config_celebration_duration"] = settings["celebration"]["duration"]
         legacy_effect_intensity = settings.get("effectIntensity", DEFAULT_SITE_SETTINGS["effectIntensity"])
         st.session_state["config_effect_intensity"] = legacy_effect_intensity
         st.session_state["config_effect_backdrop_intensity"] = settings.get("effectBackdropIntensity", legacy_effect_intensity)
@@ -2445,6 +2457,19 @@ def render_site_configuration() -> None:
         except Exception as exc:
             st.session_state["config_toggle_status"] = str(exc)
 
+    st.subheader("Effetto celebrativo")
+    celebration_enabled = st.toggle("Attiva sulla fotografia in homepage", key="config_celebration_enabled", on_change=mark_site_config_dirty)
+    celebration_text = st.text_area(
+        "Testo celebrativo", key="config_celebration_text", max_chars=CELEBRATION_TEXT_LIMIT,
+        help="Massimo 120 caratteri Unicode. Testo vuoto: nessun effetto. Il testo lungo va automaticamente su piu righe.",
+        on_change=mark_site_config_dirty,
+    )
+    celebration_duration = st.number_input(
+        "Durata totale (secondi)", min_value=3, max_value=30, step=1,
+        key="config_celebration_duration", on_change=mark_site_config_dirty,
+    )
+    st.caption("Salva con Salva configurazione sito. Dopo la prima build di installazione, questi valori sono letti dal sito senza nuova build. Una sola esecuzione per ingresso in Home; modifiche al testo dopo l'avvio valgono dall'ingresso successivo.")
+    st.divider()
     st.subheader("Effetti Speciali")
     effect_label_by_value = {value: label for label, value in SITE_EFFECT_OPTIONS.items()}
     intensity_label_by_value = {value: label for label, value in EFFECT_INTENSITY_OPTIONS.items()}
@@ -2638,6 +2663,7 @@ def render_site_configuration() -> None:
             "effectBackdrop": bool(effect_backdrop),
             "effectFloatingItems": bool(effect_floating_items),
             "effectBackdropText": bool(effect_backdrop_text),
+            "celebration": normalize_celebration({"enabled": celebration_enabled, "text": celebration_text, "duration": celebration_duration}),
             "fakeError": {
                 "enabled": False if restore_site_clicked else bool(fake_error_enabled),
                 "title": fake_error_title.strip() or DEFAULT_SITE_SETTINGS["fakeError"]["title"],

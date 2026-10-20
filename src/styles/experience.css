@@ -102,6 +102,7 @@ button { touch-action: manipulation; }
   transform: none;
   animation: none;
 }
+.photo-celebration-stage { position: relative; min-width: 0; }
 .music-art .full-photo-frame .art-caption {
   position: relative;
   inset: auto;

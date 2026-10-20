@@ -1,0 +1,11 @@
+[
+  {"input": null, "expected": {"enabled": false, "text": "", "duration": 10}},
+  {"input": {}, "expected": {"enabled": false, "text": "", "duration": 10}},
+  {"input": {"enabled": true, "text": "  "}, "expected": {"enabled": false, "text": "", "duration": 10}},
+  {"input": {"enabled": "true", "text": "Pilli", "duration": "bad"}, "expected": {"enabled": false, "text": "Pilli", "duration": 10}},
+  {"input": {"enabled": true, "text": "  Pìlli,\n l’amore è magia! 🌺 ", "duration": "10.9"}, "expected": {"enabled": true, "text": "Pìlli, l’amore è magia! 🌺", "duration": 10}},
+  {"input": {"enabled": true, "text": "Auguri", "duration": 1}, "expected": {"enabled": true, "text": "Auguri", "duration": 3}},
+  {"input": {"enabled": true, "text": "Auguri", "duration": 99}, "expected": {"enabled": true, "text": "Auguri", "duration": 30}},
+  {"input": {"enabled": true, "text": 42, "duration": false}, "expected": {"enabled": false, "text": "", "duration": 10}},
+  {"input": {"enabled": true, "text": "<script>alert('x')</script>", "duration": null}, "expected": {"enabled": true, "text": "<script>alert('x')</script>", "duration": 10}}
+]
