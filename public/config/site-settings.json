@@ -14,7 +14,7 @@
   "effectBackdropText": true,
   "celebration": {
     "enabled": true,
-    "text": "Ti AMO!!!",
+    "text": "2 Alta macche lene Altamente mia !!",
     "duration": 10
   },
   "fakeError": {
@@ -26,5 +26,5 @@
     "imageMessage": "Attaccati al Tram!! Il sistema momentaneamente offline. Sei stata cattiva con MassiTuo!!Contatta Amministratore del sito!",
     "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
   },
-  "updated_at": "2026-10-28T13:36:22.939308+00:00"
+  "updated_at": "2026-10-28T13:44:55.675003+00:00"
 }
