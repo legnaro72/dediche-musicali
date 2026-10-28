@@ -1,14 +1,14 @@
 {
-  "id": "2026-10-19-far-di-te-un-uomo-s-pozzoli-v-matteucci-v-giannetti-g-giannolla-m-cataldi-e-papi",
-  "date": "2026-10-19",
-  "day_name": "lunedì",
+  "id": "2026-10-28-due-altalene-mr-rain",
+  "date": "2026-10-28",
+  "day_name": "mercoledì",
   "status": "published",
-  "song_title": "Farò di Te un Uomo",
-  "artist": "S Pozzoli, V Matteucci, V Giannetti, G Giannolla, M Cataldi, E Papi",
+  "song_title": "DUE ALTALENE",
+  "artist": "Mr.Rain",
   "dedication_title": "La dedica del giorno",
-  "dedication_text": "E sarai .... veloce come veloce è il vento\nPotente come un vulcano attivo sarai la Pillin!! 🌺🌺🌺🌺",
+  "dedication_text": "Amore, sono riuscito a sistemare il sito e torno a mandarti la mia dedica del giorno. A volte  fai un po’ paura, alla macchinetta del caffè quando non parte😊 . Basta che la tua armatura si scosti appena e intravedo qualcosa di bellissimo: quella tenerezza che cerchi di nascondere e che, quando arriva, mi lascia senza difese❤️ Poi b. Non voglio forzare niente, amore. Mi piace pensare che con me, piano piano, tu possa sentirti abbastanza al sicuro da posarla. E lasciarti abbracciare proprio lì, dove di solito ti proteggi. e Insieme volare come due altalene",
   "audio": {
-    "url": "https://open.spotify.com/track/1d36tpKpByF5Wcndsqr4Bq",
+    "url": "https://open.spotify.com/track/4QRWBM7LFWHhIUU8b1O6GK",
     "type": "spotify",
     "source_type": "spotify",
     "original_filename": "",
@@ -18,23 +18,23 @@
     "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
   },
   "image": {
-    "path": "/images/dedications/2026-10-19-far-di-te-un-uomo-s-pozzoli-v-matteucci-v-giannetti-g-giannolla-m-cataldi-e-papi.webp",
-    "alt": "Dedica musicale Farò di Te un Uomo di S Pozzoli, V Matteucci, V Giannetti, G Giannolla, M Cataldi, E Papi",
+    "path": "/images/dedications/2026-10-28-due-altalene-mr-rain.webp",
+    "alt": "Dedica musicale DUE ALTALENE di Mr.Rain",
     "mode": "raw",
-    "source": "public/images/upload/2026-10-19-far-di-te-un-uomo-s-pozzoli-v-matteucci-v-giannetti-g-giannolla-m-cataldi-e-papi.webp"
+    "source": "public/images/upload/2026-10-28-due-altalene-mr-rain.webp"
   },
-  "short_phrase": "La mia Pillin!🏵🌼🌺🌺🌺",
+  "short_phrase": "Come due altalene",
   "tags": [
     "musica",
     "emozioni",
     "dedica"
   ],
   "seo": {
-    "title": "Farò di Te un Uomo - S Pozzoli, V Matteucci, V Giannetti, G Giannolla, M Cataldi, E Papi | DDGPilliSite",
-    "description": "Dedica musicale del giorno con \"Farò di Te un Uomo\" di S Pozzoli, V Matteucci, V Giannetti, G Giannolla, M Cataldi, E Papi."
+    "title": "DUE ALTALENE - Mr.Rain | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"DUE ALTALENE\" di Mr.Rain."
   },
-  "created_at": "2026-10-19T08:01:21.303173+02:00",
-  "updated_at": "2026-10-19T08:01:22.304680+02:00",
+  "created_at": "2026-10-28T14:15:32.986667+01:00",
+  "updated_at": "2026-10-28T14:15:33.290490+01:00",
   "voteAverage": null,
   "thoughtsText": "",
   "reactions": {
@@ -46,5 +46,5 @@
   "votes": [],
   "thoughts": [],
   "reactionEntries": [],
-  "date_it": "19 ottobre 2026"
+  "date_it": "28 ottobre 2026"
 }
