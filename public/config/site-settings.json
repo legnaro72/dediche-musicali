@@ -15,7 +15,7 @@
   "celebration": {
     "enabled": true,
     "text": "2 Alta mente MIA",
-    "duration": 15
+    "duration": 10
   },
   "fakeError": {
     "enabled": false,
@@ -26,5 +26,5 @@
     "imageMessage": "Attaccati al Tram!! Il sistema momentaneamente offline. Sei stata cattiva con MassiTuo!!Contatta Amministratore del sito!",
     "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
   },
-  "updated_at": "2026-10-28T13:19:58.623605+00:00"
+  "updated_at": "2026-10-28T13:22:03.715523+00:00"
 }
