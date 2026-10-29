@@ -540,11 +540,7 @@ body.site-is-locked > :not(.site-lock) {
   line-height: 1.9;
   margin-bottom: 2rem;
   white-space: pre-line;
-  display: -webkit-box;
-  -webkit-line-clamp: 6;
-  line-clamp: 6;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .hero-actions {
