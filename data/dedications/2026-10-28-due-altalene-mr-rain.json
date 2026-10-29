@@ -34,13 +34,13 @@
     "description": "Dedica musicale del giorno con \"DUE ALTALENE\" di Mr.Rain."
   },
   "created_at": "2026-10-28T14:15:32.986667+01:00",
-  "updated_at": "2026-10-28T21:06:58.247Z",
+  "updated_at": "2026-10-29T05:20:15.492Z",
   "voteAverage": 10,
   "thoughtsText": "[Paola Faggioni] non si legge tutta la dedica. Comunque non sono d’accordo che i cuori si danno a tutti oggi. Io voglio essere l’unica persona  destinataria di cuori e baci con cuore. Non penso che sia una cosa così difficile. Cosa ne pensi? Mi viene da svenire. Scusa ma non è così normale che sono così debole e stanca.",
   "reactions": {
     "down": 0,
     "like": 0,
-    "heart": 1,
+    "heart": 0,
     "sun": 0
   },
   "votes": [
@@ -63,15 +63,6 @@
       "updatedAt": "2026-10-28T21:06:58.247Z"
     }
   ],
-  "reactionEntries": [
-    {
-      "userId": "c64bc9fa-75c6-42d0-bb63-dac41be3f4e3",
-      "userKey": "paola-faggioni",
-      "userName": "Paola Faggioni",
-      "value": "heart",
-      "createdAt": "2026-10-28T21:02:45.842Z",
-      "updatedAt": "2026-10-28T21:02:45.842Z"
-    }
-  ],
+  "reactionEntries": [],
   "date_it": "28 ottobre 2026"
 }
