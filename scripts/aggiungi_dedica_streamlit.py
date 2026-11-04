@@ -2468,7 +2468,7 @@ def render_site_configuration() -> None:
         "Durata totale (secondi)", min_value=3, max_value=30, step=1,
         key="config_celebration_duration", on_change=mark_site_config_dirty,
     )
-    st.caption("Salva con Salva configurazione sito. Dopo la prima build di installazione, questi valori sono letti dal sito senza nuova build. Una sola esecuzione per ingresso in Home; modifiche al testo dopo l'avvio valgono dall'ingresso successivo.")
+    st.caption("Basta Salva configurazione sito: le modifiche a testo, durata o attivazione si applicano automaticamente alla Home aperta entro circa 15 secondi, senza ricaricare o avviare un deploy. L'effetto riparte quando cambia la sua configurazione; se resta invariata non si ripete.")
     st.divider()
     st.subheader("Effetti Speciali")
     effect_label_by_value = {value: label for label, value in SITE_EFFECT_OPTIONS.items()}

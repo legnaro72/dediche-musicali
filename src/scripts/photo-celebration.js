@@ -309,9 +309,14 @@ let settings = window.__DDGPILLI_SITE_SETTINGS || {};
 function consider() {
   if (!entry) return;
   const config = normalizeCelebration(settings.celebration);
+  const key = JSON.stringify(config);
+  if (entry.key !== key) {
+    entry.run?.cancel();
+    entry.key = key;
+    entry.started = false;
+  }
   if (!config.enabled) { entry.run?.cancel(); return; }
   if (entry.started) return;
-  const key = JSON.stringify(config);
   if (entry.run && entry.key === key) return;
   entry.run?.cancel();
   const current = entry;

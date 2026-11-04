@@ -69,6 +69,26 @@ const active = (text = 'Pìlli, sei magia!', duration = 10) => ({ enabled: true,
       await page.evaluate(c => { window.dispatchEvent(new CustomEvent('ddgpilli:site-settings-updated', { detail: { celebration: c } })); document.dispatchEvent(new Event('astro:page-load')); }, active());
       await page.waitForTimeout(200);
       await expect(canvas).toHaveCount(0); // Polling and repeated page-load events cannot replay.
+      // A saved configuration is picked up by the real 15s polling, without navigation.
+      config = active('Una nuova frase salvata', 30);
+      await expect(root).toHaveAttribute('data-state', 'running', { timeout: 18000 });
+      await expect(root).toHaveAttribute('data-duration', '30');
+      const firstCanvas = await canvas.elementHandle();
+      config = active('La frase cambia anche durante la celebrazione', 3);
+      await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+      await expect(root).toHaveAttribute('data-duration', '3');
+      assert.equal(await firstCanvas.evaluate(el => el.isConnected), false, 'Previous animation is disposed');
+      await expect(canvas).toHaveCount(1);
+      await expect(root).toHaveAttribute('data-state', 'finished', { timeout: 6000 });
+      await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+      await page.waitForTimeout(300);
+      await expect(canvas).toHaveCount(0);
+      config = { ...config, enabled: false };
+      await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+      await expect.poll(() => page.evaluate(() => window.__DDGPILLI_SITE_SETTINGS.celebration.enabled)).toBe(false);
+      config = { ...config, enabled: true };
+      await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+      await expect(root).toHaveAttribute('data-state', 'running');
       console.log(`${name}: real-time default animation, five phases, cleanup, frame and Spotify passed`);
 
       for (const value of [undefined, { enabled: false, text: 'Off', duration: 10 }, active(''), active('   ')]) {
