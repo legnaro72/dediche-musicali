@@ -1,14 +1,14 @@
 {
-  "id": "2026-10-29-viaggio-intorno-al-sole-tommaso-paradiso",
-  "date": "2026-10-28",
-  "day_name": "mercoledì",
+  "id": "2026-11-06-l-uomo-volante-marco-masini",
+  "date": "2026-11-06",
+  "day_name": "venerdì",
   "status": "published",
-  "song_title": "Viaggio Intorno Al Sole",
-  "artist": "Tommaso Paradiso",
+  "song_title": "L'uomo volante",
+  "artist": "Marco Masini",
   "dedication_title": "La dedica del giorno",
-  "dedication_text": "Pili mia ❤️ sai, sono un po’ preoccupato, ma non per noi, per te, per questo periodo che stai vivendo, per quei brutti pensieri che non riesci a mandare via e che a volte ti fanno vedere tutto più nero di quello che è davvero. Mi dispiace tanto, soprattutto quando penso che una parte di quel dolore venga da cose che senti o pensi di me, che io so non essere vere, ma che non posso toglierti dalla testa con le parole. E credimi, mi pesa tanto saperti così. Vorrei solo che riuscissi a lasciare un po’ di spazio alle cose belle, perché a volte basta davvero poco per essere felici. Io sono dalla tua parte, Pili, sempre, anche quando è difficile. Perché quando sono con te sento un calore dentro che sembra esplodere come una stella. Tu sei il mio sole, e stare con te è come viaggiare intorno al sole, proprio come la canzone che ti dedico stasera. Vorrei che stanotte, mentre dormiamo, la tua anima venisse a cercare la mia, come a volte sembra succedere, e che si parlassero senza paura, senza giudizi, senza tutti quei pensieri che non ci appartengono. Che si abbracciassero e portassero via un po’ di quel peso. Io posso amarti, starti vicino e tenderti la mano, ma quella porta dentro di te puoi aprirla soltanto tu. E io spero tanto che tu lo faccia, perché meriti di stare bene, di sorridere e di sentire tutto il bello che ancora abbiamo davanti. Io sono qui, Pili mia, dalla tua parte, sempre e comunque. ❤️",
+  "dedication_text": "Un uomo volante. Quelle ali per volare piu in alto. Più in alto di tutto piua lato delle nuvole che piangono, piu alto del sole in modo che sia lui a scaldarsi con il tuo sorriso che vede dall alto.🌺🌼🌞🎶",
   "audio": {
-    "url": "https://open.spotify.com/track/5ciZXxzvR5Hhvc7d6MKWQx",
+    "url": "https://open.spotify.com/track/4aLonZsuzl4BgT3ck9wl2f",
     "type": "spotify",
     "source_type": "spotify",
     "original_filename": "",
@@ -18,23 +18,23 @@
     "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
   },
   "image": {
-    "path": "/images/dedications/2026-10-29-viaggio-intorno-al-sole-tommaso-paradiso.webp",
-    "alt": "Dedica musicale Viaggio Intorno Al Sole di Tommaso Paradiso",
+    "path": "/images/dedications/2026-11-06-l-uomo-volante-marco-masini.webp",
+    "alt": "Dedica musicale L'uomo volante di Marco Masini",
     "mode": "raw",
-    "source": "public/images/upload/2026-10-29-viaggio-intorno-al-sole-tommaso-paradiso.webp"
+    "source": "public/images/upload/2026-11-06-l-uomo-volante-marco-masini.webp"
   },
-  "short_phrase": "Viaggio intorno a Pilli♥️✨️🎵",
+  "short_phrase": "Più in alto....🎶🎶🌈",
   "tags": [
     "musica",
     "emozioni",
     "dedica"
   ],
   "seo": {
-    "title": "Viaggio Intorno Al Sole - Tommaso Paradiso | DDGPilliSite",
-    "description": "Dedica musicale del giorno con \"Viaggio Intorno Al Sole\" di Tommaso Paradiso."
+    "title": "L'uomo volante - Marco Masini | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"L'uomo volante\" di Marco Masini."
   },
-  "created_at": "2026-10-29T23:38:00.639153+01:00",
-  "updated_at": "2026-10-29T23:38:01.312880+01:00",
+  "created_at": "2026-11-06T08:15:01.470157+01:00",
+  "updated_at": "2026-11-06T08:15:02.170396+01:00",
   "voteAverage": null,
   "thoughtsText": "",
   "reactions": {
@@ -46,5 +46,5 @@
   "votes": [],
   "thoughts": [],
   "reactionEntries": [],
-  "date_it": "28 ottobre 2026"
+  "date_it": "6 novembre 2026"
 }

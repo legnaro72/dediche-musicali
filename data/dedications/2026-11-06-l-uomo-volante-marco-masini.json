@@ -1,0 +1,50 @@
+{
+  "id": "2026-11-06-l-uomo-volante-marco-masini",
+  "date": "2026-11-06",
+  "day_name": "venerdì",
+  "status": "published",
+  "song_title": "L'uomo volante",
+  "artist": "Marco Masini",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "Un uomo volante. Quelle ali per volare piu in alto. Più in alto di tutto piua lato delle nuvole che piangono, piu alto del sole in modo che sia lui a scaldarsi con il tuo sorriso che vede dall alto.🌺🌼🌞🎶",
+  "audio": {
+    "url": "https://open.spotify.com/track/4aLonZsuzl4BgT3ck9wl2f",
+    "type": "spotify",
+    "source_type": "spotify",
+    "original_filename": "",
+    "mime_type": ""
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-11-06-l-uomo-volante-marco-masini.webp",
+    "alt": "Dedica musicale L'uomo volante di Marco Masini",
+    "mode": "raw",
+    "source": "public/images/upload/2026-11-06-l-uomo-volante-marco-masini.webp"
+  },
+  "short_phrase": "Più in alto....🎶🎶🌈",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "L'uomo volante - Marco Masini | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"L'uomo volante\" di Marco Masini."
+  },
+  "created_at": "2026-11-06T08:15:01.470157+01:00",
+  "updated_at": "2026-11-06T08:15:02.170396+01:00",
+  "voteAverage": null,
+  "thoughtsText": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 0,
+    "sun": 0
+  },
+  "votes": [],
+  "thoughts": [],
+  "reactionEntries": [],
+  "date_it": "6 novembre 2026"
+}
