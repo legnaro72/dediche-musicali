@@ -1,0 +1,50 @@
+{
+  "id": "2026-11-12-qualcosa-di-grande-remastered-2019-l-napop",
+  "date": "2026-11-12",
+  "day_name": "giovedì",
+  "status": "published",
+  "song_title": "Qualcosa Di Grande - Remastered 2019",
+  "artist": "Lùnapop",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "Dicono che sbucci frutta soltanto alla persona che ha ami profondamente. C'è chi la sbuccia ai propri figli come fai tu. E ci sono io che la sbuccio solo per te. C'è qualcosa di grande... sei tu! Il fiore più bello🎵",
+  "audio": {
+    "url": "https://open.spotify.com/track/6wG6dvRcdlIzDaHZT9RUBP",
+    "type": "spotify",
+    "source_type": "spotify",
+    "original_filename": "",
+    "mime_type": ""
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-11-12-qualcosa-di-grande-remastered-2019-l-napop.webp",
+    "alt": "Dedica musicale Qualcosa Di Grande - Remastered 2019 di Lùnapop",
+    "mode": "raw",
+    "source": "public/images/upload/2026-11-12-qualcosa-di-grande-remastered-2019-l-napop.webp"
+  },
+  "short_phrase": "La mela rossa.✨",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "Qualcosa Di Grande - Remastered 2019 - Lùnapop | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"Qualcosa Di Grande - Remastered 2019\" di Lùnapop."
+  },
+  "created_at": "2026-11-12T00:14:35.313196+01:00",
+  "updated_at": "2026-11-12T00:14:36.073404+01:00",
+  "voteAverage": null,
+  "thoughtsText": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 0,
+    "sun": 0
+  },
+  "votes": [],
+  "thoughts": [],
+  "reactionEntries": [],
+  "date_it": "12 novembre 2026"
+}
