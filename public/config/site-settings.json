@@ -4,13 +4,13 @@
     "plusVote": false
   },
   "feedbackApiUrl": "",
-  "siteEffect": "auto",
-  "effectIntensity": "low",
+  "siteEffect": "glow_bubbles",
+  "effectIntensity": "medium",
   "effectBackdropIntensity": "low",
-  "effectFloatingIntensity": "low",
-  "effectBackdropTextIntensity": "low",
+  "effectFloatingIntensity": "medium",
+  "effectBackdropTextIntensity": "medium",
   "effectBackdrop": false,
-  "effectFloatingItems": false,
+  "effectFloatingItems": true,
   "effectBackdropText": false,
   "celebration": {
     "enabled": true,
@@ -26,5 +26,5 @@
     "imageMessage": "Sistema momentaneamente offline.",
     "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
   },
-  "updated_at": "2026-11-11T23:31:00.855727+00:00"
+  "updated_at": "2026-11-11T23:33:39.692420+00:00"
 }
