@@ -422,20 +422,20 @@
 
       if (generation !== effectGeneration || reducedMotion()) return;
 
-      const built = buildOptions(effect, backdropIntensity);
-      if (activeKey === built.key) return;
+      const built = buildOptions(effect, floatingIntensity);
+      if (activeKey === built.key && activeContainer && !activeContainer.destroyed) return;
       if (activeContainer) {
         activeContainer.destroy();
         activeContainer = null;
       }
       clearCustomEffect();
-      activeKey = built.key;
       const loaded = await tsParticles.load({ id: effectRootId, element: root, options: built.options });
       if (generation !== effectGeneration || reducedMotion()) {
         loaded?.destroy();
         return;
       }
       activeContainer = loaded;
+      activeKey = built.key;
     } catch (error) {
       console.warn('Effetto speciale non avviato con tsParticles:', error);
     }

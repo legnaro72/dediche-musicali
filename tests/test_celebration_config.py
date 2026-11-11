@@ -33,6 +33,9 @@ class CelebrationConfigTest(unittest.TestCase):
         ui.session_state = {'config_loaded_version': 'default'}
         namespace['st'] = ui
         namespace['prime_config_state']()
+        self.assertTrue(ui.session_state['config_plus_vote_visible'])
+        self.assertTrue(ui.session_state['config_google_vote_visible'])
+        self.assertEqual(ui.session_state['config_site_effect'], 'none')
         self.assertEqual(ui.session_state['config_celebration_duration'], 10)
         self.assertFalse(ui.session_state['config_celebration_enabled'])
         legacy = namespace['normalize_site_settings']({'buttons': {'plusVote': False}})

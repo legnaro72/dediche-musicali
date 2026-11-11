@@ -387,7 +387,6 @@ const fullOgImage = ogImage
 
       applyFakeErrorMode(settings?.fakeError || {});
       applyGlobalSiteEffectFallback(settings || {});
-      window.__DDGPILLI_APPLY_GLOBAL_SITE_EFFECT?.(settings || {});
       window.dispatchEvent(new CustomEvent('ddgpilli:site-settings-updated', { detail: settings || {} }));
     };
 

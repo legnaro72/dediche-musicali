@@ -1,9 +1,9 @@
 {
   "buttons": {
     "googleVote": false,
-    "plusVote": false
+    "plusVote": true
   },
-  "feedbackApiUrl": "",
+  "feedbackApiUrl": "https://ddgpilli-feedback.massimiliano-ferrando.workers.dev",
   "siteEffect": "glow_bubbles",
   "effectIntensity": "medium",
   "effectBackdropIntensity": "low",

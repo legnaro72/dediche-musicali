@@ -2415,7 +2415,12 @@ def render_site_configuration() -> None:
     fake_error = settings["fakeError"]
     config_version = settings.get("updated_at") or "default"
     config_dirty = bool(st.session_state.get("config_site_dirty", False))
-    config_first_load = "config_loaded_version" not in st.session_state
+    # Streamlit removes widget keys when another admin section is rendered,
+    # but keeps config_loaded_version. Reload values on returning to this page.
+    config_first_load = "config_loaded_version" not in st.session_state or any(
+        key not in st.session_state
+        for key in ("config_site_effect", "config_google_vote_visible", "config_plus_vote_visible", "config_feedback_api_url")
+    )
     for field in ("enabled", "text", "duration"):
         st.session_state.setdefault("config_celebration_" + field, settings["celebration"][field])
     if config_first_load or (st.session_state.get("config_loaded_version") != config_version and not config_dirty):
