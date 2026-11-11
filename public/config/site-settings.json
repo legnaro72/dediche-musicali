@@ -1,30 +1,30 @@
 {
   "buttons": {
     "googleVote": false,
-    "plusVote": true
+    "plusVote": false
   },
-  "feedbackApiUrl": "https://ddgpilli-feedback.massimiliano-ferrando.workers.dev",
-  "siteEffect": "shooting_stars",
-  "effectIntensity": "high",
-  "effectBackdropIntensity": "medium",
-  "effectFloatingIntensity": "high",
+  "feedbackApiUrl": "",
+  "siteEffect": "auto",
+  "effectIntensity": "low",
+  "effectBackdropIntensity": "low",
+  "effectFloatingIntensity": "low",
   "effectBackdropTextIntensity": "low",
-  "effectBackdrop": true,
-  "effectFloatingItems": true,
-  "effectBackdropText": true,
+  "effectBackdrop": false,
+  "effectFloatingItems": false,
+  "effectBackdropText": false,
   "celebration": {
-    "enabled": true,
-    "text": "intorno a TE!",
-    "duration": 10
+    "enabled": false,
+    "text": "Il fiore rosso più bello.",
+    "duration": 3
   },
   "fakeError": {
     "enabled": false,
     "title": "ERROR 404",
     "message": "Il server non e' al momento raggiungibile.",
-    "buttonText": "Ritenta",
+    "buttonText": "Verifica stato sistema",
     "imagePath": "https://raw.githubusercontent.com/legnaro72/dediche-musicali/main/public/images/site-lock/20260516125756-20240823-164901.jpg",
-    "imageMessage": "Attaccati al Tram!! Il sistema momentaneamente offline. Sei stata cattiva con MassiTuo!!Contatta Amministratore del sito!",
+    "imageMessage": "Sistema momentaneamente offline.",
     "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
   },
-  "updated_at": "2026-10-29T22:41:09.798473+00:00"
+  "updated_at": "2026-11-11T23:22:35.810419+00:00"
 }
