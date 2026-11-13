@@ -1,14 +1,14 @@
 {
-  "id": "2026-11-12-qualcosa-di-grande-remastered-2019-l-napop",
-  "date": "2026-11-12",
-  "day_name": "giovedì",
+  "id": "2026-11-13-fix-you-coldplay",
+  "date": "2026-11-13",
+  "day_name": "venerdì",
   "status": "published",
-  "song_title": "Qualcosa Di Grande - Remastered 2019",
-  "artist": "Lùnapop",
+  "song_title": "Fix You",
+  "artist": "Coldplay",
   "dedication_title": "La dedica del giorno",
-  "dedication_text": "Dicono che sbucci frutta soltanto alla persona che ha ami profondamente. C'è chi la sbuccia ai propri figli come fai tu. E ci sono io che la sbuccio solo per te. C'è qualcosa di grande... sei tu! Il fiore più bello🎵",
+  "dedication_text": "Questa canzone sembra scritta apposta per il momento. Ti amo. Sono molto triste vorrei proteggerti dal dolore dalla tristezza da tutto il brutto.♥️",
   "audio": {
-    "url": "https://open.spotify.com/track/6wG6dvRcdlIzDaHZT9RUBP",
+    "url": "https://open.spotify.com/track/6YAbIZPjyQ5euHxyxUgRoQ",
     "type": "spotify",
     "source_type": "spotify",
     "original_filename": "",
@@ -18,23 +18,23 @@
     "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
   },
   "image": {
-    "path": "/images/dedications/2026-11-12-qualcosa-di-grande-remastered-2019-l-napop.webp",
-    "alt": "Dedica musicale Qualcosa Di Grande - Remastered 2019 di Lùnapop",
+    "path": "/images/dedications/2026-11-13-fix-you-coldplay.webp",
+    "alt": "Dedica musicale Fix You di Coldplay",
     "mode": "raw",
-    "source": "public/images/upload/2026-11-12-qualcosa-di-grande-remastered-2019-l-napop.webp"
+    "source": "public/images/upload/2026-11-13-fix-you-coldplay.webp"
   },
-  "short_phrase": "La mela rossa.✨",
+  "short_phrase": "Fix you✨",
   "tags": [
     "musica",
     "emozioni",
     "dedica"
   ],
   "seo": {
-    "title": "Qualcosa Di Grande - Remastered 2019 - Lùnapop | DDGPilliSite",
-    "description": "Dedica musicale del giorno con \"Qualcosa Di Grande - Remastered 2019\" di Lùnapop."
+    "title": "Fix You - Coldplay | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"Fix You\" di Coldplay."
   },
-  "created_at": "2026-11-12T00:14:35.313196+01:00",
-  "updated_at": "2026-11-12T00:14:36.073404+01:00",
+  "created_at": "2026-11-13T07:07:47.154610+01:00",
+  "updated_at": "2026-11-13T07:07:47.884515+01:00",
   "voteAverage": null,
   "thoughtsText": "",
   "reactions": {
@@ -46,5 +46,5 @@
   "votes": [],
   "thoughts": [],
   "reactionEntries": [],
-  "date_it": "12 novembre 2026"
+  "date_it": "13 novembre 2026"
 }

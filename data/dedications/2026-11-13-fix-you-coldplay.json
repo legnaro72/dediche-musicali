@@ -1,0 +1,50 @@
+{
+  "id": "2026-11-13-fix-you-coldplay",
+  "date": "2026-11-13",
+  "day_name": "venerdì",
+  "status": "published",
+  "song_title": "Fix You",
+  "artist": "Coldplay",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "Questa canzone sembra scritta apposta per il momento. Ti amo. Sono molto triste vorrei proteggerti dal dolore dalla tristezza da tutto il brutto.♥️",
+  "audio": {
+    "url": "https://open.spotify.com/track/6YAbIZPjyQ5euHxyxUgRoQ",
+    "type": "spotify",
+    "source_type": "spotify",
+    "original_filename": "",
+    "mime_type": ""
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-11-13-fix-you-coldplay.webp",
+    "alt": "Dedica musicale Fix You di Coldplay",
+    "mode": "raw",
+    "source": "public/images/upload/2026-11-13-fix-you-coldplay.webp"
+  },
+  "short_phrase": "Fix you✨",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "Fix You - Coldplay | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"Fix You\" di Coldplay."
+  },
+  "created_at": "2026-11-13T07:07:47.154610+01:00",
+  "updated_at": "2026-11-13T07:07:47.884515+01:00",
+  "voteAverage": null,
+  "thoughtsText": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 0,
+    "sun": 0
+  },
+  "votes": [],
+  "thoughts": [],
+  "reactionEntries": [],
+  "date_it": "13 novembre 2026"
+}
