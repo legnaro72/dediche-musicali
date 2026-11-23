@@ -1,0 +1,50 @@
+{
+  "id": "2026-11-23-aria-ricchi-e-poveri",
+  "date": "2026-11-23",
+  "day_name": "lunedì",
+  "status": "published",
+  "song_title": "Aria",
+  "artist": "Ricchi E Poveri",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "Nel Testo di questa canzone ci sei tu! Che sei la mia aria. E a volte respiro male perché mi manchi come l aria. Ti amo. Un sacchissimo !!supercalifragilistichespiralidoso!!! 🌞🌼Come è dolce la chiara con te!!!♥️",
+  "audio": {
+    "url": "https://open.spotify.com/track/7wpSczRfUUgFAFyXbhq6Wc",
+    "type": "spotify",
+    "source_type": "spotify",
+    "original_filename": "",
+    "mime_type": ""
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-11-23-aria-ricchi-e-poveri.webp",
+    "alt": "Dedica musicale Aria di Ricchi E Poveri",
+    "mode": "raw",
+    "source": "public/images/upload/2026-11-23-aria-ricchi-e-poveri.webp"
+  },
+  "short_phrase": "La mia aria sei tu♥️",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "Aria - Ricchi E Poveri | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"Aria\" di Ricchi E Poveri."
+  },
+  "created_at": "2026-11-23T23:44:49.040202+01:00",
+  "updated_at": "2026-11-23T23:44:49.390143+01:00",
+  "voteAverage": null,
+  "thoughtsText": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 0,
+    "sun": 0
+  },
+  "votes": [],
+  "thoughts": [],
+  "reactionEntries": [],
+  "date_it": "23 novembre 2026"
+}
