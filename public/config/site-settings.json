@@ -14,7 +14,7 @@
   "effectBackdropText": false,
   "celebration": {
     "enabled": true,
-    "text": "Il fiore rosso più bello.",
+    "text": "Aria mia altamente mia",
     "duration": 3
   },
   "fakeError": {
@@ -26,5 +26,5 @@
     "imageMessage": "Sistema momentaneamente offline.",
     "adminMessage": "Per il ripristino del servizio contattare l'amministratore del sito."
   },
-  "updated_at": "2026-11-11T23:33:39.692420+00:00"
+  "updated_at": "2026-11-23T22:52:10.274958+00:00"
 }
