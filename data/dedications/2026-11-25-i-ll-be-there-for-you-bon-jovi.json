@@ -1,0 +1,50 @@
+{
+  "id": "2026-11-25-i-ll-be-there-for-you-bon-jovi",
+  "date": "2026-11-25",
+  "day_name": "mercoledì",
+  "status": "published",
+  "song_title": "I'll Be There For You",
+  "artist": "Bon Jovi",
+  "dedication_title": "La dedica del giorno",
+  "dedication_text": "I Bon Jovi sono un gruppo esploso tra la metà anni 80 inizio anni 90. Questa canzone parla di me e di te🌞♥️",
+  "audio": {
+    "url": "https://open.spotify.com/track/67YIAxlMlfSNmbnt83zGKh",
+    "type": "spotify",
+    "source_type": "spotify",
+    "original_filename": "",
+    "mime_type": ""
+  },
+  "vote": {
+    "url": "https://docs.google.com/forms/d/17VuesL0BOupyw5M5MNCLs1gq_uqZioVKVkGC8oFfn38/viewform"
+  },
+  "image": {
+    "path": "/images/dedications/2026-11-25-i-ll-be-there-for-you-bon-jovi.webp",
+    "alt": "Dedica musicale I'll Be There For You di Bon Jovi",
+    "mode": "raw",
+    "source": "public/images/upload/2026-11-25-i-ll-be-there-for-you-bon-jovi.webp"
+  },
+  "short_phrase": "I will be there for you♥️",
+  "tags": [
+    "musica",
+    "emozioni",
+    "dedica"
+  ],
+  "seo": {
+    "title": "I'll Be There For You - Bon Jovi | DDGPilliSite",
+    "description": "Dedica musicale del giorno con \"I'll Be There For You\" di Bon Jovi."
+  },
+  "created_at": "2026-11-25T12:28:51.601850+01:00",
+  "updated_at": "2026-11-25T12:28:52.125845+01:00",
+  "voteAverage": null,
+  "thoughtsText": "",
+  "reactions": {
+    "down": 0,
+    "like": 0,
+    "heart": 0,
+    "sun": 0
+  },
+  "votes": [],
+  "thoughts": [],
+  "reactionEntries": [],
+  "date_it": "25 novembre 2026"
+}
